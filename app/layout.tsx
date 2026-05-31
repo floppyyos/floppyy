@@ -1,0 +1,146 @@
+import type { Metadata, Viewport } from "next";
+import { Pixelify_Sans } from "next/font/google";
+import "./globals.css";
+
+const pixelifySans = Pixelify_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-pixelify",
+});
+
+export const metadata: Metadata = {
+  metadataBase: new URL("https://www.floppyy.com"),
+  title: {
+    default: "Floppyy - The web you grew up on",
+    template: "%s | Floppyy",
+  },
+  description:
+    "Floppyy is a browser desktop built on pure nostalgia. Boot up, click around, remember everything — minus the dial-up wait. Mostly.",
+  applicationName: "Floppyy",
+  authors: [{ name: "Floppyy", url: "https://www.floppyy.com" }],
+  creator: "Floppyy",
+  publisher: "Floppyy",
+  keywords: [
+    "Floppyy",
+    "Floppyy browser desktop",
+    "Windows 98",
+    "Windows 98 desktop",
+    "floppy disk",
+    "blue floppy",
+    "retro desktop",
+    "retro computer",
+    "web desktop",
+    "online desktop",
+    "browser desktop",
+    "early web",
+    "BIOS boot screen",
+    "Winamp player",
+    "Doom browser",
+    "Minesweeper online",
+    "Solitaire online",
+    "Paint online",
+    "Norton Commander",
+    "pixel UI",
+    "retro games",
+    "nostalgic web app",
+    "90s computer",
+    "virtual desktop",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.png", type: "image/png", sizes: "192x192" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "Floppyy - The web you grew up on",
+    description:
+      "A browser desktop built on pure nostalgia: pixel windows, floppy disks, BIOS boot screens, classic games, Winamp vibes, and the early web.",
+    url: "https://www.floppyy.com",
+    siteName: "Floppyy",
+    locale: "en_US",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 680,
+        alt: "Floppyy retro browser desktop with blue floppy, Windows 98 clouds, and pixel UI",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Floppyy - The web you grew up on",
+    description:
+      "A browser desktop built on pure nostalgia. Boot up, click around, remember everything — minus the dial-up wait. Mostly.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 680,
+        alt: "Floppyy retro browser desktop",
+      },
+    ],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  category: "technology",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#c0c0c0",
+  width: "device-width",
+  initialScale: 1,
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Floppyy",
+  alternateName: "The web you grew up on.",
+  url: "https://www.floppyy.com",
+  description:
+    "Floppyy is a retro computer in your browser. It brings back the feeling of old desktop systems, pixel windows, floppy disks, BIOS boot screens, Winamp vibes, classic games, and the early web as a playful browser experience.",
+  applicationCategory: "Entertainment",
+  operatingSystem: "Any",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  author: {
+    "@type": "Organization",
+    name: "Floppyy",
+    url: "https://www.floppyy.com",
+  },
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en" className={pixelifySans.variable}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
+}

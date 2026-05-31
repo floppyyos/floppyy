@@ -1,0 +1,30 @@
+export const soundFiles: Record<string, string> = {
+  startup: "/sounds/windows-98-startup-sound.mp3",
+  click: "/sounds/click.mp3",
+  open: "/sounds/open.mp3",
+  close: "/sounds/close.mp3",
+  error: "/sounds/windows-98-error.mp3",
+  notification: "/sounds/windows-98-notify.mp3",
+  shutdown: "/sounds/windows-98-shutdown.mp3",
+  recycle: "/sounds/windows-98-recycle.mp3",
+  music: "/sounds/music-click.mp3",
+  "dialup-01": "/sounds/dialup-modem-01.mp3",
+  "dialup-02": "/sounds/dialup-modem-02.mp3",
+  "dialup-03": "/sounds/dialup-modem-03.mp3",
+  floppy: "/sounds/floppy.mp3",
+};
+
+export const toneMap: Record<string, [number, number, OscillatorType]> = {
+  startup: [523, 880, "sine"],
+  click: [650, 0, "square"],
+  open: [440, 660, "triangle"],
+  close: [330, 220, "triangle"],
+  error: [160, 110, "sawtooth"],
+  notification: [784, 988, "sine"],
+  shutdown: [440, 220, "sine"],
+  recycle: [300, 200, "triangle"],
+  music: [330, 392, "square"],
+  "dialup-01": [1000, 2000, "sawtooth"],
+  "dialup-02": [1000, 2000, "sawtooth"],
+  "dialup-03": [1000, 2000, "sawtooth"],
+};
