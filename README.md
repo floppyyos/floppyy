@@ -1,5 +1,7 @@
 # Floppyy
 
+<img src="/public/og-image.jpg">
+
 Floppyy is a browser desktop built on pure nostalgia.
 Boot up, click around, remember everything — minus the dial-up wait.
 Mostly.
