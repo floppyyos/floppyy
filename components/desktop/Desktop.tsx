@@ -52,6 +52,7 @@ type IconDrag = {
   originY: number;
   moved: boolean;
 } | null;
+type WindowDrag = { instanceId: string; dx: number; dy: number } | null;
 
 const ICON_WIDTH = 75;
 const ICON_HEIGHT = 68;
@@ -154,6 +155,7 @@ export default function Desktop() {
   const [safeToTurnOff, setSafeToTurnOff] = useState(false);
   const [iconPositions, setIconPositions] = useState<Record<string, IconPosition>>(() => initialIconPositions());
   const iconDrag = useRef<IconDrag>(null);
+  const winampDrag = useRef<WindowDrag>(null);
   const wm = useWindowManager();
   const { playSound, fadeOutSound, muted, setMuted } = useSound();
   const screensaver = useScreensaver(60000);
@@ -207,6 +209,7 @@ export default function Desktop() {
       setSelectedIcon(id);
       const icon = desktopIcons.find((item) => item.id === id);
       if (icon?.windowId) {
+        if (id === "recycle") playSound("recycle");
         openWindow(icon.windowId, icon.payload);
       } else {
         if (id === "recycle") playSound("recycle");
@@ -391,6 +394,7 @@ export default function Desktop() {
         wm.closeWindow(instanceId);
         playSound("close");
       },
+      minimizeWindow: wm.minimizeWindow,
       notify,
       playSound,
       fadeOutSound,
@@ -481,20 +485,34 @@ export default function Desktop() {
                 zIndex: item.zIndex,
               }}
               onPointerDown={() => wm.focusWindow(item.instanceId)}
+              onPointerMove={(event) => {
+                if (!winampDrag.current) return;
+                wm.moveWindow(
+                  winampDrag.current.instanceId,
+                  event.clientX - winampDrag.current.dx,
+                  event.clientY - winampDrag.current.dy,
+                );
+              }}
+              onPointerUp={() => {
+                winampDrag.current = null;
+              }}
             >
-              <div className="relative">
-                {/* Close button */}
-                <button
-                  className="absolute top-[3px] right-[3px] z-10 winamp-tiny-btn"
-                  onClick={() => {
-                    wm.closeWindow(item.instanceId);
-                    playSound("close");
-                  }}
-                  aria-label="Close Winamp"
-                  title="Close"
-                >
-                  ×
-                </button>
+              <div
+                className="relative"
+                onPointerDown={(event) => {
+                  const target = event.target as HTMLElement;
+                  if (target.closest("button,input")) return;
+                  if (!target.closest(".winamp-titlebar,.winamp-eq-titlebar,.winamp-pl-titlebar")) return;
+                  event.stopPropagation();
+                  wm.focusWindow(item.instanceId);
+                  winampDrag.current = {
+                    instanceId: item.instanceId,
+                    dx: event.clientX - item.x,
+                    dy: event.clientY - item.y,
+                  };
+                  event.currentTarget.setPointerCapture(event.pointerId);
+                }}
+              >
                 {renderWindow({ window: item, ...commonProps })}
               </div>
             </div>
@@ -651,11 +669,11 @@ function McAfeePropertiesDialog({ onClose }: { onClose: () => void }) {
         }}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex h-[18px] items-center justify-between bg-gradient-to-r from-[#808080] to-[#b8b8b8] px-[4px]">
-          <span className="text-[11px] font-bold text-white">Download Scan Properties</span>
+        <div className="flex h-[18px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] px-[4px]">
+          <span className="text-[11px] font-bold text-white">McAffee Virus Scan</span>
           <div className="flex gap-[2px]">
-            <button className="win-button flex h-[14px] min-h-0 w-[16px] items-center justify-center p-0 text-[10px]">?</button>
-            <button className="win-button flex h-[14px] min-h-0 w-[16px] items-center justify-center p-0 text-[10px]" onClick={onClose}>
+            <button className="win-button flex h-[13px] w-[15px] items-center justify-center p-0 text-[9px] leading-none" style={{ minHeight: 0 }}>?</button>
+            <button className="win-button flex h-[13px] w-[15px] items-center justify-center p-0 text-[9px] leading-none" style={{ minHeight: 0 }} onClick={onClose}>
               ×
             </button>
           </div>
@@ -680,19 +698,8 @@ function McAfeePropertiesDialog({ onClose }: { onClose: () => void }) {
           </aside>
 
           <section className="min-w-0 flex-1">
-            <div className="flex h-[24px] items-end">
-              {["Detection", "Action", "Alert", "Report"].map((tab) => (
-                <button
-                  key={tab}
-                  className={`h-[22px] border px-[8px] text-[11px] ${
-                    tab === "Detection"
-                      ? "border-b-[#c0c0c0] border-l-[#ffffff] border-r-[#808080] border-t-[#ffffff] bg-[#c0c0c0]"
-                      : "border-l-[#ffffff] border-r-[#808080] border-t-[#ffffff] border-b-[#808080] bg-[#c0c0c0]"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+            <div className="flex h-[24px] items-center px-[2px]">
+              <span className="text-[13px] font-bold">McAfee 4.0</span>
             </div>
             <div
               className="min-h-[330px] bg-[#c0c0c0] p-[10px]"

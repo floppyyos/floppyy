@@ -31,7 +31,15 @@ function formatTotalTime(tracks: WinampTrack[]): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-export function WinampPlayer({ playSound }: { playSound: (name: string) => void }) {
+export function WinampPlayer({
+  playSound,
+  onClose,
+  onMinimize,
+}: {
+  playSound: (name: string) => void;
+  onClose?: () => void;
+  onMinimize?: () => void;
+}) {
   const [tracks, setTracks] = useState<WinampTrack[]>(DEFAULT_TRACKS);
   const [currentTrack, setCurrentTrack] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -59,6 +67,22 @@ export function WinampPlayer({ playSound }: { playSound: (name: string) => void 
   const track = tracks[currentTrack];
   const trackDuration = duration || track.duration || 0;
   const displayText = `${track.artist} - ${track.title}  ***  `;
+
+  const setupAudioGraph = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new AudioContext();
+      analyserRef.current = audioCtxRef.current.createAnalyser();
+      analyserRef.current.fftSize = 64;
+      sourceRef.current = audioCtxRef.current.createMediaElementSource(audio);
+      sourceRef.current.connect(analyserRef.current);
+      analyserRef.current.connect(audioCtxRef.current.destination);
+    }
+    if (audioCtxRef.current.state === "suspended") {
+      await audioCtxRef.current.resume();
+    }
+  }, []);
 
   // Marquee scrolling
   useEffect(() => {
@@ -108,6 +132,7 @@ export function WinampPlayer({ playSound }: { playSound: (name: string) => void 
   // that don't depend on changing state.
   useEffect(() => {
     const audio = new Audio();
+    audio.preload = "auto";
     audioRef.current = audio;
 
     const onTimeUpdate = () => setElapsed(Math.floor(audio.currentTime));
@@ -132,6 +157,25 @@ export function WinampPlayer({ playSound }: { playSound: (name: string) => void 
       audio.removeEventListener("loadedmetadata", onLoadedMetadata);
     };
   }, []);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !playing || !track.file) return;
+
+    const src = new URL(track.file, window.location.href).href;
+    if (audio.src !== src) {
+      audio.src = track.file;
+      audio.currentTime = 0;
+      setElapsed(0);
+      audio.load();
+    }
+
+    setupAudioGraph()
+      .then(() => audio.play())
+      .catch(() => {
+        setPlaying(false);
+      });
+  }, [playing, currentTrack, track.file, setupAudioGraph]);
 
   const nextTrack = useCallback(() => {
     if (shuffle) {
@@ -198,28 +242,8 @@ export function WinampPlayer({ playSound }: { playSound: (name: string) => void 
 
   const handlePlay = () => {
     playSound("music");
+    void setupAudioGraph();
     setPlaying(true);
-
-    if (track.file) {
-      if (audioRef.current) {
-        if (audioRef.current.src !== window.location.origin + track.file) {
-          audioRef.current.src = track.file;
-        }
-        audioRef.current.play().then(() => {
-          // Setup Web Audio API for visualizer
-          if (!audioCtxRef.current) {
-            audioCtxRef.current = new AudioContext();
-            analyserRef.current = audioCtxRef.current.createAnalyser();
-            analyserRef.current.fftSize = 64;
-            sourceRef.current = audioCtxRef.current.createMediaElementSource(audioRef.current!);
-            sourceRef.current.connect(analyserRef.current);
-            analyserRef.current.connect(audioCtxRef.current.destination);
-          }
-        }).catch(() => {
-
-        });
-      }
-    }
   };
 
   const handlePause = () => {
@@ -250,17 +274,11 @@ export function WinampPlayer({ playSound }: { playSound: (name: string) => void 
 
   const handleTrackSelect = (index: number) => {
     playSound("music");
+    void setupAudioGraph();
     setCurrentTrack(index);
     setElapsed(0);
     setDuration(tracks[index].duration || 0);
     setPlaying(true);
-
-    if (tracks[index].file) {
-      if (audioRef.current) {
-        audioRef.current.src = tracks[index].file!;
-        audioRef.current.play().catch(() => {});
-      }
-    }
   };
 
   const seekPercent = trackDuration > 0 ? (elapsed / trackDuration) * 100 : 0;
@@ -276,9 +294,9 @@ export function WinampPlayer({ playSound }: { playSound: (name: string) => void 
           </div>
           <span className="winamp-title-text text-[8px] font-bold tracking-wider">WINAMP</span>
           <div className="flex items-center gap-px">
-            <button className="winamp-tiny-btn" aria-label="Minimize">_</button>
+            <button className="winamp-tiny-btn" aria-label="Minimize" onClick={onMinimize}>_</button>
             <button className="winamp-tiny-btn" aria-label="Shade">▬</button>
-            <button className="winamp-tiny-btn" aria-label="Close">×</button>
+            <button className="winamp-tiny-btn" aria-label="Close" onClick={onClose}>×</button>
           </div>
         </div>
 

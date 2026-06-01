@@ -56,6 +56,7 @@ export type WindowComponentProps = {
   window: DesktopWindow;
   openWindow: (id: WindowId, payload?: string) => void;
   closeWindow: (instanceId: string) => void;
+  minimizeWindow?: (instanceId: string) => void;
   notify: (message: string) => void;
   playSound: (sound: string) => void;
   fadeOutSound?: (sound: string, duration?: number) => void;
@@ -76,13 +77,13 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   msdos: { id: "msdos", title: "MS-DOS Prompt", icon: "prompt", width: 640, height: 400 },
   notepad: { id: "notepad", title: "Untitled - Notepad", icon: "notepad", width: 600, height: 440 },
   mediaplayer: { id: "mediaplayer", title: "Windows Media Player", icon: "sound", width: 420, height: 380 },
-  minesweeper: { id: "minesweeper", title: "Minesweeper", icon: "mine", width: 382, height: 428 },
+  minesweeper: { id: "minesweeper", title: "Minesweeper", icon: "mine", width: 330, height: 428 },
   outlook: { id: "outlook", title: "Outlook Express", icon: "msoutlook", width: 720, height: 500 },
   projects: { id: "projects", title: "Projects", icon: "folder", width: 720, height: 500 },
   games: { id: "games", title: "Games", icon: "joystick", width: 760, height: 560 },
   music: { id: "music", title: "Winamp", icon: "winamp", width: 290, height: 560 },
   norton: { id: "norton", title: "Norton Commander", icon: "norton", width: 760, height: 500 },
-  paint: { id: "paint", title: "untitled - Paint", icon: "paint", width: 760, height: 500 },
+  paint: { id: "paint", title: "untitled - Paint", icon: "paint", width: 800, height: 620 },
   "recycle-bin": { id: "recycle-bin", title: "Recycle Bin", icon: "trash", width: 720, height: 500 },
   screensaver: { id: "screensaver", title: "Screensaver", icon: "monitor", width: 460, height: 330 },
   run: { id: "run", title: "Run", icon: "run", width: 420, height: 210 },
@@ -121,7 +122,7 @@ export const desktopIcons: DesktopIconDefinition[] = [
   { id: "calculator", label: "Calculator", icon: "calculator", windowId: "calculator" },
   { id: "themes", label: "Themes", icon: "folder", windowId: "settings" },
   { id: "pinball", label: "Pinball", icon: "pinball", windowId: "games" },
-  { id: "credits", label: "CREDITS.txt", icon: "credits", windowId: "about", payload: "credits" },
+  { id: "credits", label: "CREDITS.txt", icon: "credits", windowId: "about", payload: "welcome" },
   { id: "minesweeper", label: "Minesweeper", icon: "mine", windowId: "minesweeper" },
   { id: "solitaire", label: "Solitaire", icon: "cards", windowId: "games" },
   { id: "netscape", label: "Netscape Navigator", icon: "netscape", windowId: "netscape" },

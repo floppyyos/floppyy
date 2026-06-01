@@ -8,14 +8,11 @@ type AboutPanel = "welcome" | "nostalgia" | "credits" | "connect";
 const panels: Array<{ id: AboutPanel; label: string }> = [
   { id: "welcome", label: "Welcome" },
   { id: "nostalgia", label: "Discover Floppyy" },
-  { id: "credits", label: "Credits" },
   { id: "connect", label: "Connect" },
 ];
 
 export function AboutWindow({ window, closeWindow, notify, playSound }: WindowComponentProps) {
-  const [activePanel, setActivePanel] = useState<AboutPanel>(
-    window.payload === "credits" ? "credits" : "welcome",
-  );
+  const [activePanel, setActivePanel] = useState<AboutPanel>("welcome");
   const [showOnBoot, setShowOnBoot] = useState(true);
 
   const setPanel = (panel: AboutPanel) => {
@@ -89,7 +86,7 @@ export function AboutWindow({ window, closeWindow, notify, playSound }: WindowCo
               imageRendering: "pixelated",
             }}
           />
-          <PanelContent activePanel={activePanel} notify={notify} />
+          <PanelContent activePanel={activePanel} notify={notify} setPanel={setPanel} />
         </main>
       </div>
 
@@ -113,7 +110,15 @@ export function AboutWindow({ window, closeWindow, notify, playSound }: WindowCo
   );
 }
 
-function PanelContent({ activePanel, notify }: { activePanel: AboutPanel; notify: (message: string) => void }) {
+function PanelContent({
+  activePanel,
+  notify,
+  setPanel,
+}: {
+  activePanel: AboutPanel;
+  notify: (message: string) => void;
+  setPanel: (panel: AboutPanel) => void;
+}) {
   if (activePanel === "nostalgia") {
     return (
       <section className="relative max-w-[300px] space-y-[12px]">
@@ -133,10 +138,12 @@ function PanelContent({ activePanel, notify }: { activePanel: AboutPanel; notify
         <div className="grid grid-cols-[92px_1fr] gap-y-[5px]">
           <span className="font-bold">Design</span><span>Windows 98 clouds, blue floppy, pixel UI</span>
           <span className="font-bold">Build</span><span>Next.js, TypeScript, canvas, web audio</span>
-          <span className="font-bold">Mood</span><span>Early web, old desktops, tiny surprises</span>
         </div>
         <button className="win-button mt-[4px] min-w-[100px]" onClick={() => notify("CREDITS.txt checked. The nostalgia is intact.")}>
           Read Credits
+        </button>
+        <button className="win-button ml-[6px] mt-[4px] min-w-[100px]" onClick={() => setPanel("welcome")}>
+          Welcome
         </button>
       </section>
     );
@@ -165,6 +172,9 @@ function PanelContent({ activePanel, notify }: { activePanel: AboutPanel; notify
       <p>Welcome to the web you grew up on, where your browser desktop meets the Internet memories you almost forgot.</p>
       <p>Sit back and take a brief tour of a tiny retro machine made from clouds, clicks, windows, games, and floppy-disk feelings.</p>
       <p>If you want to explore an option, just click it.</p>
+      <button className="win-button mt-[2px] min-w-[92px]" onClick={() => setPanel("credits")}>
+        Credits
+      </button>
     </section>
   );
 }
