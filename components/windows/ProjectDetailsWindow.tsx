@@ -3,8 +3,12 @@
 import { projects } from "@/lib/projects";
 import type { WindowComponentProps } from "@/lib/windows";
 
-export function ProjectDetailsWindow({ window, notify }: WindowComponentProps) {
+export function ProjectDetailsWindow({ window }: WindowComponentProps) {
   const project = projects.find((item) => item.slug === window.payload) ?? projects[0];
+  const visit = (url: string) => {
+    globalThis.window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className="flex h-full flex-col gap-3">
       <div className="win-bevel-inset bg-white p-3">
@@ -12,16 +16,14 @@ export function ProjectDetailsWindow({ window, notify }: WindowComponentProps) {
         <p>{project.details}</p>
       </div>
       <div className="grid grid-cols-[90px_1fr] gap-2">
-        <span className="font-bold">Status</span>
-        <span>{project.status}</span>
         <span className="font-bold">Stack</span>
         <span>{project.stack.join(", ")}</span>
       </div>
       <div className="mt-auto flex justify-end gap-2">
-        <button className="win-button" onClick={() => notify(`${project.name}: site placeholder`)}>
+        <button className="win-button" onClick={() => visit(project.site)}>
           Visit Site
         </button>
-        <button className="win-button" onClick={() => notify(`${project.name}: GitHub placeholder`)}>
+        <button className="win-button" onClick={() => visit(project.github)}>
           GitHub
         </button>
       </div>

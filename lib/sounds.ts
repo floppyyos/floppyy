@@ -1,13 +1,9 @@
 export const soundFiles: Record<string, string> = {
   startup: "/sounds/windows-98-startup-sound.mp3",
-  click: "/sounds/click.mp3",
-  open: "/sounds/open.mp3",
-  close: "/sounds/close.mp3",
   error: "/sounds/windows-98-error.mp3",
   notification: "/sounds/windows-98-notify.mp3",
   shutdown: "/sounds/windows-98-shutdown.mp3",
   recycle: "/sounds/windows-98-recycle.mp3",
-  music: "/sounds/music-click.mp3",
   "dialup-01": "/sounds/dialup-modem-01.mp3",
   "dialup-02": "/sounds/dialup-modem-02.mp3",
   "dialup-03": "/sounds/dialup-modem-03.mp3",

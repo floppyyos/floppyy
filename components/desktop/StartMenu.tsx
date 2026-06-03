@@ -4,7 +4,7 @@ import type { WindowId } from "@/lib/windows";
 import { FloppyyIcon } from "./FloppyyIcon";
 
 type Props = {
-  onOpen: (id: WindowId) => void;
+  onOpen: (id: WindowId, payload?: string) => void;
   onScreensaver: () => void;
   onShutdown: () => void;
 };
@@ -13,12 +13,18 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
   const programs: Array<[WindowId, string, string]> = [
     ["about", "About", "credits"],
     ["projects", "Projects", "folder"],
-    ["games", "Games", "joystick"],
     ["internet", "Dial-Up Networking", "dialup"],
     ["music", "Winamp", "winamp"],
-    ["norton", "Norton Commander", "norton"],
+    ["norton", "Norton Commander", "console"],
     ["paint", "Paint", "paint"],
     ["defrag", "Disk Defragmenter", "defrag"],
+  ];
+
+  const games: Array<[WindowId, string, string, string?]> = [
+    ["minesweeper", "Minesweeper", "mine"],
+    ["games", "Solitaire", "cards", "solitaire"],
+    ["games", "Snake", "scheduled", "snake"],
+    ["doom", "Doom", "doom"],
   ];
 
   return (
@@ -42,7 +48,46 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
         <div className="px-[4px] py-[1px] text-[11px] font-bold text-[#808080]">Programs</div>
         <div className="mx-[3px] my-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
         
-        {programs.map(([id, label, icon]) => (
+        {programs.slice(0, 2).map(([id, label, icon]) => (
+          <button
+            key={id}
+            className="menu-command flex items-center gap-[8px] py-[3px]"
+            onClick={() => onOpen(id)}
+          >
+            <FloppyyIcon type={icon} size={16} />
+            <span>{label}</span>
+          </button>
+        ))}
+
+        <div className="group/games relative">
+          <button
+            className="menu-command flex items-center gap-[8px] py-[3px]"
+            onClick={() => onOpen("games")}
+          >
+            <FloppyyIcon type="directory_open" size={16} />
+            <span>Games</span>
+            <span className="ml-auto pr-[2px]">▶</span>
+          </button>
+          <div
+            className="absolute left-full top-0 hidden w-[180px] bg-[#c0c0c0] py-[3px] group-hover/games:block"
+            style={{
+              boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+            }}
+          >
+            {games.map(([id, label, icon, payload]) => (
+              <button
+                key={`${id}-${label}`}
+                className="menu-command flex items-center gap-[8px] py-[3px]"
+                onClick={() => onOpen(id, payload)}
+              >
+                <FloppyyIcon type={icon} size={16} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {programs.slice(2).map(([id, label, icon]) => (
           <button
             key={id}
             className="menu-command flex items-center gap-[8px] py-[3px]"
@@ -57,11 +102,15 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
 
         {/* Settings & utilities */}
         <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("settings")}>
-          <FloppyyIcon type="settings" size={16} />
+          <FloppyyIcon type="folder" size={16} />
+          <span>Themes</span>
+        </button>
+        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("settings")}>
+          <FloppyyIcon type="gears" size={16} />
           <span>Settings</span>
         </button>
         <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={onScreensaver}>
-          <FloppyyIcon type="monitor" size={16} />
+          <FloppyyIcon type="monitor_windows" size={16} />
           <span>Screensaver</span>
         </button>
         <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("run")}>

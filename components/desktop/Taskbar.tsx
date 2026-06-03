@@ -80,6 +80,13 @@ export function Taskbar({ windows, activeId, startOpen, internetConnected, muted
         >
           <FloppyyIcon type="msoutlook" size={16} />
         </button>
+        <button
+          className="flex h-[20px] w-[20px] items-center justify-center hover:bg-white/20 active:translate-x-px active:translate-y-px"
+          title="Norton Commander"
+          onClick={() => onQuickLaunch?.("norton")}
+        >
+          <FloppyyIcon type="console" size={16} />
+        </button>
       </div>
 
       {/* Divider */}

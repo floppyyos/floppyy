@@ -1,14 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 import { Minesweeper } from "@/components/games/Minesweeper";
 import { Solitaire } from "@/components/games/Solitaire";
 import { Snake } from "@/components/games/Snake";
 import { Doom } from "@/components/games/Doom";
 
-export function GamesWindow({ playSound }: WindowComponentProps) {
-  const [tab, setTab] = useState<"mines" | "solitaire" | "snake" | "doom">("mines");
+type GameTab = "mines" | "solitaire" | "snake" | "doom";
+
+function payloadToTab(payload?: string): GameTab {
+  if (payload === "solitaire" || payload === "snake" || payload === "doom") return payload;
+  return "mines";
+}
+
+export function GamesWindow({ playSound, window }: WindowComponentProps) {
+  const [tab, setTab] = useState<GameTab>(() => payloadToTab(window.payload));
+
+  useEffect(() => {
+    setTab(payloadToTab(window.payload));
+  }, [window.payload]);
+
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex gap-1">
@@ -18,7 +30,7 @@ export function GamesWindow({ playSound }: WindowComponentProps) {
           ["snake", "Snake"],
           ["doom", "Doom"],
         ].map(([id, label]) => (
-          <button key={id} className={`win-button ${tab === id ? "active" : ""}`} onClick={() => setTab(id as typeof tab)}>
+          <button key={id} className={`win-button ${tab === id ? "active" : ""}`} onClick={() => setTab(id as GameTab)}>
             {label}
           </button>
         ))}

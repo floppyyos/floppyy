@@ -6,9 +6,13 @@ import type { WindowComponentProps } from "@/lib/windows";
 import { MenuBar } from "./MenuBar";
 
 export function ProjectsWindow({ openWindow, notify }: WindowComponentProps) {
+  const visit = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <div className="flex h-full flex-col">
-      <MenuBar onHelp={() => notify("Double click a project folder, or press Details.")} />
+      <MenuBar onHelp={() => notify("Double click a project folder to view details.")} />
       <div className="field-border mb-2 flex gap-2 bg-white px-2 py-1">
         <span>Address:</span>
         <span className="font-mono">C:\PORTFOLIO\PROJECTS</span>
@@ -24,17 +28,13 @@ export function ProjectsWindow({ openWindow, notify }: WindowComponentProps) {
             <div>
               <div className="font-bold">{project.name}</div>
               <div>{project.description}</div>
-              <div className="text-[11px]">Status: {project.status} | {project.stack.join(", ")}</div>
             </div>
             <div className="flex flex-wrap justify-end gap-1">
-              <button className="win-button" onClick={() => notify(`${project.name}: site placeholder`)}>
+              <button className="win-button" onClick={() => visit(project.site)}>
                 Visit Site
               </button>
-              <button className="win-button" onClick={() => notify(`${project.name}: GitHub placeholder`)}>
+              <button className="win-button" onClick={() => visit(project.github)}>
                 GitHub
-              </button>
-              <button className="win-button" onClick={() => openWindow("project-details", project.slug)}>
-                Details
               </button>
             </div>
           </div>
