@@ -28,7 +28,8 @@ export function useWindowManager() {
   const openWindow = useCallback(
     (id: WindowId, payload?: string) => {
       const definition = windowDefinitions[id];
-      const instanceId = id === "project-details" && payload ? `${id}-${payload}` : id;
+      const instanceId =
+        (id === "project-details" || id === "drive") && payload ? `${id}-${payload}` : id;
       setWindows((items) => {
         const existing = items.find((item) => item.instanceId === instanceId);
         const maxZ = Math.max(10, ...items.map((item) => item.zIndex)) + 1;
@@ -51,8 +52,17 @@ export function useWindowManager() {
           {
             instanceId,
             id,
-            title: payload && id === "project-details" ? "Project Details" : payload && id === "mediaplayer" ? `Windows Media Player - ${payload}` : definition.title,
-            icon: definition.icon,
+            title:
+              payload && id === "project-details"
+                ? "Project Details"
+                : payload && id === "mediaplayer"
+                  ? `Windows Media Player - ${payload}`
+                  : payload && id === "drive"
+                    ? payload === "D"
+                      ? "(D:)"
+                      : "(C:)"
+                    : definition.title,
+            icon: payload && id === "drive" ? `drive-${payload.toLowerCase()}` : definition.icon,
             x: mobile ? 8 : clamp(80 + offset, 8, viewportWidth - width - 8),
             y: mobile ? 8 : clamp(40 + offset, 8, viewportHeight - height - 36),
             width,

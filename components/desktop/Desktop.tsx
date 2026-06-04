@@ -32,6 +32,7 @@ import { SettingsWindow } from "@/components/windows/SettingsWindow";
 import { ShareWindow } from "@/components/windows/ShareWindow";
 import { DefragWindow } from "@/components/windows/DefragWindow";
 import { DocumentsWindow } from "@/components/windows/DocumentsWindow";
+import { DriveWindow } from "@/components/windows/DriveWindow";
 import { RecycleBinWindow } from "@/components/windows/RecycleBinWindow";
 import { ShutDownOverlay } from "@/components/windows/ShutDownOverlay";
 import { ScreensaverOverlay } from "@/components/screensavers/ScreensaverOverlay";
@@ -338,6 +339,8 @@ export default function Desktop() {
         return <DefragWindow {...props} />;
       case "documents":
         return <DocumentsWindow {...props} />;
+      case "drive":
+        return <DriveWindow {...props} />;
       case "recycle-bin":
         return <RecycleBinWindow {...props} />;
       case "screensaver":

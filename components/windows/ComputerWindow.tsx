@@ -124,6 +124,11 @@ export function ComputerWindow({ notify, openWindow, playSound }: WindowComponen
                     openWindow("internet");
                     return;
                   }
+                  if (item.id === "drive-c" || item.id === "drive-d") {
+                    playSound("open");
+                    openWindow("drive", item.id === "drive-d" ? "D" : "C");
+                    return;
+                  }
                   playSound(item.id === "floppy" ? "floppy" : "open");
                   notify(`${item.label}: ${item.description}`);
                 }}

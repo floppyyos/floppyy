@@ -50,4 +50,14 @@ export const projects: Project[] = [
     github: "https://github.com/titanbaserun",
     details: "Visual Schema Designer For Developers and Product Teams.",
   },
+  {
+    slug: "floppyy",
+    name: "Floppyy",
+    description: "Floppyy is a browser desktop built on pure nostalgia.",
+    status: "Online",
+    stack: ["Retro Web", "Browser Desktop", "Nostalgia"],
+    site: "https://www.floppyy.com",
+    github: "https://github.com/floppyyos",
+    details: "Floppyy is a browser desktop built on pure nostalgia.",
+  },
 ];

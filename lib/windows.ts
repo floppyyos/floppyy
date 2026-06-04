@@ -7,6 +7,7 @@ export type WindowId =
   | "defrag"
   | "documents"
   | "doom"
+  | "drive"
   | "internet"
   | "ie-browser"
   | "netscape"
@@ -71,6 +72,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   defrag: { id: "defrag", title: "Defragmenting Drive C", icon: "computer", width: 500, height: 340 },
   documents: { id: "documents", title: "My Documents", icon: "documents", width: 720, height: 500 },
   doom: { id: "doom", title: "Doom", icon: "doom", width: 800, height: 580 },
+  drive: { id: "drive", title: "Local Disk", icon: "drive-c", width: 780, height: 550 },
   internet: { id: "internet", title: "Floppyy Net", icon: "dialup", width: 355, height: 470 },
   "ie-browser": { id: "ie-browser", title: "Microsoft Internet Explorer", icon: "ie", width: 840, height: 580 },
   netscape: { id: "netscape", title: "Netscape Navigator", icon: "netscape", width: 760, height: 520 },
@@ -92,7 +94,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   "project-details": {
     id: "project-details",
     title: "Project Details",
-    icon: "app",
+    icon: "folder",
     width: 460,
     height: 330,
   },
