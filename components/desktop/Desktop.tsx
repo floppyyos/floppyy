@@ -11,6 +11,7 @@ import { WindowFrame } from "@/components/windows/WindowFrame";
 import { AboutWindow } from "@/components/windows/AboutWindow";
 import { CalculatorWindow } from "@/components/windows/CalculatorWindow";
 import { ComputerWindow } from "@/components/windows/ComputerWindow";
+import { ControlPanelWindow } from "@/components/windows/ControlPanelWindow";
 import { DoomWindow } from "@/components/windows/DoomWindow";
 import { GamesWindow } from "@/components/windows/GamesWindow";
 import { InternetWindow } from "@/components/windows/InternetWindow";
@@ -150,7 +151,8 @@ export default function Desktop() {
   const [contextMenu, setContextMenu] = useState<MenuState>(null);
   const [startOpen, setStartOpen] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
-  const [disconnectOpen, setDisconnectOpen] = useState(false);
+  const [connectionStatusOpen, setConnectionStatusOpen] = useState(false);
+  const [connectedAt, setConnectedAt] = useState<number | null>(null);
   const [mcAfeeOpen, setMcAfeeOpen] = useState(false);
   const [shutdownOpen, setShutdownOpen] = useState(false);
   const [safeToTurnOff, setSafeToTurnOff] = useState(false);
@@ -173,16 +175,24 @@ export default function Desktop() {
 
   const openWindow = useCallback(
     (id: WindowId, payload?: string) => {
+      if (id === "internet" && dialupDone) {
+        setConnectionStatusOpen(true);
+        setStartOpen(false);
+        setContextMenu(null);
+        playSound("click");
+        return;
+      }
       wm.openWindow(id, payload);
       setStartOpen(false);
       setContextMenu(null);
       playSound("open");
     },
-    [playSound, wm],
+    [dialupDone, playSound, wm],
   );
 
   const handleDialupConnected = useCallback(() => {
     setDialupDone(true);
+    setConnectedAt(Date.now());
   }, []);
 
   const handleQuickLaunch = useCallback(
@@ -299,6 +309,8 @@ export default function Desktop() {
         return <CalculatorWindow {...props} />;
       case "computer":
         return <ComputerWindow {...props} />;
+      case "control-panel":
+        return <ControlPanelWindow {...props} />;
       case "projects":
         return <ProjectsWindow {...props} />;
       case "project-details":
@@ -591,7 +603,7 @@ export default function Desktop() {
         }}
         onTask={(instanceId) => wm.focusWindow(instanceId)}
         onDisconnectRequest={() => {
-          setDisconnectOpen(true);
+          setConnectionStatusOpen(true);
           playSound("click");
         }}
         onMcAfeeOpen={() => {
@@ -620,12 +632,14 @@ export default function Desktop() {
         />
       )}
 
-      {disconnectOpen && (
-        <DisconnectDialog
-          onCancel={() => setDisconnectOpen(false)}
+      {connectionStatusOpen && (
+        <ConnectionStatusDialog
+          connectedAt={connectedAt}
+          onClose={() => setConnectionStatusOpen(false)}
           onDisconnect={() => {
             setDialupDone(false);
-            setDisconnectOpen(false);
+            setConnectedAt(null);
+            setConnectionStatusOpen(false);
             notify("Disconnected from Floppyy Net.");
           }}
         />
@@ -759,48 +773,77 @@ function McAfeePropertiesDialog({ onClose }: { onClose: () => void }) {
   );
 }
 
-function DisconnectDialog({
-  onCancel,
+function ConnectionStatusDialog({
+  connectedAt,
+  onClose,
   onDisconnect,
 }: {
-  onCancel: () => void;
+  connectedAt: number | null;
+  onClose: () => void;
   onDisconnect: () => void;
 }) {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const seconds = Math.max(0, Math.floor((now - (connectedAt ?? now)) / 1000));
+  const duration = `${Math.floor(seconds / 3600)}:${String(Math.floor((seconds % 3600) / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  const sent = (12 + seconds * 0.7).toFixed(1);
+  const received = (48 + seconds * 2.4).toFixed(1);
+
   return (
-    <div className="fixed inset-0 z-[7200] flex items-center justify-center" onClick={onCancel}>
+    <div className="fixed inset-0 z-[7200] flex items-center justify-center" onClick={onClose}>
       <div
-        className="w-[330px] bg-[#c0c0c0] p-[3px]"
+        className="w-[360px] bg-[#c0c0c0] p-[3px]"
         style={{
           boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
         }}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex h-[18px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] px-[4px]">
-          <span className="text-[11px] font-bold text-white">Disconnect Floppyy Net</span>
-          <button className="win-button flex h-[14px] min-h-0 w-[16px] items-center justify-center p-0 text-[10px]" onClick={onCancel}>
+          <span className="text-[11px] font-bold text-white">Floppyy Net Status</span>
+          <button className="win-button flex h-[14px] min-h-0 w-[16px] items-center justify-center p-0 text-[10px]" onClick={onClose}>
             ×
           </button>
         </div>
         <div className="flex gap-[12px] p-[14px]">
-          <img
-            src="/icons/connection.png"
-            alt=""
-            width={32}
-            height={32}
-            draggable={false}
-            style={{ imageRendering: "pixelated" }}
-          />
-          <div className="text-[11px] leading-[15px]">
-            <p className="mb-[8px]">You are currently connected to Floppyy Net.</p>
-            <p>Do you want to disconnect now?</p>
+          <span className="flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden">
+            <img
+              src="/icons/connection.png"
+              alt=""
+              width={32}
+              height={32}
+              draggable={false}
+              className="block h-[32px] w-[32px] object-contain"
+              style={{ imageRendering: "pixelated" }}
+            />
+          </span>
+          <div className="min-w-0 flex-1 text-[11px] leading-[15px]">
+            <p className="mb-[8px] font-bold">Connected to Floppyy Net</p>
+            <div className="grid grid-cols-[88px_1fr] gap-x-2 gap-y-[3px]">
+              <span>Speed:</span>
+              <span>33.6 kbps</span>
+              <span>Duration:</span>
+              <span>{duration}</span>
+              <span>Sent:</span>
+              <span>{sent} KB</span>
+              <span>Received:</span>
+              <span>{received} KB</span>
+            </div>
+            <div className="mt-[10px] h-[12px] bg-white" style={{ boxShadow: "inset -1px -1px #ffffff, inset 1px 1px #808080" }}>
+              <div className="h-full w-[64%] bg-[#000080]" />
+            </div>
           </div>
         </div>
         <div className="flex justify-end gap-[6px] px-[10px] pb-[10px]">
           <button className="win-button min-w-[82px] font-bold" onClick={onDisconnect}>
             Disconnect
           </button>
-          <button className="win-button min-w-[70px]" onClick={onCancel}>
-            Cancel
+          <button className="win-button min-w-[70px]" onClick={onClose}>
+            Close
           </button>
         </div>
       </div>

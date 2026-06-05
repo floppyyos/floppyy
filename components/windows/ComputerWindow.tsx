@@ -129,6 +129,11 @@ export function ComputerWindow({ notify, openWindow, playSound }: WindowComponen
                     openWindow("drive", item.id === "drive-d" ? "D" : "C");
                     return;
                   }
+                  if (item.id === "control-panel") {
+                    playSound("open");
+                    openWindow("control-panel");
+                    return;
+                  }
                   playSound(item.id === "floppy" ? "floppy" : "open");
                   notify(`${item.label}: ${item.description}`);
                 }}

@@ -11,13 +11,12 @@ type Props = {
 
 export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
   const programs: Array<[WindowId, string, string]> = [
-    ["about", "About", "credits"],
-    ["projects", "Projects", "folder"],
     ["internet", "Dial-Up Networking", "dialup"],
     ["music", "Winamp", "winamp"],
-    ["norton", "Norton Commander", "console"],
     ["paint", "Paint", "paint"],
-    ["defrag", "Disk Defragmenter", "defrag"],
+    ["netscape", "Netscape Navigator", "netscape"],
+    ["msdos", "MS-DOS Prompt", "prompt"],
+    ["outlook", "Outlook Express", "msoutlook"],
   ];
 
   const games: Array<[WindowId, string, string, string?]> = [
@@ -36,7 +35,12 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
       onClick={(event) => event.stopPropagation()}
     >
       {/* Side banner */}
-      <div className="flex w-[26px] items-end justify-center bg-[#000080]" style={{ paddingBottom: "24px" }}>
+      <div
+        className="relative flex w-[26px] items-end justify-center bg-[#000080]"
+        style={{ paddingBottom: "24px" }}
+        title="Double click"
+        onDoubleClick={() => onOpen("about", "welcome")}
+      >
         <div className="-rotate-90 whitespace-nowrap text-[12px] font-bold tracking-wider">
           <span className="text-[#b0b0b0]">floppy</span><span className="text-white">y</span>
         </div>
@@ -44,29 +48,49 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
 
       {/* Menu items */}
       <div className="flex-1 py-[3px]">
-        {/* Programs */}
-        <div className="px-[4px] py-[1px] text-[11px] font-bold text-[#808080]">Programs</div>
+        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("about", "welcome")}>
+          <FloppyyIcon type="credits" size={16} />
+          <span>About</span>
+        </button>
+        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("projects")}>
+          <FloppyyIcon type="folder" size={16} />
+          <span>Projects</span>
+        </button>
         <div className="mx-[3px] my-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
-        
-        {programs.slice(0, 2).map(([id, label, icon]) => (
-          <button
-            key={id}
-            className="menu-command flex items-center gap-[8px] py-[3px]"
-            onClick={() => onOpen(id)}
-          >
-            <FloppyyIcon type={icon} size={16} />
-            <span>{label}</span>
-          </button>
-        ))}
 
-        <div className="group/games relative">
+        <div className="group/programs relative">
           <button
             className="menu-command flex items-center gap-[8px] py-[3px]"
-            onClick={() => onOpen("games")}
+            onClick={(event) => event.preventDefault()}
           >
             <FloppyyIcon type="directory_open" size={16} />
+            <span>Programs</span>
+            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">▶</span>
+          </button>
+          <div
+            className="absolute left-full top-0 hidden w-[210px] bg-[#c0c0c0] py-[3px] group-hover/programs:block"
+            style={{
+              boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+            }}
+          >
+            {programs.map(([id, label, icon]) => (
+              <button
+                key={`${id}-${label}`}
+                className="menu-command flex items-center gap-[8px] py-[3px]"
+                onClick={() => onOpen(id)}
+              >
+                <FloppyyIcon type={icon} size={16} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="group/games relative">
+          <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("games")}>
+            <FloppyyIcon type="directory_open" size={16} />
             <span>Games</span>
-            <span className="ml-auto pr-[2px]">▶</span>
+            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">▶</span>
           </button>
           <div
             className="absolute left-full top-0 hidden w-[180px] bg-[#c0c0c0] py-[3px] group-hover/games:block"
@@ -87,37 +111,54 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
           </div>
         </div>
 
-        {programs.slice(2).map(([id, label, icon]) => (
-          <button
-            key={id}
-            className="menu-command flex items-center gap-[8px] py-[3px]"
-            onClick={() => onOpen(id)}
-          >
-            <FloppyyIcon type={icon} size={16} />
-            <span>{label}</span>
-          </button>
-        ))}
-
         <div className="mx-[3px] my-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
 
-        {/* Settings & utilities */}
-        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("settings")}>
-          <FloppyyIcon type="folder" size={16} />
-          <span>Themes</span>
+        <div className="group/settings relative">
+          <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("control-panel")}>
+            <FloppyyIcon type="gears" size={16} />
+            <span>Settings</span>
+            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">▶</span>
+          </button>
+          <div
+            className="absolute left-full top-0 hidden w-[190px] bg-[#c0c0c0] py-[3px] group-hover/settings:block"
+            style={{
+              boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+            }}
+          >
+            <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("control-panel")}>
+              <FloppyyIcon type="control-panel" size={16} />
+              <span>Control Panel</span>
+            </button>
+            <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("settings")}>
+              <FloppyyIcon type="gears" size={16} />
+              <span>Display Settings</span>
+            </button>
+            <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("internet")}>
+              <FloppyyIcon type="dialup" size={16} />
+              <span>Dial-Up Networking</span>
+            </button>
+            <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={onScreensaver}>
+              <FloppyyIcon type="monitor_windows" size={16} />
+              <span>Screensaver</span>
+            </button>
+          </div>
+        </div>
+        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("computer")}>
+          <FloppyyIcon type="computer" size={16} />
+          <span>My Computer</span>
         </button>
-        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("settings")}>
-          <FloppyyIcon type="gears" size={16} />
-          <span>Settings</span>
+        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("norton")}>
+          <FloppyyIcon type="console" size={16} />
+          <span>Norton Commander</span>
         </button>
-        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={onScreensaver}>
-          <FloppyyIcon type="monitor_windows" size={16} />
-          <span>Screensaver</span>
+        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("defrag")}>
+          <FloppyyIcon type="defrag" size={16} />
+          <span>Disk Defragmenter</span>
         </button>
         <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("run")}>
           <FloppyyIcon type="run" size={16} />
           <span>Run...</span>
         </button>
-
         <div className="mx-[3px] my-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
 
         {/* Shut Down */}

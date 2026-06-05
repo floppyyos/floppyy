@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type BootMode = "normal" | "logged" | "safe" | "command";
 
@@ -31,6 +31,15 @@ const BIOS_LINES = [
   { text: "Starting Floppyy 98..." },
 ];
 
+const RARE_BIOS_LINES = [
+  "Detecting nostalgia cache ... OK",
+  "Checking dial-up patience ... FAILED",
+  "Loading clouds.bmp into memory ... OK",
+  "Searching for lost bookmarks ... 12 found",
+  "Calibrating pixel dust ... OK",
+  "Floppy drive reports: still here",
+];
+
 const MENU_ITEMS = [
   "1. Normal",
   "2. Logged (\\BOOTLOG.TXT)",
@@ -51,6 +60,11 @@ const BOOTLOG_LINES = [
 ];
 
 export function BiosScreen({ onComplete }: BiosScreenProps) {
+  const biosLines = useMemo(() => {
+    if (Math.random() > 0.28) return BIOS_LINES;
+    const rare = RARE_BIOS_LINES[Math.floor(Math.random() * RARE_BIOS_LINES.length)];
+    return [...BIOS_LINES.slice(0, -1), { text: rare, highlight: true }, ...BIOS_LINES.slice(-1)];
+  }, []);
   const [visibleLines, setVisibleLines] = useState(0);
   const [phase, setPhase] = useState<"bios" | "menu" | "bootlog" | "command" | "booting">("bios");
   const [menuChoice, setMenuChoice] = useState("");
@@ -72,12 +86,12 @@ export function BiosScreen({ onComplete }: BiosScreenProps) {
     if (phase !== "bios") return;
     const interval = setInterval(() => {
       setVisibleLines((v) => {
-        if (v + 1 >= BIOS_LINES.length) clearInterval(interval);
-        return Math.min(v + 1, BIOS_LINES.length);
+        if (v + 1 >= biosLines.length) clearInterval(interval);
+        return Math.min(v + 1, biosLines.length);
       });
     }, 80);
     return () => clearInterval(interval);
-  }, [phase]);
+  }, [phase, biosLines.length]);
 
   useEffect(() => {
     if (phase !== "bios") return;
@@ -96,7 +110,7 @@ export function BiosScreen({ onComplete }: BiosScreenProps) {
   // synchronous setState-in-effect and lets the cleanup cancel the pending
   // auto-boot timer if F8/ESC is pressed during the countdown.
   useEffect(() => {
-    if (phase !== "bios" || visibleLines < BIOS_LINES.length) return;
+    if (phase !== "bios" || visibleLines < biosLines.length) return;
     if (f8Pressed) {
       const toMenu = setTimeout(() => setPhase("menu"), 300);
       return () => clearTimeout(toMenu);
@@ -106,7 +120,7 @@ export function BiosScreen({ onComplete }: BiosScreenProps) {
       setTimeout(() => complete("normal"), 400);
     }, 500);
     return () => clearTimeout(toBoot);
-  }, [phase, visibleLines, f8Pressed, complete]);
+  }, [phase, visibleLines, f8Pressed, complete, biosLines.length]);
 
   useEffect(() => {
     if (phase !== "menu") return;
@@ -169,7 +183,7 @@ export function BiosScreen({ onComplete }: BiosScreenProps) {
       ref={containerRef}
       onClick={() => {
 
-        if (phase === "bios" && visibleLines >= BIOS_LINES.length && !f8Pressed) {
+        if (phase === "bios" && visibleLines >= biosLines.length && !f8Pressed) {
           setPhase("booting");
           setTimeout(() => complete("normal"), 200);
         }
@@ -190,7 +204,7 @@ export function BiosScreen({ onComplete }: BiosScreenProps) {
         />
       )}
 
-      {BIOS_LINES.slice(0, visibleLines).map((line, i) => (
+      {biosLines.slice(0, visibleLines).map((line, i) => (
         <div
           key={i}
           className={[
@@ -203,7 +217,7 @@ export function BiosScreen({ onComplete }: BiosScreenProps) {
         </div>
       ))}
 
-      {phase === "bios" && visibleLines < BIOS_LINES.length && (
+      {phase === "bios" && visibleLines < biosLines.length && (
         <span className="inline-block w-[8px] h-[14px] bg-[#aaaaaa] animate-pulse" />
       )}
 

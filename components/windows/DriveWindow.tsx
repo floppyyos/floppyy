@@ -23,7 +23,7 @@ const toolbarButtons = [
   { label: "Undo", icon: "↩", action: "noop" },
   { label: "Delete", icon: "✕", action: "noop" },
   { label: "Properties", icon: "📝", action: "properties" },
-  { label: "Views", icon: "▦", action: "noop" },
+  { label: "Views", icon: "▦", action: "views" },
 ];
 
 const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
@@ -129,11 +129,45 @@ function parentPath(path: string) {
   return parts.join("\\");
 }
 
+function itemType(item: DriveItem) {
+  if (item.kind === "folder") return "File Folder";
+  const label = item.label.toLowerCase();
+  if (label.endsWith(".exe") || label.endsWith(".com")) return "Application";
+  if (label.endsWith(".dll")) return "Application Extension";
+  if (label.endsWith(".bmp")) return "Bitmap Image";
+  if (label.endsWith(".url")) return "Internet Shortcut";
+  if (label.endsWith(".htm") || label.endsWith(".html")) return "HTML Document";
+  if (label.endsWith(".ini") || label.endsWith(".inf")) return "Setup Information";
+  if (label.endsWith(".bat")) return "MS-DOS Batch File";
+  if (label.endsWith(".sys")) return "System File";
+  return "Text Document";
+}
+
+function itemSize(item: DriveItem) {
+  if (item.kind === "folder") return "";
+  const sizes: Record<string, string> = {
+    "COMMAND.COM": "94 KB",
+    "SETUP.EXE": "128 KB",
+    "WINAMP.EXE": "512 KB",
+    "DOOM.EXE": "699 KB",
+    "KERNEL32.DLL": "460 KB",
+    "USER.EXE": "452 KB",
+    "Clouds.bmp": "44 KB",
+  };
+  return sizes[item.label] ?? `${Math.max(1, item.label.length * 3)} KB`;
+}
+
+function itemModified(item: DriveItem) {
+  if (item.label.includes("WINDOWS") || item.label.includes(".DLL") || item.label.includes(".SYS") || item.label.includes(".COM")) return "06/26/1998 12:00 AM";
+  return "06/01/2026 01:35 PM";
+}
+
 export function DriveWindow({ window, notify, openWindow, playSound }: WindowComponentProps) {
   const drive = window.payload === "D" ? "D" : "C";
   const [path, setPath] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"icons" | "details">("icons");
 
   const items = useMemo(() => driveFiles[drive][path] ?? [], [drive, path]);
   const selectedItem = items.find((item) => item.id === selected);
@@ -209,6 +243,11 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
       playSound("click");
       return;
     }
+    if (action === "views") {
+      setViewMode((value) => (value === "icons" ? "details" : "icons"));
+      playSound("click");
+      return;
+    }
     playSound("click");
     notify(`${label} is not available.`);
   };
@@ -261,27 +300,59 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
         </aside>
 
         <div className="flex-1 overflow-auto p-4">
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(82px,1fr))] content-start gap-x-2 gap-y-1">
-            {items.map((item) => (
-              <button
-                key={item.id}
-                className={`flex cursor-default flex-col items-center justify-start gap-1 rounded-none p-1 text-center ${
-                  selected === item.id ? "bg-[#000080] text-white" : "hover:bg-[#000080]/10"
-                }`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setSelected(item.id);
-                  playSound("click");
-                }}
-                onDoubleClick={() => openItem(item)}
-              >
-                <img src={`/icons/${item.icon}.png`} alt="" width={32} height={32} draggable={false} style={{ imageRendering: "pixelated" }} />
-                <span className={`px-1 text-[11px] leading-[13px] ${selected === item.id ? "bg-[#000080] text-white" : ""}`}>
-                  {item.label}
-                </span>
-              </button>
-            ))}
-          </div>
+          {viewMode === "icons" ? (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(82px,1fr))] content-start gap-x-2 gap-y-1">
+              {items.map((item) => (
+                <button
+                  key={item.id}
+                  className={`flex cursor-default flex-col items-center justify-start gap-1 rounded-none p-1 text-center ${
+                    selected === item.id ? "bg-[#000080] text-white" : "hover:bg-[#000080]/10"
+                  }`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setSelected(item.id);
+                    playSound("click");
+                  }}
+                  onDoubleClick={() => openItem(item)}
+                >
+                  <img src={`/icons/${item.icon}.png`} alt="" width={32} height={32} draggable={false} style={{ imageRendering: "pixelated" }} />
+                  <span className={`px-1 text-[11px] leading-[13px] ${selected === item.id ? "bg-[#000080] text-white" : ""}`}>
+                    {item.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="border border-[#808080] bg-white">
+              <div className="grid h-[22px] grid-cols-[minmax(160px,1.4fr)_140px_80px_150px] bg-[#c0c0c0] font-bold">
+                {["Name", "Type", "Size", "Modified"].map((heading) => (
+                  <div key={heading} className="border-r border-[#808080] px-2 py-[3px]">{heading}</div>
+                ))}
+              </div>
+              {items.map((item) => (
+                <button
+                  key={item.id}
+                  className={`grid h-[24px] w-full grid-cols-[minmax(160px,1.4fr)_140px_80px_150px] text-left ${
+                    selected === item.id ? "bg-[#000080] text-white" : "hover:bg-[#000080]/10"
+                  }`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setSelected(item.id);
+                    playSound("click");
+                  }}
+                  onDoubleClick={() => openItem(item)}
+                >
+                  <div className="flex min-w-0 items-center gap-1 px-2">
+                    <img src={`/icons/${item.icon}.png`} alt="" width={16} height={16} draggable={false} style={{ imageRendering: "pixelated" }} />
+                    <span className="truncate">{item.label}</span>
+                  </div>
+                  <div className="truncate px-2 py-[4px]">{itemType(item)}</div>
+                  <div className="truncate px-2 py-[4px] text-right">{itemSize(item)}</div>
+                  <div className="truncate px-2 py-[4px]">{itemModified(item)}</div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

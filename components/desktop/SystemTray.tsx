@@ -27,7 +27,7 @@ export function SystemTray({
         <button
           aria-label="Disconnect Floppyy Net"
           className="desktop-icon-button flex items-center"
-          title="Floppyy Net: Connected"
+          title={"Floppyy Net: Connected\nSpeed: 33.6 kbps"}
           onDoubleClick={(event) => {
             event.stopPropagation();
             onDisconnectRequest();

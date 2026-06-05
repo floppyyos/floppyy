@@ -15,6 +15,8 @@ export const commands: Record<string, WindowId | "help"> = {
   paint: "paint",
   notepad: "notepad",
   computer: "computer",
+  control: "control-panel",
+  "control panel": "control-panel",
   ie: "ie-browser",
   iexplore: "ie-browser",
   explorer: "ie-browser",

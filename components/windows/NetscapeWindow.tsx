@@ -5,6 +5,13 @@ import type { WindowComponentProps } from "@/lib/windows";
 
 const WAYBACK_PREFIX = "https://web.archive.org/web/1999if_/";
 const HOME_URL = "https://www.yahoo.com/";
+const BOOKMARKS = [
+  ["Yahoo!", "https://www.yahoo.com/"],
+  ["AltaVista", "https://www.altavista.com/"],
+  ["GeoCities", "https://www.geocities.com/"],
+  ["Space Jam", "https://www.spacejam.com/1996/"],
+  ["Floppyy", "https://www.floppyy.com/"],
+] as const;
 
 function toWaybackUrl(url: string): string {
   if (url.startsWith("https://web.archive.org/")) return url;
@@ -189,9 +196,11 @@ export function NetscapeWindow({ playSound, internetConnected }: WindowComponent
 
       {/* Quick links bar */}
       <div className="flex items-center h-[20px] px-2 gap-3 border-b border-[#808080] bg-[#c0c0c0] text-[10px]">
-        <button className="hover:underline cursor-default" onClick={() => navigate("https://www.yahoo.com/")}>Internet</button>
-        <button className="hover:underline cursor-default" onClick={() => navigate("https://www.altavista.com/")}>Lookup</button>
-        <button className="hover:underline cursor-default" onClick={() => navigate("https://www.geocities.com/")}>New&amp;Cool</button>
+        {BOOKMARKS.map(([label, url]) => (
+          <button key={label} className="hover:underline cursor-default" onClick={() => navigate(url)}>
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Content area - iframe */}

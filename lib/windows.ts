@@ -4,6 +4,7 @@ export type WindowId =
   | "about"
   | "calculator"
   | "computer"
+  | "control-panel"
   | "defrag"
   | "documents"
   | "doom"
@@ -69,6 +70,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   about: { id: "about", title: "Welcome to Floppyy", icon: "computer", width: 560, height: 500 },
   calculator: { id: "calculator", title: "Calculator", icon: "calculator", width: 260, height: 270 },
   computer: { id: "computer", title: "My Computer", icon: "computer", width: 720, height: 520 },
+  "control-panel": { id: "control-panel", title: "Control Panel", icon: "control-panel", width: 600, height: 420 },
   defrag: { id: "defrag", title: "Defragmenting Drive C", icon: "computer", width: 500, height: 340 },
   documents: { id: "documents", title: "My Documents", icon: "documents", width: 720, height: 500 },
   doom: { id: "doom", title: "Doom", icon: "doom", width: 800, height: 580 },

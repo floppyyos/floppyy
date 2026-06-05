@@ -5,6 +5,13 @@ import type { WindowComponentProps } from "@/lib/windows";
 
 const WAYBACK_PREFIX = "https://web.archive.org/web/1999if_/";
 const HOME_URL = "https://www.aol.com/";
+const FAVORITES = [
+  ["AOL", "https://www.aol.com/"],
+  ["Yahoo!", "https://www.yahoo.com/"],
+  ["GeoCities", "https://www.geocities.com/"],
+  ["Space Jam", "https://www.spacejam.com/1996/"],
+  ["Floppyy", "https://www.floppyy.com/"],
+] as const;
 
 function toWaybackUrl(url: string): string {
   // If already a wayback URL, return as-is
@@ -179,6 +186,15 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected }: W
         >
           ↗ Go
         </button>
+      </div>
+
+      <div className="flex h-[22px] items-center gap-2 border-b border-[#808080] bg-[#c0c0c0] px-2 text-[10px]">
+        <span className="font-bold">Links</span>
+        {FAVORITES.map(([label, url]) => (
+          <button key={label} className="cursor-default hover:underline" onClick={() => navigate(url)}>
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Content area - iframe */}

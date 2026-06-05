@@ -5,16 +5,19 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Floppyy - The web you grew up on",
     short_name: "Floppyy",
     description:
-      "A browser desktop built on pure nostalgia.",
+      "Floppyy is a retro computer in your browser. A browser desktop built on pure nostalgia.",
     start_url: "/",
+    id: "/",
     display: "standalone",
-    background_color: "#c5d5e6",
-    theme_color: "#c5d5e6",
+    background_color: "#008080",
+    theme_color: "#c0c0c0",
+    categories: ["entertainment", "games", "productivity"],
     icons: [
       {
         src: "/favicon.png",
         sizes: "192x192",
         type: "image/png",
+        purpose: "any",
       },
       {
         src: "/favicon.ico",

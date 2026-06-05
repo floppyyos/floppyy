@@ -1,8 +1,8 @@
 {
   "name": "floppyy",
-  "version": "2.4.5",
+  "version": "2.5.0",
   "private": true,
-  "description": "A browser desktop built on pure nostalgia.",
+  "description": "Floppyy is a retro computer in your browser.",
   "engines": {
     "node": ">=20.9.0"
   },
@@ -14,19 +14,19 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.2.6",
-    "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "next": "16.2.7",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4.1.17",
-    "@types/node": "^24",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
-    "tailwindcss": "^4.1.17",
+    "@eslint/eslintrc": "^3.3.5",
+    "@tailwindcss/postcss": "^4.3.0",
+    "@types/node": "^24.13.0",
+    "@types/react": "^19.2.16",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "16.2.7",
+    "tailwindcss": "^4.3.0",
     "typescript": "5.9.3"
   }
 }

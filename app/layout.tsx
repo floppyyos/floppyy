@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s | Floppyy",
   },
   description:
-    "Floppyy is a browser desktop built on pure nostalgia. Boot up, click around, remember everything — minus the dial-up wait. Mostly.",
+    "Floppyy is a retro computer in your browser. A playful browser desktop built on old desktop systems, pixel windows, floppy disks, BIOS boot screens, Winamp vibes, classic games, and the early web.",
   applicationName: "Floppyy",
   authors: [{ name: "Floppyy", url: "https://www.floppyy.com" }],
   creator: "Floppyy",
@@ -41,6 +41,9 @@ export const metadata: Metadata = {
     "Solitaire online",
     "Paint online",
     "Norton Commander",
+    "dial-up internet",
+    "Netscape Navigator",
+    "Internet Explorer",
     "pixel UI",
     "retro games",
     "nostalgic web app",
@@ -50,6 +53,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -61,15 +65,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Floppyy - The web you grew up on",
     description:
-      "A browser desktop built on pure nostalgia: pixel windows, floppy disks, BIOS boot screens, classic games, Winamp vibes, and the early web.",
+      "Floppyy is a retro computer in your browser: pixel windows, floppy disks, BIOS boot screens, classic games, Winamp vibes, dial-up, and the early web.",
     url: "https://www.floppyy.com",
     siteName: "Floppyy",
     locale: "en_US",
     images: [
       {
         url: "/og-image.jpg",
-        width: 1200,
-        height: 680,
+        width: 1500,
+        height: 844,
         alt: "Floppyy retro browser desktop with blue floppy, Windows 98 clouds, and pixel UI",
       },
     ],
@@ -79,13 +83,13 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Floppyy - The web you grew up on",
     description:
-      "A browser desktop built on pure nostalgia. Boot up, click around, remember everything — minus the dial-up wait. Mostly.",
+      "Floppyy is a retro computer in your browser. Boot up, click around, remember everything — minus the dial-up wait. Mostly.",
     images: [
       {
         url: "/og-image.jpg",
-        width: 1200,
-        height: 680,
-        alt: "Floppyy retro browser desktop",
+        width: 1500,
+        height: 844,
+        alt: "Floppyy retro computer in your browser",
       },
     ],
   },
@@ -116,9 +120,11 @@ const jsonLd = {
   alternateName: "The web you grew up on.",
   url: "https://www.floppyy.com",
   description:
-    "Floppyy is a retro computer in your browser. It brings back the feeling of old desktop systems, pixel windows, floppy disks, BIOS boot screens, Winamp vibes, classic games, and the early web as a playful browser experience.",
-  applicationCategory: "Entertainment",
+    "Floppyy is a retro computer in your browser. It brings back the feeling of old desktop systems, pixel windows, floppy disks, BIOS boot screens, Winamp vibes, classic games, dial-up, and the early web as a playful browser experience.",
+  applicationCategory: "EntertainmentApplication",
   operatingSystem: "Any",
+  browserRequirements: "Requires JavaScript and a modern web browser.",
+  image: "https://www.floppyy.com/og-image.jpg",
   offers: {
     "@type": "Offer",
     price: "0",

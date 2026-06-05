@@ -244,7 +244,7 @@ export function NortonCommanderWindow({ window: win, closeWindow, openWindow, no
   const [left, setLeft] = useState<PanelState>({ drive: "C", path: [], cursor: 0, selected: [] });
   const [right, setRight] = useState<PanelState>({ drive: "D", path: [], cursor: 0, selected: [] });
   const [dialog, setDialog] = useState<DialogState>(null);
-  const [commandLine, setCommandLine] = useState("C:\\>");
+  const [commandText, setCommandText] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
 
   const leftEntries = useMemo(() => listEntries(fs, left), [fs, left]);
@@ -525,6 +525,21 @@ export function NortonCommanderWindow({ window: win, closeWindow, openWindow, no
     [activePanel, fs, viewFile, editFile, copySelected, deleteSelected, closeWindow, win.instanceId],
   );
 
+  const runCommandLine = useCallback(() => {
+    const command = commandText.trim().toLowerCase();
+    if (!command) return;
+    if (command === "llama") {
+      openWindow("music");
+      notify("Norton Commander found a llama. Launching Winamp...");
+      playSound("open");
+      setCommandText("");
+      return;
+    }
+    notify(`Bad command or file name - ${commandText}`);
+    playSound("error");
+    setCommandText("");
+  }, [commandText, notify, openWindow, playSound]);
+
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (dialog) {
@@ -651,15 +666,16 @@ export function NortonCommanderWindow({ window: win, closeWindow, openWindow, no
         />
       </div>
       <div className="mt-1 flex h-[22px] items-center bg-black px-2 text-[#c0c0c0]">
-        <span>{commandLine}</span>
+        <span>{activePanel.drive}:\&gt;</span>
         <input
           className="ml-1 flex-1 bg-transparent text-white outline-none"
-          value={commandLine.replace(/^[CD]:\\?>?/, "")}
-          onChange={(event) => setCommandLine(`${activePanel.drive}:\\>${event.target.value}`)}
+          value={commandText}
+          onChange={(event) => setCommandText(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
-              notify("Command line is decorative. Use the function keys above.");
-              playSound("error");
+              event.preventDefault();
+              event.stopPropagation();
+              runCommandLine();
             }
           }}
           aria-label="Norton command line"
