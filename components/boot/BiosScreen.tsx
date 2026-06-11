@@ -24,11 +24,15 @@ const BIOS_LINES = [
   { text: "Detecting IDE Primary Slave    ... None" },
   { text: "Detecting IDE Secondary Master ... ATAPI CD-ROM" },
   { text: "Detecting IDE Secondary Slave  ... None" },
+  { text: "Detecting Floppy Drive A       ... 1.44M, 3.5 in." },
   { text: "" },
   { text: "Keyboard detected" },
   { text: "Mouse initialized" },
   { text: "" },
-  { text: "Starting Floppyy 98..." },
+  { text: "Booting from A:\\..." },
+  { text: "Loading A:\\FLOPPYY\\FLOPPYY.EXE" },
+  { text: "" },
+  { text: "Starting Floppyy..." },
 ];
 
 const RARE_BIOS_LINES = [
@@ -53,6 +57,9 @@ const BOOTLOG_LINES = [
   "Memory test passed: 65536K",
   "Primary Master: WDC AC21600H",
   "CD-ROM detected",
+  "Floppy Drive A: 1.44M, 3.5 in.",
+  "Booting from A:\\",
+  "Loaded A:\\FLOPPYY\\FLOPPYY.EXE",
   "Keyboard initialized",
   "Mouse initialized",
   "Floppyy shell loaded",

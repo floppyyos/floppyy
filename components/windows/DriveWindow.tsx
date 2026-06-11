@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import type { WindowComponentProps, WindowId } from "@/lib/windows";
 
-type DriveId = "C" | "D";
+type DriveId = "A" | "C" | "D";
 type DriveItem = {
   id: string;
   label: string;
@@ -11,6 +11,7 @@ type DriveItem = {
   description: string;
   kind: "folder" | "file";
   target?: string;
+  content?: string;
 };
 
 const toolbarButtons = [
@@ -27,6 +28,38 @@ const toolbarButtons = [
 ];
 
 const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
+  A: {
+    "": [
+      { id: "floppyy-exe", label: "FLOPPYY.EXE", icon: "floppy", description: "Floppyy boot application", kind: "file" },
+      {
+        id: "readme",
+        label: "README.TXT",
+        icon: "notepad",
+        description: "Text Document",
+        kind: "file",
+        content:
+          "FLOPPYY BOOT DISK\n\nThis floppy starts Floppyy from a tiny corner of the old web.\n\nIf the desktop is already running, FLOPPYY.EXE will not start a second copy. That is normal. Click around, open a few windows, and remember everything minus the dial-up wait.\n\nMostly.",
+      },
+      {
+        id: "bootlog",
+        label: "BOOTLOG.TXT",
+        icon: "notepad",
+        description: "Boot log text file",
+        kind: "file",
+        content:
+          "[BOOTLOG]\nBIOS initialized\nMemory test passed: 65536K\nPrimary Master: WDC AC21600H\nSecondary Master: ATAPI CD-ROM\nFloppy Drive A: 1.44M, 3.5 in.\nBooting from A:\\\nLoading A:\\FLOPPYY\\FLOPPYY.EXE\nStarting Floppyy shell\nDesktop initialized\nStatus: OK",
+      },
+      {
+        id: "oldweb",
+        label: "OLDWEB.INI",
+        icon: "gears",
+        description: "Configuration Settings",
+        kind: "file",
+        content:
+          "[OldWeb]\nHomePage=https://www.floppyy.com\nDialUpSpeed=33.6kbps\nBookmarks=AOL,Yahoo,GeoCities,SpaceJam\nRememberEverything=1\nWaitForDialup=0",
+      },
+    ],
+  },
   C: {
     "": [
       { id: "windows", label: "WINDOWS", icon: "folder", description: "System folder", kind: "folder", target: "WINDOWS" },
@@ -116,10 +149,12 @@ const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
 };
 
 function driveTitle(drive: DriveId) {
+  if (drive === "A") return "3½ Floppy (A:)";
   return drive === "C" ? "(C:)" : "(D:)";
 }
 
 function driveDescription(drive: DriveId) {
+  if (drive === "A") return "3½ Inch Floppy Disk";
   return drive === "C" ? "Local Disk" : "Compact Disc";
 }
 
@@ -148,6 +183,10 @@ function itemSize(item: DriveItem) {
   const sizes: Record<string, string> = {
     "COMMAND.COM": "94 KB",
     "SETUP.EXE": "128 KB",
+    "FLOPPYY.EXE": "144 KB",
+    "README.TXT": "2 KB",
+    "BOOTLOG.TXT": "4 KB",
+    "OLDWEB.INI": "1 KB",
     "WINAMP.EXE": "512 KB",
     "DOOM.EXE": "699 KB",
     "KERNEL32.DLL": "460 KB",
@@ -163,15 +202,16 @@ function itemModified(item: DriveItem) {
 }
 
 export function DriveWindow({ window, notify, openWindow, playSound }: WindowComponentProps) {
-  const drive = window.payload === "D" ? "D" : "C";
+  const drive: DriveId = window.payload === "A" ? "A" : window.payload === "D" ? "D" : "C";
   const [path, setPath] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"icons" | "details">("icons");
+  const [viewer, setViewer] = useState<DriveItem | null>(null);
 
   const items = useMemo(() => driveFiles[drive][path] ?? [], [drive, path]);
   const selectedItem = items.find((item) => item.id === selected);
-  const icon = drive === "D" ? "drive-d" : "drive-c";
+  const icon = drive === "A" ? "floppy" : drive === "D" ? "drive-d" : "drive-c";
   const address = `${drive}:\\${path}`;
 
   const goToPath = (nextPath: string) => {
@@ -217,6 +257,14 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
     }
 
     const label = item.label.toLowerCase();
+    if (drive === "A" && label === "floppyy.exe") {
+      notify("Floppyy is already running.");
+      return;
+    }
+    if (item.content) {
+      setViewer(item);
+      return;
+    }
     if (label.includes("winamp")) openWindow("music");
     else if (label.includes("minesweeper")) openWindow("minesweeper");
     else if (label.includes("solitaire")) openWindow("games", "solitaire");
@@ -253,7 +301,7 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
   };
 
   return (
-    <div className="flex h-full flex-col bg-[#c0c0c0] text-[11px]">
+    <div className="relative flex h-full flex-col bg-[#c0c0c0] text-[11px]">
       <div className="flex h-[20px] items-center border-b border-[#808080] bg-[#c0c0c0] px-1">
         {["File", "Edit", "View", "Go", "Favorites", "Help"].map((item) => (
           <span key={item} className="cursor-default px-2 hover:underline">
@@ -363,6 +411,39 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
           <span className="text-[10px]">My Computer</span>
         </div>
       </div>
+
+      {viewer && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 p-5">
+          <div
+            className="w-[min(440px,92%)] bg-[#c0c0c0] p-[3px]"
+            style={{
+              boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+            }}
+          >
+            <div className="flex h-[18px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] px-[4px]">
+              <span className="truncate text-[11px] font-bold text-white">{viewer.label} - Notepad</span>
+              <button className="win-button flex h-[14px] min-h-0 w-[16px] items-center justify-center p-0 text-[10px]" onClick={() => setViewer(null)}>
+                ×
+              </button>
+            </div>
+            <div className="border-b border-[#808080] px-1 py-[2px]">
+              {["File", "Edit", "Search", "Help"].map((item) => (
+                <span key={item} className="cursor-default px-2 hover:underline">
+                  {item}
+                </span>
+              ))}
+            </div>
+            <pre className="h-[220px] overflow-auto whitespace-pre-wrap bg-white p-2 font-mono text-[12px] leading-[15px] text-black">
+              {viewer.content}
+            </pre>
+            <div className="mt-[6px] flex justify-end">
+              <button className="win-button min-w-[70px]" onClick={() => setViewer(null)}>
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

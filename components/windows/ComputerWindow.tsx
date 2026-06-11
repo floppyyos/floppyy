@@ -119,6 +119,11 @@ export function ComputerWindow({ notify, openWindow, playSound }: WindowComponen
                   playSound("click");
                 }}
                 onDoubleClick={() => {
+                  if (item.id === "floppy") {
+                    playSound("floppy");
+                    openWindow("drive", "A");
+                    return;
+                  }
                   if (item.id === "dialup") {
                     playSound("open");
                     openWindow("internet");

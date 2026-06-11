@@ -58,11 +58,13 @@ export function useWindowManager() {
                 : payload && id === "mediaplayer"
                   ? `Windows Media Player - ${payload}`
                   : payload && id === "drive"
-                    ? payload === "D"
+                    ? payload === "A"
+                      ? "3½ Floppy (A:)"
+                      : payload === "D"
                       ? "(D:)"
                       : "(C:)"
                     : definition.title,
-            icon: payload && id === "drive" ? `drive-${payload.toLowerCase()}` : definition.icon,
+            icon: payload && id === "drive" ? (payload === "A" ? "floppy" : `drive-${payload.toLowerCase()}`) : definition.icon,
             x: mobile ? 8 : clamp(80 + offset, 8, viewportWidth - width - 8),
             y: mobile ? 8 : clamp(40 + offset, 8, viewportHeight - height - 36),
             width,
