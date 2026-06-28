@@ -64,7 +64,7 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
           <span>About</span>
         </button>
         <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("projects")}>
-          <FloppyyIcon type="folder" size={16} />
+          <FloppyyIcon type="directory_net" size={16} />
           <span>Projects</span>
         </button>
         <div className="mx-[3px] my-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
@@ -99,7 +99,7 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
 
         <div className="group/games relative">
           <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("games")}>
-            <FloppyyIcon type="directory_open" size={16} />
+            <FloppyyIcon type="directory_check" size={16} />
             <span>Games</span>
             <span className="ml-auto w-[10px] text-center text-[7px] leading-none">▶</span>
           </button>

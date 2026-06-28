@@ -161,6 +161,8 @@ export default function Desktop() {
   const [shutdownOpen, setShutdownOpen] = useState(false);
   const [safeToTurnOff, setSafeToTurnOff] = useState(false);
   const [iconPositions, setIconPositions] = useState<Record<string, IconPosition>>(() => initialIconPositions());
+  const [binItems, setBinItems] = useState<Set<string>>(() => new Set());
+  const [emptiedIcons, setEmptiedIcons] = useState<Set<string>>(() => new Set());
   const iconDrag = useRef<IconDrag>(null);
   const winampDrag = useRef<WindowDrag>(null);
   const wm = useWindowManager();
@@ -259,16 +261,81 @@ export default function Desktop() {
       iconDrag.current = null;
       if (!drag.moved) {
         iconClick(drag.id);
-      } else {
+        return;
+      }
+
+      // Check whether the icon was dropped onto the Recycle Bin.
+      const recyclePosition = iconPositions["recycle"];
+      const overRecycleBin =
+        drag.id !== "recycle" &&
+        !!recyclePosition &&
+        event.clientX >= recyclePosition.x &&
+        event.clientX <= recyclePosition.x + ICON_WIDTH &&
+        event.clientY >= recyclePosition.y &&
+        event.clientY <= recyclePosition.y + ICON_HEIGHT;
+
+      if (overRecycleBin) {
+        // My Computer and Dial-Up Networking can't be thrown away.
+        if (drag.id === "computer" || drag.id === "dialup") {
+          playSound("error");
+          setIconPositions((positions) => ({
+            ...positions,
+            [drag.id]: { x: drag.originX, y: drag.originY },
+          }));
+          return;
+        }
+
+        // Everything else gets removed from the desktop and dropped in the bin.
+        setBinItems((previous) => {
+          const next = new Set(previous);
+          next.add(drag.id);
+          return next;
+        });
+        setSelectedIcon((current) => (current === drag.id ? null : current));
         setIconPositions((positions) => ({
           ...positions,
-          [drag.id]: nearestFreeGridPosition(drag.id, positions[drag.id]?.x ?? drag.originX, positions[drag.id]?.y ?? drag.originY, positions),
+          [drag.id]: { x: drag.originX, y: drag.originY },
         }));
-        playSound("click");
+        playSound("recycle");
+        return;
       }
+
+      setIconPositions((positions) => ({
+        ...positions,
+        [drag.id]: nearestFreeGridPosition(drag.id, positions[drag.id]?.x ?? drag.originX, positions[drag.id]?.y ?? drag.originY, positions),
+      }));
+      playSound("click");
     },
-    [iconClick, playSound],
+    [iconClick, playSound, iconPositions],
   );
+
+  const emptyRecycleBin = useCallback(() => {
+    setBinItems((previous) => {
+      if (previous.size === 0) {
+        notify("Recycle Bin is already empty.");
+        return previous;
+      }
+      setEmptiedIcons((gone) => {
+        const next = new Set(gone);
+        previous.forEach((id) => next.add(id));
+        return next;
+      });
+      playSound("recycle");
+      return new Set();
+    });
+    setContextMenu(null);
+  }, [notify, playSound]);
+
+  const restoreAllFromRecycleBin = useCallback(() => {
+    setBinItems((previous) => {
+      if (previous.size === 0) {
+        notify("There are no items to restore.");
+        return previous;
+      }
+      playSound("click");
+      return new Set();
+    });
+  }, [notify, playSound]);
 
   const arrangeIcons = useCallback(() => {
     setIconPositions(initialIconPositions());
@@ -362,7 +429,14 @@ export default function Desktop() {
       case "drive":
         return <DriveWindow {...props} />;
       case "recycle-bin":
-        return <RecycleBinWindow {...props} />;
+        return (
+          <RecycleBinWindow
+            {...props}
+            items={desktopIcons.filter((icon) => binItems.has(icon.id))}
+            onEmptyBin={emptyRecycleBin}
+            onRestoreAll={restoreAllFromRecycleBin}
+          />
+        );
       case "screensaver":
         return <ScreensaverWindow {...props} />;
       case "duke":
@@ -460,12 +534,14 @@ export default function Desktop() {
       }}
     >
       <div className="relative h-[calc(100vh-28px)]">
-        {desktopIcons.map((icon) => (
+        {desktopIcons
+          .filter((icon) => !binItems.has(icon.id) && !emptiedIcons.has(icon.id))
+          .map((icon) => (
           <DesktopIcon
             key={icon.id}
             id={icon.id}
             label={icon.label}
-            icon={icon.icon}
+            icon={icon.id === "recycle" && binItems.size > 0 ? "recycle_bin_full" : icon.icon}
             selected={selectedIcon === icon.id}
             x={iconPositions[icon.id]?.x ?? DESKTOP_PADDING}
             y={iconPositions[icon.id]?.y ?? DESKTOP_PADDING}
@@ -597,6 +673,7 @@ export default function Desktop() {
           onLineUpIcons={lineUpIcons}
           onRefresh={refreshDesktop}
           onProperties={showProperties}
+          onEmptyRecycleBin={emptyRecycleBin}
           onClose={() => setContextMenu(null)}
         />
       )}

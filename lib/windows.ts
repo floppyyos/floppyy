@@ -98,7 +98,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   solitaire: { id: "solitaire", title: "Solitaire", icon: "cards", width: 720, height: 500, minWidth: 560, minHeight: 400 },
   run: { id: "run", title: "Run", icon: "run", width: 420, height: 210 },
   settings: { id: "settings", title: "Settings", icon: "gears", width: 520, height: 380 },
-  share: { id: "share", title: "Send to a Friend", icon: "share", width: 400, height: 555 },
+  share: { id: "share", title: "Send to a Friend", icon: "garfield", width: 400, height: 555 },
   duke: { id: "duke", title: "Duke Nukem 3D", icon: "doom", width: 720, height: 560, minWidth: 480, minHeight: 380 },
   "shadow-warrior": { id: "shadow-warrior", title: "Shadow Warrior", icon: "doom", width: 720, height: 560, minWidth: 480, minHeight: 380 },
   "project-details": {

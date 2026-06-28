@@ -1,6 +1,13 @@
 "use client";
 
-import type { WindowComponentProps } from "@/lib/windows";
+import type { DesktopIconDefinition, WindowComponentProps } from "@/lib/windows";
+import { FloppyyIcon } from "@/components/desktop/FloppyyIcon";
+
+type RecycleBinWindowProps = WindowComponentProps & {
+  items?: DesktopIconDefinition[];
+  onEmptyBin?: () => void;
+  onRestoreAll?: () => void;
+};
 
 const toolbarButtons = [
   { label: "Back", icon: "←" },
@@ -15,7 +22,8 @@ const toolbarButtons = [
   { label: "Views", icon: "▦" },
 ];
 
-export function RecycleBinWindow({ notify, playSound }: WindowComponentProps) {
+export function RecycleBinWindow({ notify, playSound, items = [], onEmptyBin, onRestoreAll }: RecycleBinWindowProps) {
+  const hasItems = items.length > 0;
   return (
     <div className="flex h-full flex-col bg-[#c0c0c0] text-[11px]">
       <div className="flex h-[20px] items-center border-b border-[#808080] bg-[#c0c0c0] px-1">
@@ -78,8 +86,12 @@ export function RecycleBinWindow({ notify, playSound }: WindowComponentProps) {
                 <button
                   className="font-bold text-[#0000ff] underline"
                   onClick={() => {
-                    playSound("recycle");
-                    notify("Recycle Bin is already empty.");
+                    if (onEmptyBin) {
+                      onEmptyBin();
+                    } else {
+                      playSound("recycle");
+                      notify("Recycle Bin is already empty.");
+                    }
                   }}
                 >
                   Empty Recycle Bin.
@@ -90,8 +102,12 @@ export function RecycleBinWindow({ notify, playSound }: WindowComponentProps) {
                 <button
                   className="font-bold text-[#0000ff] underline"
                   onClick={() => {
-                    playSound("click");
-                    notify("There are no items to restore.");
+                    if (onRestoreAll) {
+                      onRestoreAll();
+                    } else {
+                      playSound("click");
+                      notify("There are no items to restore.");
+                    }
                   }}
                 >
                   Restore All.
@@ -101,12 +117,28 @@ export function RecycleBinWindow({ notify, playSound }: WindowComponentProps) {
           </div>
         </aside>
 
-        <div className="flex-1 overflow-auto bg-white" />
+        <div className="flex-1 overflow-auto bg-white p-2">
+          {hasItems ? (
+            <div className="flex flex-wrap content-start gap-x-2 gap-y-3">
+              {items.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex w-[76px] flex-col items-center gap-[2px] p-1 text-center"
+                  title={item.label}
+                  onClick={() => playSound("click")}
+                >
+                  <FloppyyIcon type={item.icon} size={32} />
+                  <span className="break-words text-[11px] leading-[13px]">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <div className="flex h-[20px] items-center border-t border-[#808080] bg-[#c0c0c0] px-2">
         <div className="flex-1 border-r border-[#808080] pr-2 text-[10px]">
-          0 object(s)
+          {items.length} object(s)
         </div>
         <div className="flex items-center gap-1 pl-2">
           <img src="/icons/computer.png" alt="" width={14} height={14} draggable={false} style={{ imageRendering: "pixelated" }} />

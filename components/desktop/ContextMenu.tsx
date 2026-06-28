@@ -9,6 +9,7 @@ type Props = {
   onLineUpIcons: () => void;
   onRefresh: () => void;
   onProperties: () => void;
+  onEmptyRecycleBin: () => void;
   onClose: () => void;
 };
 
@@ -21,6 +22,7 @@ export function ContextMenu({
   onLineUpIcons,
   onRefresh,
   onProperties,
+  onEmptyRecycleBin,
   onClose,
 }: Props) {
   return (
@@ -39,6 +41,11 @@ export function ContextMenu({
           <button className="menu-command font-bold" onClick={onOpen}>
             Open
           </button>
+          {target === "recycle" && (
+            <button className="menu-command" onClick={onEmptyRecycleBin}>
+              Empty Recycle Bin
+            </button>
+          )}
           <div className="mx-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
         </>
       )}
