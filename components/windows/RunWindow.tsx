@@ -78,7 +78,7 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
       return;
     }
     if (command === "help") {
-      notify("Commands: about, computer, winamp, ie, netscape, notepad, paint, calc, cmd, doom, pinball, projects, games, music, screensaver, defrag, help. Some old words still work.");
+      notify("Commands: about, computer, winamp, ie, netscape, notepad, paint, calc, cmd, doom, duke, sw, projects, games, music, screensaver, defrag, help. Some old words still work.");
       return;
     }
     openWindow(command as WindowId);

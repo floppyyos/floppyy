@@ -110,8 +110,8 @@ const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
       { id: "readme", label: "README.txt", icon: "notepad", description: "Text Document", kind: "file" },
     ],
     Projects: [
-      { id: "with-no-hype", label: "With No Hype", icon: "folder", description: "AI and new tech explained honestly. No Hype.", kind: "file" },
       { id: "brewwery", label: "Brewwery", icon: "folder", description: "A visual Homebrew manager for macOS.", kind: "file" },
+      { id: "with-no-hype", label: "With No Hype", icon: "folder", description: "AI and new tech explained honestly. No Hype.", kind: "file" },
       { id: "openmodels", label: "OpenModels", icon: "folder", description: "Open Registry & Telemetry for AI Infrastructure.", kind: "file" },
       { id: "titanbase", label: "Titanbase", icon: "folder", description: "Visual Schema Designer For Developers and Product Teams.", kind: "file" },
       { id: "floppyy", label: "Floppyy", icon: "folder", description: "A retro computer in your browser.", kind: "file" },
@@ -119,7 +119,10 @@ const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
     Games: [
       { id: "mines", label: "Minesweeper.exe", icon: "mine", description: "Application", kind: "file" },
       { id: "solitaire", label: "Solitaire.exe", icon: "cards", description: "Application", kind: "file" },
+      { id: "snake", label: "Snake.exe", icon: "snake", description: "Application", kind: "file" },
       { id: "doom", label: "Doom.exe", icon: "doom", description: "Application", kind: "file" },
+      { id: "duke", label: "Duke3D.exe", icon: "doom", description: "Application", kind: "file" },
+      { id: "shadow-warrior", label: "ShadowWarrior.exe", icon: "doom", description: "Application", kind: "file" },
     ],
   },
   D: {
@@ -267,13 +270,18 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
     }
     if (label.includes("winamp")) openWindow("music");
     else if (label.includes("minesweeper")) openWindow("minesweeper");
-    else if (label.includes("solitaire")) openWindow("games", "solitaire");
+    else if (label.includes("solitaire")) openWindow("solitaire");
+    else if (label.includes("snake")) openWindow("snake");
     else if (label.includes("doom")) openWindow("doom");
+    else if (label.includes("duke")) openWindow("duke");
+    else if (label.includes("shadowwarrior") || label.includes("shadow warrior")) openWindow("shadow-warrior");
     else if (label.includes("netscape")) openWindow("netscape");
     else if (label.includes("internet explorer") || label.endsWith(".url") || label.endsWith(".htm")) openWindow("ie-browser", "https://www.aol.com/");
     else if (label.includes("norton") || label === "nc.exe") openWindow("norton");
-    else if (label.endsWith(".bmp")) openWindow("paint");
-    else if (label.endsWith(".txt") || label.endsWith(".sys") || label.endsWith(".bat") || label.endsWith(".ini") || label.endsWith(".inf")) openWindow("notepad");
+    else if (label.endsWith(".bmp")) openWindow("paint", label === "clouds.bmp" ? "clouds" : undefined);
+    else if (label.endsWith(".txt") || label.endsWith(".sys") || label.endsWith(".bat") || label.endsWith(".ini") || label.endsWith(".inf")) {
+      openWindow("notepad", path === "My Documents" && label === "readme.txt" ? "readme" : undefined);
+    }
     notify(`${item.label}: ${item.description}`);
   };
 

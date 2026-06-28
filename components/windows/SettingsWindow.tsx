@@ -27,6 +27,15 @@ export function SettingsWindow({ startScreensaver, notify }: WindowComponentProp
           <button className="win-button" onClick={() => startScreensaver("pipes")}>
             3D Pipes
           </button>
+          <button className="win-button" onClick={() => startScreensaver("maze")}>
+            3D Maze
+          </button>
+          <button className="win-button" onClick={() => startScreensaver("mystify")}>
+            Mystify
+          </button>
+          <button className="win-button" onClick={() => startScreensaver("flying-windows")}>
+            Flying Windows
+          </button>
         </div>
       </div>
     </div>

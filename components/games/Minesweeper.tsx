@@ -1,26 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { GameMenuBar } from "./GameChrome";
 
 const cols = 16;
 const rows = 16;
 const totalMines = 40;
 const totalCells = cols * rows;
-const cellSize = 18;
+const cellSize = 16;
 
 type Face = "happy" | "pressed" | "lost" | "won";
-
-function makeMines(seed: number) {
-  const mines = new Set<number>();
-  let value = seed || 1;
-
-  while (mines.size < totalMines) {
-    value = (value * 9301 + 49297) % 233280;
-    mines.add(value % totalCells);
-  }
-
-  return mines;
-}
 
 function neighbors(index: number) {
   const x = index % cols;
@@ -35,6 +25,22 @@ function neighbors(index: number) {
   }
 
   return result;
+}
+
+/** Place mines randomly, never on an excluded cell (first-click safety). */
+function placeMines(exclude: Set<number>): Set<number> {
+  const mines = new Set<number>();
+  while (mines.size < totalMines) {
+    const cell = Math.floor(Math.random() * totalCells);
+    if (!exclude.has(cell)) mines.add(cell);
+  }
+  return mines;
+}
+
+function computeCounts(mines: Set<number>): number[] {
+  return Array.from({ length: totalCells }, (_, index) =>
+    neighbors(index).filter((neighbor) => mines.has(neighbor)).length,
+  );
 }
 
 function revealEmpty(start: number, counts: number[], mines: Set<number>, current: Set<number>) {
@@ -57,61 +63,55 @@ function revealEmpty(start: number, counts: number[], mines: Set<number>, curren
 }
 
 function LedCounter({ value }: { value: number }) {
+  const clamped = Math.max(-99, Math.min(999, value));
+  const negative = clamped < 0;
+  const digits = String(Math.abs(clamped)).padStart(negative ? 2 : 3, "0").split("");
+  const cells = negative ? ["-", ...digits] : digits;
   return (
-    <div
-      className="flex h-[30px] min-w-[60px] items-center justify-center bg-black px-[4px] font-mono text-[23px] font-bold leading-none text-[#ff1a1a]"
-      style={{
-        boxShadow: "inset 1px 1px #808080, inset -1px -1px #ffffff",
-        textShadow: "0 0 2px #ff0000",
-      }}
-    >
-      {String(Math.max(0, Math.min(999, value))).padStart(3, "0")}
+    <div className="flex h-[23px] w-[39px] bg-black">
+      {cells.map((digit, index) => (
+        <Image
+          key={`${digit}-${index}`}
+          src={`/game-assets/minesweeper/time${digit === "-" ? "-" : digit}.gif`}
+          alt=""
+          width={13}
+          height={23}
+          unoptimized
+        />
+      ))}
     </div>
   );
 }
 
 function FaceButton({ face, onClick }: { face: Face; onClick: () => void }) {
-  const mark = face === "lost" ? "×" : face === "won" ? "⌐" : face === "pressed" ? "o" : "";
-
+  const faceFile = face === "lost" ? "facedead" : face === "won" ? "facewin" : face === "pressed" ? "faceooh" : "facesmile";
   return (
     <button
       aria-label="Reset minesweeper"
-      className="flex h-[30px] w-[30px] items-center justify-center bg-[#c0c0c0] p-0"
-      style={{
-        boxShadow: "inset -2px -2px #808080, inset 2px 2px #ffffff, inset -3px -3px #404040, inset 3px 3px #dfdfdf",
-      }}
+      className="h-[26px] w-[26px] bg-[#c0c0c0] p-0"
+      style={{ boxShadow: "inset -2px -2px #808080, inset 2px 2px #ffffff" }}
       onClick={onClick}
     >
-      <span className="relative block h-[20px] w-[20px] rounded-full border border-[#808000] bg-[#ffff00]">
-        <span className="absolute left-[5px] top-[5px] h-[3px] w-[3px] bg-black" />
-        <span className="absolute right-[5px] top-[5px] h-[3px] w-[3px] bg-black" />
-        {mark ? (
-          <span className="absolute left-1/2 top-[9px] -translate-x-1/2 text-[11px] font-bold leading-none text-black">{mark}</span>
-        ) : (
-          <span className="absolute bottom-[4px] left-[5px] h-[5px] w-[10px] rounded-b-full border-b-2 border-black" />
-        )}
-      </span>
+      <Image src={`/game-assets/minesweeper/${faceFile}.gif`} alt="" width={26} height={26} unoptimized />
     </button>
   );
 }
 
 export function Minesweeper({ playSound }: { playSound: (name: string) => void }) {
-  const [seed, setSeed] = useState(() => Date.now() % 233280);
+  const [mines, setMines] = useState<Set<number>>(new Set());
   const [open, setOpen] = useState<Set<number>>(new Set());
   const [flags, setFlags] = useState<Set<number>>(new Set());
+  const [questions, setQuestions] = useState<Set<number>>(new Set());
   const [lost, setLost] = useState(false);
+  const [deathCell, setDeathCell] = useState<number | null>(null);
   const [started, setStarted] = useState(false);
   const [startedAt, setStartedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
   const [face, setFace] = useState<Face>("happy");
 
-  const mines = useMemo(() => makeMines(seed), [seed]);
-  const counts = useMemo(
-    () => Array.from({ length: totalCells }, (_, index) => neighbors(index).filter((neighbor) => mines.has(neighbor)).length),
-    [mines],
-  );
-  const won = !lost && open.size >= totalCells - totalMines;
-  const elapsed = started && !lost && !won ? Math.min(999, Math.floor((now - startedAt) / 1000)) : Math.min(999, Math.floor((now - startedAt) / 1000));
+  const counts = useMemo(() => computeCounts(mines), [mines]);
+  const won = !lost && started && open.size >= totalCells - totalMines;
+  const elapsed = Math.min(999, Math.floor((now - startedAt) / 1000));
 
   useEffect(() => {
     if (!started || lost || won) return;
@@ -120,15 +120,20 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
   }, [started, lost, won]);
 
   useEffect(() => {
-    if (won) setFace("won");
-  }, [won]);
+    if (won) {
+      setFace("won");
+      playSound("notification");
+    }
+  }, [won, playSound]);
 
   const reset = () => {
     const nextNow = Date.now();
-    setSeed(nextNow % 233280);
+    setMines(new Set());
     setOpen(new Set());
     setFlags(new Set());
+    setQuestions(new Set());
     setLost(false);
+    setDeathCell(null);
     setStarted(false);
     setStartedAt(nextNow);
     setNow(nextNow);
@@ -136,65 +141,115 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
     playSound("click");
   };
 
+  const loseWith = (death: number, mineSet: Set<number>) => {
+    setMines(mineSet);
+    setDeathCell(death);
+    setLost(true);
+    setFace("lost");
+    playSound("error");
+  };
+
   const openCell = (index: number) => {
-    if (lost || won || open.has(index) || flags.has(index)) return;
+    if (lost || won || flags.has(index) || questions.has(index)) return;
 
-    if (!started) {
-      const nextNow = Date.now();
-      setStarted(true);
-      setStartedAt(nextNow);
-      setNow(nextNow);
-    }
+    // Chord: clicking a satisfied number opens its remaining neighbors
+    if (open.has(index)) {
+      const count = counts[index];
+      if (count <= 0) return;
+      const nbrs = neighbors(index);
+      const flaggedCount = nbrs.filter((n) => flags.has(n)).length;
+      if (flaggedCount !== count) return;
 
-    if (mines.has(index)) {
-      setLost(true);
-      setFace("lost");
-      playSound("error");
+      const toReveal = nbrs.filter((n) => !flags.has(n) && !questions.has(n) && !open.has(n));
+      const hitMine = toReveal.find((n) => mines.has(n));
+      if (hitMine !== undefined) {
+        loseWith(hitMine, mines);
+        return;
+      }
+      let next = open;
+      for (const n of toReveal) next = revealEmpty(n, counts, mines, next);
+      if (next !== open) {
+        setOpen(next);
+        playSound("click");
+      }
       return;
     }
 
-    setOpen((current) => revealEmpty(index, counts, mines, current));
+    // First click: generate mines avoiding this cell and its neighbors
+    let activeMines = mines;
+    if (!started) {
+      const exclude = new Set<number>([index, ...neighbors(index)]);
+      activeMines = placeMines(exclude);
+      setMines(activeMines);
+      setStarted(true);
+      const t = Date.now();
+      setStartedAt(t);
+      setNow(t);
+    }
+
+    if (activeMines.has(index)) {
+      loseWith(index, activeMines);
+      return;
+    }
+
+    const activeCounts = computeCounts(activeMines);
+    setOpen((current) => revealEmpty(index, activeCounts, activeMines, current));
     setFace("happy");
     playSound("click");
   };
 
-  const toggleFlag = (index: number) => {
+  // Right click cycles: blank -> flag -> question -> blank
+  const cycleMark = (index: number) => {
     if (lost || won || open.has(index)) return;
-    setFlags((current) => {
-      const next = new Set(current);
-      if (next.has(index)) next.delete(index);
-      else next.add(index);
-      return next;
-    });
+    if (flags.has(index)) {
+      setFlags((s) => {
+        const n = new Set(s);
+        n.delete(index);
+        return n;
+      });
+      setQuestions((s) => new Set(s).add(index));
+    } else if (questions.has(index)) {
+      setQuestions((s) => {
+        const n = new Set(s);
+        n.delete(index);
+        return n;
+      });
+    } else {
+      setFlags((s) => new Set(s).add(index));
+    }
     playSound("click");
   };
 
-  const colorFor = (count: number) => {
-    if (count === 1) return "#0000ff";
-    if (count === 2) return "#008000";
-    if (count === 3) return "#ff0000";
-    if (count === 4) return "#000080";
-    if (count === 5) return "#800000";
-    if (count === 6) return "#008080";
-    if (count === 7) return "#000000";
-    return "#808080";
+  const cellAsset = (index: number): string => {
+    const mine = mines.has(index);
+    const flagged = flags.has(index);
+    const question = questions.has(index);
+
+    if (lost) {
+      if (index === deathCell) return "bombdeath";
+      if (mine && flagged) return "bombflagged";
+      if (mine) return "bombrevealed";
+      if (flagged && !mine) return "bombmisflagged";
+    }
+    if (won && mine) return "bombflagged";
+    if (flagged) return "bombflagged";
+    if (question) return "bombquestion";
+    if (open.has(index)) return `open${counts[index]}`;
+    return "blank";
   };
 
   return (
     <div className="inline-flex flex-col bg-[#c0c0c0] text-[11px]">
-      <div className="flex h-[20px] items-center gap-[18px] px-[6px] text-[14px]">
-        <button className="cursor-default underline" onClick={reset}>Game</button>
-        <button className="cursor-default underline" onClick={() => playSound("click")}>Help</button>
-      </div>
+      <GameMenuBar items={[{ label: "Game", onClick: reset }, { label: "Help", onClick: () => playSound("click") }]} />
 
       <div
-        className="bg-[#c0c0c0] p-[8px]"
+        className="bg-[#c0c0c0] p-[6px]"
         style={{
           boxShadow: "inset -2px -2px #808080, inset 2px 2px #ffffff, inset -3px -3px #404040, inset 3px 3px #dfdfdf",
         }}
       >
         <div
-          className="mb-[8px] flex h-[44px] items-center justify-between bg-[#c0c0c0] px-[12px]"
+          className="mb-[6px] flex h-[37px] items-center justify-between bg-[#c0c0c0] px-[7px]"
           style={{
             boxShadow: "inset 2px 2px #808080, inset -2px -2px #ffffff",
           }}
@@ -213,50 +268,36 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
           }}
         >
           {Array.from({ length: totalCells }, (_, index) => {
-            const revealed = open.has(index) || lost;
-            const mine = mines.has(index);
-            const count = counts[index];
+            const opened = open.has(index);
             const flagged = flags.has(index);
-
+            const question = questions.has(index);
             return (
               <button
                 key={index}
                 aria-label={`Cell ${index}`}
-                className="flex items-center justify-center p-0 text-[12px] font-bold leading-none"
+                className="block p-0"
                 style={{
                   width: cellSize,
                   height: cellSize,
-                  ...(revealed
-                    ? {
-                        background: "#c0c0c0",
-                        borderLeft: "1px solid #808080",
-                        borderTop: "1px solid #808080",
-                        borderRight: "1px solid #dfdfdf",
-                        borderBottom: "1px solid #dfdfdf",
-                        color: colorFor(count),
-                      }
-                    : {
-                        background: "#c0c0c0",
-                        boxShadow: "inset -2px -2px #808080, inset 2px 2px #ffffff, inset -3px -3px #404040, inset 3px 3px #dfdfdf",
-                      }),
+                  backgroundImage: `url('/game-assets/minesweeper/${cellAsset(index)}.gif')`,
+                  backgroundSize: "16px 16px",
+                  imageRendering: "pixelated",
                 }}
-                onMouseDown={() => {
-                  if (!revealed && !flagged) setFace("pressed");
+                onMouseDown={(event) => {
+                  if (event.button === 0 && !opened && !flagged && !question && !lost && !won) setFace("pressed");
                 }}
                 onMouseUp={() => {
                   if (!lost && !won) setFace("happy");
                 }}
                 onMouseLeave={() => {
-                  if (!lost && !won) setFace("happy");
+                  if (!lost && !won && face === "pressed") setFace("happy");
                 }}
                 onClick={() => openCell(index)}
                 onContextMenu={(event) => {
                   event.preventDefault();
-                  toggleFlag(index);
+                  cycleMark(index);
                 }}
-              >
-                {revealed && mine ? "✹" : flagged ? "⚑" : revealed && count ? count : ""}
-              </button>
+              />
             );
           })}
         </div>

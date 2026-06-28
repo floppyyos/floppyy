@@ -20,10 +20,21 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
   ];
 
   const games: Array<[WindowId, string, string, string?]> = [
-    ["minesweeper", "Minesweeper", "mine"],
-    ["games", "Solitaire", "cards", "solitaire"],
-    ["games", "Snake", "scheduled", "snake"],
+    ["solitaire", "Solitaire", "cards"],
     ["doom", "Doom", "doom"],
+    ["duke", "Duke Nukem 3D", "doom"],
+    ["shadow-warrior", "Shadow Warrior", "doom"],
+    ["snake", "Snake", "snake"],
+    ["minesweeper", "Minesweeper", "mine"],
+  ];
+
+  const favorites: Array<[string, string]> = [
+    ["Lycos", "https://web.archive.org/web/19961225002710/http://www.lycos.com/"],
+    ["AltaVista", "https://web.archive.org/web/19961023234631/http://altavista.digital.com/"],
+    ["AOL", "https://web.archive.org/web/19961219002550/http://www.aol.com/"],
+    ["Yahoo", "https://web.archive.org/web/19961017235908/http://www.yahoo.com/"],
+    ["Amazon", "https://web.archive.org/web/19961112181513/http://www.amazon.com/"],
+    ["eBay", "https://web.archive.org/web/19961225025243/http://www.ebay.com/"],
   ];
 
   return (
@@ -105,6 +116,36 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
                 onClick={() => onOpen(id, payload)}
               >
                 <FloppyyIcon type={icon} size={16} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mx-[3px] my-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
+
+        <div className="group/favorites relative">
+          <button
+            className="menu-command flex items-center gap-[8px] py-[3px]"
+            onClick={(event) => event.preventDefault()}
+          >
+            <FloppyyIcon type="fav" size={16} />
+            <span>Favorites</span>
+            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">▶</span>
+          </button>
+          <div
+            className="absolute left-full top-0 hidden w-[190px] bg-[#c0c0c0] py-[3px] group-hover/favorites:block"
+            style={{
+              boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+            }}
+          >
+            {favorites.map(([label, url]) => (
+              <button
+                key={label}
+                className="menu-command flex items-center gap-[8px] py-[3px]"
+                onClick={() => onOpen("ie-browser", url)}
+              >
+                <FloppyyIcon type="html" size={16} />
                 <span>{label}</span>
               </button>
             ))}

@@ -14,6 +14,19 @@ export interface WinampTrack {
 const DEFAULT_TRACKS: WinampTrack[] = [
   { title: "Winamp Intro", artist: "Winamp", duration: 0, file: "/winamp/winamp-intro.mp3" },
   { title: "Alternative", artist: "Winamp", duration: 0, file: "/winamp/winamp-alternative.mp3" },
+  { title: "Baby One More Time", artist: "Britney Spears", duration: 0, file: "/winamp/Britney.mp3" },
+  { title: "Bye Bye Bye", artist: "NSync", duration: 0, file: "/winamp/NSync.mp3" },
+  { title: "Barbie Girl", artist: "Aqua", duration: 0, file: "/winamp/Aqua.mp3" },
+  { title: "Everybody", artist: "Backstreet Boys", duration: 0, file: "/winamp/BackstreetBoys.mp3" },
+  { title: "Beautiful Life", artist: "Ace of Base", duration: 0, file: "/winamp/AceOfBace.mp3" },
+  { title: "Freestyler", artist: "Bomfunk MC's", duration: 0, file: "/winamp/BomfunkMCs.mp3" },
+  { title: "Happy Nation", artist: "Ace of Base", duration: 0, file: "/winamp/AceOfBace-HapyNation.mp3" },
+  { title: "Mortal Kombat", artist: "The Immortals", duration: 0, file: "/winamp/TheImmortals.mp3" },
+  { title: "Captain Jack", artist: "Captain Jack", duration: 0, file: "/winamp/CaptainJack.mp3" },
+  { title: "Wannabe", artist: "Spice Girls", duration: 0, file: "/winamp/SpiceGirls.mp3" },
+  { title: "The Kids Aren't Alright", artist: "The Offspring", duration: 0, file: "/winamp/TheOffspring.mp3" },
+  { title: "Its My Life", artist: "Dr. Alban", duration: 0, file: "/winamp/DrAlban.mp3" },
+  { title: "Never Gonna Give You Up", artist: "Rick Astley", duration: 0, file: "/winamp/RickAstley.mp3" },
 ];
 
 const IDLE_BARS = Array(19).fill(2);
@@ -49,40 +62,53 @@ export function WinampPlayer({
   const [balance, setBalance] = useState(0);
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState(false);
-  const [showEq, setShowEq] = useState(true);
+  const [showEq, setShowEq] = useState(false);
   const [showPl, setShowPl] = useState(true);
   const [eqOn, setEqOn] = useState(true);
   const [eqBands, setEqBands] = useState<number[]>([50, 50, 50, 50, 50, 50, 50, 50, 50, 50]);
   const [preamp, setPreamp] = useState(50);
   const [marqueeOffset, setMarqueeOffset] = useState(0);
   const [visBars, setVisBars] = useState<number[]>(IDLE_BARS);
+  const [showRemaining, setShowRemaining] = useState(true);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const gainRef = useRef<GainNode | null>(null);
+  const pannerRef = useRef<StereoPannerNode | null>(null);
   const animFrameRef = useRef<number>(0);
   const intervalRef = useRef<number | null>(null);
 
   const track = tracks[currentTrack];
   const trackDuration = duration || track.duration || 0;
   const displayText = `${track.artist} - ${track.title}  ***  `;
+  const remaining = Math.max(0, trackDuration - elapsed);
+  const timeText = showRemaining ? `-${formatTime(remaining)}` : formatTime(elapsed);
 
   const setupAudioGraph = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio) return;
     if (!audioCtxRef.current) {
-      audioCtxRef.current = new AudioContext();
-      analyserRef.current = audioCtxRef.current.createAnalyser();
+      const ctx = new AudioContext();
+      audioCtxRef.current = ctx;
+      analyserRef.current = ctx.createAnalyser();
       analyserRef.current.fftSize = 64;
-      sourceRef.current = audioCtxRef.current.createMediaElementSource(audio);
-      sourceRef.current.connect(analyserRef.current);
-      analyserRef.current.connect(audioCtxRef.current.destination);
+      gainRef.current = ctx.createGain();
+      gainRef.current.gain.value = volume / 100;
+      pannerRef.current = ctx.createStereoPanner();
+      pannerRef.current.pan.value = balance / 50;
+      sourceRef.current = ctx.createMediaElementSource(audio);
+      // source → gain → panner → analyser → destination
+      sourceRef.current.connect(gainRef.current);
+      gainRef.current.connect(pannerRef.current);
+      pannerRef.current.connect(analyserRef.current);
+      analyserRef.current.connect(ctx.destination);
     }
     if (audioCtxRef.current.state === "suspended") {
       await audioCtxRef.current.resume();
     }
-  }, []);
+  }, [volume, balance]);
 
   // Marquee scrolling
   useEffect(() => {
@@ -228,7 +254,17 @@ export function WinampPlayer({
     if (audioRef.current) {
       audioRef.current.volume = volume / 100;
     }
+    if (gainRef.current && audioCtxRef.current) {
+      gainRef.current.gain.setTargetAtTime(volume / 100, audioCtxRef.current.currentTime, 0.01);
+    }
   }, [volume]);
+
+  useEffect(() => {
+    if (pannerRef.current && audioCtxRef.current) {
+      // balance is -50..50 → pan -1..1
+      pannerRef.current.pan.setTargetAtTime(balance / 50, audioCtxRef.current.currentTime, 0.01);
+    }
+  }, [balance]);
 
   const prevTrack = () => {
     if (elapsed > 3) {
@@ -289,9 +325,7 @@ export function WinampPlayer({
       <div className="winamp-main w-[275px] relative">
         {/* Title bar area */}
         <div className="winamp-titlebar flex items-center justify-between h-[14px] px-[3px]">
-          <div className="flex items-center gap-[2px]">
-            <WinampClutterBar />
-          </div>
+          <div className="flex items-center gap-[2px]" />
           <span className="winamp-title-text text-[8px] font-bold tracking-wider">WINAMP</span>
           <div className="flex items-center gap-px">
             <button className="winamp-tiny-btn" aria-label="Minimize" onClick={onMinimize}>_</button>
@@ -303,9 +337,16 @@ export function WinampPlayer({
         <div className="winamp-display mx-[7px] mt-[2px] h-[42px] flex">
 
           <div className="winamp-vis-area w-[63px] h-full flex flex-col relative">
-            <div className="flex items-baseline px-[2px] pt-[2px]">
-              <span className="text-[16px] font-mono font-bold winamp-text-green leading-none tracking-tight">
-                {formatTime(elapsed)}
+            <div className="flex items-center gap-[3px] px-[2px] pt-[2px]">
+              <span className="winamp-text-green text-[7px] leading-none">
+                {playing ? "\u25B6" : elapsed > 0 ? "\u2759\u2759" : "\u25A0"}
+              </span>
+              <span
+                className="text-[16px] font-mono font-bold winamp-text-green leading-none tracking-tight cursor-pointer"
+                onClick={() => setShowRemaining((v) => !v)}
+                title="Click to toggle elapsed / remaining time"
+              >
+                {timeText}
               </span>
             </div>
 
@@ -353,7 +394,7 @@ export function WinampPlayer({
         </div>
 
         <div className="flex items-center mx-[7px] mt-[3px] gap-[4px]">
-          <div className="flex items-center gap-[4px]">
+          <div className="flex items-center gap-[12px]">
             <WinampSlider
               value={volume}
               onChange={setVolume}
@@ -446,16 +487,6 @@ export function WinampPlayer({
           totalTime={formatTotalTime(tracks)}
         />
       )}
-    </div>
-  );
-}
-
-function WinampClutterBar() {
-  return (
-    <div className="flex flex-col gap-px">
-      {["O", "A", "I", "D", "V"].map((letter) => (
-        <span key={letter} className="text-[5px] winamp-text-dim leading-none">{letter}</span>
-      ))}
     </div>
   );
 }

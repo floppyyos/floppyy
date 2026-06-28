@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 
 type MenuActionId =
@@ -18,6 +18,20 @@ type MenuActionId =
   | "wordWrap";
 
 type MenuItem = { label: string; action: MenuActionId; disabled?: boolean };
+
+const DOCUMENT_TEXT: Record<string, string> = {
+  readme: `Welcome to Floppyy!
+
+Floppyy is a retro computer in your browser, built from good old internet memories.
+
+Open windows, play a game, listen to Winamp, explore the disks, or connect through dial-up at a blazing 33.6 kbps. Nothing here is trying to make you more productive. That is the point.
+
+It is not an emulator and it does not need a manual. Just click around and see what you remember.
+
+The web you grew up on.
+
+www.floppyy.com`,
+};
 
 // Static menu structure — labels and action ids only. No closures or refs flow
 // through here, so it is safe to map over during render.
@@ -41,10 +55,14 @@ const MENU_ITEMS: Record<string, MenuItem[]> = {
 };
 
 export function NotepadWindow({ window: win, closeWindow, notify, playSound }: WindowComponentProps) {
-  const [text, setText] = useState("");
+  const [text, setText] = useState(() => DOCUMENT_TEXT[win.payload ?? ""] ?? "");
   const [wordWrap, setWordWrap] = useState(true);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setText(DOCUMENT_TEXT[win.payload ?? ""] ?? "");
+  }, [win.payload]);
 
   const runAction = useCallback(
     (action: MenuActionId) => {

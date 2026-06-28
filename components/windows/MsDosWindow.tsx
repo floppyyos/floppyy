@@ -195,12 +195,13 @@ export function MsDosWindow({ window: win, closeWindow, openWindow, playSound }:
             {line.text || "\u00a0"}
           </div>
         ))}
-        <form onSubmit={handleSubmit} className="flex">
-          <span className="whitespace-pre">C:\&gt;</span>
+        <form onSubmit={handleSubmit} className="relative flex">
+          <span className="whitespace-pre">C:\&gt;{input}</span>
+          <span className="dos-caret whitespace-pre">_</span>
           <input
             ref={inputRef}
-            className="flex-1 bg-transparent outline-none border-none font-mono text-[14px] caret-current"
-            style={{ color: "inherit" }}
+            className="absolute inset-0 w-full bg-transparent outline-none border-none font-mono text-[14px] text-transparent caret-transparent"
+            style={{ color: "transparent" }}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             autoFocus

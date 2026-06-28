@@ -237,16 +237,6 @@ function FallbackSVG({ type, size: s }: { type: string; size: number }) {
           <rect x="18" y="21" width="3" height="2" fill="#fffb98" stroke="#000" strokeWidth="0.4"/>
         </svg>
       );
-    case "pinball":
-      return (
-        <svg width={s} height={s} viewBox="0 0 32 32" fill="none" style={common}>
-          <circle cx="16" cy="16" r="12" fill="#d8d8d8" stroke="#000"/>
-          <circle cx="13" cy="12" r="5" fill="#111" stroke="#000"/>
-          <circle cx="12" cy="10" r="2" fill="#ffffff"/>
-          <path d="M10 24L15 20M22 24L17 20" stroke="#d04040" strokeWidth="2"/>
-          <circle cx="22" cy="13" r="2" fill="#0000cc"/>
-        </svg>
-      );
     case "ie":
       return (
         <svg width={s} height={s} viewBox="0 0 32 32" fill="none" style={common}>

@@ -7,6 +7,7 @@ type AboutPanel = "welcome" | "nostalgia" | "credits" | "connect";
 
 const panels: Array<{ id: AboutPanel; label: string }> = [
   { id: "welcome", label: "Welcome" },
+  { id: "credits", label: "Credits" },
   { id: "nostalgia", label: "Discover Floppyy" },
   { id: "connect", label: "Connect" },
 ];
@@ -135,16 +136,12 @@ function PanelContent({
       <section className="relative max-w-[315px] space-y-[10px]">
         <h2 className="text-[20px] font-bold">Credits</h2>
         <p><strong>Floppyy</strong> is made for everyone who still remembers the magic of opening a folder just to see what was inside.</p>
-        <div className="grid grid-cols-[92px_1fr] gap-y-[5px]">
-          <span className="font-bold">Design</span><span>Windows 98 clouds, blue floppy, pixel UI</span>
-          <span className="font-bold">Build</span><span>Next.js, TypeScript, canvas, web audio</span>
-        </div>
-        <button className="win-button mt-[4px] min-w-[100px]" onClick={() => notify("CREDITS.txt checked. The nostalgia is intact.")}>
-          Read Credits
-        </button>
-        <button className="win-button ml-[6px] mt-[4px] min-w-[100px]" onClick={() => setPanel("welcome")}>
-          Welcome
-        </button>
+        <p>No AI, no AI agents, no social media. That was the golden era.</p>
+        <p className="border-t border-[#d0d0d0] pt-[8px] text-[11px] leading-[1.5] text-[#333333]">
+          All rights to logos, names, music, games, and other materials belong to their respective
+          owners. This project was created purely as a tribute to the 1990s. If you would like to add
+          or remove your project from Floppyy, please write to <span className="font-mono">hi@floppyy.com</span>.
+        </p>
       </section>
     );
   }
@@ -155,7 +152,7 @@ function PanelContent({
         <h2 className="text-[20px] font-bold">Connect</h2>
         <p>Floppyy lives at <a className="text-[#0000ff] underline" href="https://www.floppyy.com" target="_blank" rel="noopener noreferrer">www.floppyy.com</a>.</p>
         <p>The current GitHub home is <a className="text-[#0000ff] underline" href="https://github.com/floppyyos" target="_blank" rel="noopener noreferrer">github.com/floppyyos</a>.</p>
-        <p>Say hello at <span className="font-mono">hi@floppyy.com</span>.</p>
+        <p>Say hello at <a className="text-[#0000ff] underline" href="mailto:hi@floppyy.com">hi@floppyy.com</a>.</p>
       </section>
     );
   }

@@ -20,6 +20,8 @@ import { NetscapeWindow } from "@/components/windows/NetscapeWindow";
 import { MsDosWindow } from "@/components/windows/MsDosWindow";
 import { MediaPlayerWindow } from "@/components/windows/MediaPlayerWindow";
 import { MinesweeperWindow } from "@/components/windows/MinesweeperWindow";
+import { SolitaireWindow } from "@/components/windows/SolitaireWindow";
+import { SnakeWindow } from "@/components/windows/SnakeWindow";
 import { MusicWindow } from "@/components/windows/MusicWindow";
 import { NortonCommanderWindow } from "@/components/windows/NortonCommanderWindow";
 import { NotepadWindow } from "@/components/windows/NotepadWindow";
@@ -29,6 +31,8 @@ import { ProjectDetailsWindow } from "@/components/windows/ProjectDetailsWindow"
 import { ProjectsWindow } from "@/components/windows/ProjectsWindow";
 import { RunWindow } from "@/components/windows/RunWindow";
 import { ScreensaverWindow } from "@/components/windows/ScreensaverWindow";
+import { DukeWindow } from "@/components/windows/DukeWindow";
+import { ShadowWarriorWindow } from "@/components/windows/ShadowWarriorWindow";
 import { SettingsWindow } from "@/components/windows/SettingsWindow";
 import { ShareWindow } from "@/components/windows/ShareWindow";
 import { DefragWindow } from "@/components/windows/DefragWindow";
@@ -327,6 +331,10 @@ export default function Desktop() {
         return <MediaPlayerWindow {...props} />;
       case "minesweeper":
         return <MinesweeperWindow {...props} />;
+      case "solitaire":
+        return <SolitaireWindow {...props} />;
+      case "snake":
+        return <SnakeWindow {...props} />;
       case "games":
         return <GamesWindow {...props} />;
       case "doom":
@@ -340,7 +348,7 @@ export default function Desktop() {
       case "outlook":
         return <OutlookWindow {...props} />;
       case "paint":
-        return <PaintWindow />;
+        return <PaintWindow {...props} />;
       case "run":
         return <RunWindow {...props} />;
       case "settings":
@@ -357,6 +365,10 @@ export default function Desktop() {
         return <RecycleBinWindow {...props} />;
       case "screensaver":
         return <ScreensaverWindow {...props} />;
+      case "duke":
+        return <DukeWindow />;
+      case "shadow-warrior":
+        return <ShadowWarriorWindow />;
       default:
         return null;
     }
@@ -559,7 +571,7 @@ export default function Desktop() {
           onOpen={openWindow}
           onScreensaver={() => {
             setStartOpen(false);
-            screensaver.start("stars");
+            openWindow("screensaver");
           }}
           onShutdown={() => {
             setStartOpen(false);
@@ -803,10 +815,20 @@ function ConnectionStatusDialog({
         }}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex h-[18px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] px-[4px]">
+        <div className="flex h-[20px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] px-[2px] pl-[4px]">
           <span className="text-[11px] font-bold text-white">Floppyy Net Status</span>
-          <button className="win-button flex h-[14px] min-h-0 w-[16px] items-center justify-center p-0 text-[10px]" onClick={onClose}>
-            ×
+          <button
+            className="flex h-[16px] w-[16px] items-center justify-center"
+            style={{
+              background: "#c0c0c0",
+              boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+            }}
+            aria-label="Close"
+            onClick={onClose}
+          >
+            <svg width="8" height="7" viewBox="0 0 8 7" fill="none">
+              <path d="M0 0L3 3.5L0 7H1L4 3.5L7 7H8L5 3.5L8 0H7L4 3.5L1 0H0Z" fill="#000" />
+            </svg>
           </button>
         </div>
         <div className="flex gap-[12px] p-[14px]">

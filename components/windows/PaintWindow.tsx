@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { WindowComponentProps } from "@/lib/windows";
 
 type Tool = "pencil" | "brush" | "eraser" | "fill" | "line" | "rect" | "filledRect" | "ellipse" | "filledEllipse" | "spray" | "picker" | "text" | "select";
 
@@ -29,7 +30,7 @@ const TOOLS: { id: Tool; label: string; icon: string }[] = [
 
 const BRUSH_SIZES = [1, 2, 3, 5, 8];
 
-export function PaintWindow() {
+export function PaintWindow({ window: win }: WindowComponentProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const [tool, setTool] = useState<Tool>("pencil");
@@ -53,7 +54,6 @@ export function PaintWindow() {
     if (undoStack.current.length > 30) undoStack.current.shift();
   }, []);
 
-  // Initialize canvas with white background
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -61,8 +61,20 @@ export function PaintWindow() {
     if (!ctx) return;
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    saveUndo();
-  }, [saveUndo]);
+
+    if (win.payload !== "clouds") {
+      undoStack.current = [ctx.getImageData(0, 0, canvas.width, canvas.height)];
+      return;
+    }
+
+    const image = new Image();
+    image.onload = () => {
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      undoStack.current = [ctx.getImageData(0, 0, canvas.width, canvas.height)];
+      setStatusText("Clouds.bmp");
+    };
+    image.src = "/clouds-painted.png";
+  }, [win.payload]);
 
   const undo = useCallback(() => {
     const canvas = canvasRef.current;

@@ -28,6 +28,12 @@ export function useWindowManager() {
   const openWindow = useCallback(
     (id: WindowId, payload?: string) => {
       const definition = windowDefinitions[id];
+      const title =
+        id === "paint" && payload === "clouds"
+          ? "Clouds.bmp - Paint"
+          : id === "notepad" && payload === "readme"
+            ? "README.txt - Notepad"
+            : definition.title;
       const instanceId =
         (id === "project-details" || id === "drive") && payload ? `${id}-${payload}` : id;
       setWindows((items) => {
@@ -36,7 +42,7 @@ export function useWindowManager() {
         setZCounter(maxZ);
         if (existing) {
           return items.map((item) =>
-            item.instanceId === instanceId ? { ...item, minimized: false, zIndex: maxZ, payload } : item,
+            item.instanceId === instanceId ? { ...item, title, minimized: false, zIndex: maxZ, payload } : item,
           );
         }
         const offset = items.length * 26;
@@ -63,7 +69,7 @@ export function useWindowManager() {
                       : payload === "D"
                       ? "(D:)"
                       : "(C:)"
-                    : definition.title,
+                    : title,
             icon: payload && id === "drive" ? (payload === "A" ? "floppy" : `drive-${payload.toLowerCase()}`) : definition.icon,
             x: mobile ? 8 : clamp(80 + offset, 8, viewportWidth - width - 8),
             y: mobile ? 8 : clamp(40 + offset, 8, viewportHeight - height - 36),
