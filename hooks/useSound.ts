@@ -24,6 +24,37 @@ export function useSound() {
     };
   }, []);
 
+  // Apply the mute state globally to every media element on the page,
+  // including ones mounted later (Winamp, Media Player, games, etc.).
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const applyTo = (node: Node) => {
+      if (node instanceof HTMLMediaElement) {
+        node.muted = muted;
+      } else if (node instanceof Element) {
+        node.querySelectorAll("audio, video").forEach((el) => {
+          (el as HTMLMediaElement).muted = muted;
+        });
+      }
+    };
+
+    applyTo(document.body);
+
+    // Also cover the in-memory audio elements used for UI sound effects.
+    Object.values(audioCache.current).forEach((audio) => {
+      audio.muted = muted;
+    });
+
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        mutation.addedNodes.forEach(applyTo);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [muted]);
+
   const playTone = useCallback((name: string) => {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return;

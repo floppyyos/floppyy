@@ -151,7 +151,8 @@ export default function Desktop() {
   const [bootMode, setBootMode] = useState<BootMode>("normal");
   const [dialupDone, setDialupDone] = useState(false);
   const [pendingStartup, setPendingStartup] = useState(false);
-  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
+  const [selectedIcons, setSelectedIcons] = useState<Set<string>>(() => new Set());
+  const [marquee, setMarquee] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
   const [contextMenu, setContextMenu] = useState<MenuState>(null);
   const [startOpen, setStartOpen] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
@@ -165,6 +166,9 @@ export default function Desktop() {
   const [emptiedIcons, setEmptiedIcons] = useState<Set<string>>(() => new Set());
   const iconDrag = useRef<IconDrag>(null);
   const winampDrag = useRef<WindowDrag>(null);
+  const desktopRef = useRef<HTMLDivElement>(null);
+  const marqueeDrag = useRef<{ startX: number; startY: number; moved: boolean } | null>(null);
+  const suppressClickClear = useRef(false);
   const wm = useWindowManager();
   const { playSound, fadeOutSound, muted, setMuted } = useSound();
   const screensaver = useScreensaver(60000);
@@ -219,11 +223,11 @@ export default function Desktop() {
 
   const iconClick = useDoubleClick<string>(
     (id) => {
-      setSelectedIcon(id);
+      setSelectedIcons(new Set([id]));
       playSound("click");
     },
     (id) => {
-      setSelectedIcon(id);
+      setSelectedIcons(new Set([id]));
       const icon = desktopIcons.find((item) => item.id === id);
       if (icon?.windowId) {
         if (id === "recycle") playSound("recycle");
@@ -291,7 +295,12 @@ export default function Desktop() {
           next.add(drag.id);
           return next;
         });
-        setSelectedIcon((current) => (current === drag.id ? null : current));
+        setSelectedIcons((current) => {
+          if (!current.has(drag.id)) return current;
+          const next = new Set(current);
+          next.delete(drag.id);
+          return next;
+        });
         setIconPositions((positions) => ({
           ...positions,
           [drag.id]: { x: drag.originX, y: drag.originY },
@@ -358,9 +367,72 @@ export default function Desktop() {
 
   const refreshDesktop = useCallback(() => {
     setContextMenu(null);
-    setSelectedIcon(null);
+    setSelectedIcons(new Set());
     notify("Desktop refreshed.");
   }, [notify]);
+
+  const startMarquee = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    // Only start on a primary-button press over empty desktop (icons stop propagation).
+    if (event.button !== 0) return;
+    suppressClickClear.current = false;
+    const rect = desktopRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setContextMenu(null);
+    setStartOpen(false);
+    setSelectedIcons(new Set());
+    marqueeDrag.current = {
+      startX: event.clientX - rect.left,
+      startY: event.clientY - rect.top,
+      moved: false,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }, []);
+
+  const updateMarquee = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = marqueeDrag.current;
+    const rect = desktopRef.current?.getBoundingClientRect();
+    if (!drag || !rect) return;
+
+    const currentX = event.clientX - rect.left;
+    const currentY = event.clientY - rect.top;
+    const left = Math.min(drag.startX, currentX);
+    const top = Math.min(drag.startY, currentY);
+    const width = Math.abs(currentX - drag.startX);
+    const height = Math.abs(currentY - drag.startY);
+
+    if (!drag.moved && Math.hypot(width, height) > 4) {
+      drag.moved = true;
+    }
+    if (!drag.moved) return;
+
+    setMarquee({ left, top, width, height });
+
+    const hits = new Set<string>();
+    desktopIcons.forEach((icon) => {
+      if (binItems.has(icon.id) || emptiedIcons.has(icon.id)) return;
+      const position = iconPositions[icon.id];
+      if (!position) return;
+      const intersects =
+        left < position.x + ICON_WIDTH &&
+        left + width > position.x &&
+        top < position.y + ICON_HEIGHT &&
+        top + height > position.y;
+      if (intersects) hits.add(icon.id);
+    });
+    setSelectedIcons(hits);
+  }, [binItems, emptiedIcons, iconPositions]);
+
+  const endMarquee = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const drag = marqueeDrag.current;
+    if (!drag) return;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    // A drag just happened — keep the marquee selection, don't let the click clear it.
+    if (drag.moved) suppressClickClear.current = true;
+    marqueeDrag.current = null;
+    setMarquee(null);
+  }, []);
 
   const showProperties = useCallback(() => {
     if (contextMenu?.target) {
@@ -478,15 +550,16 @@ export default function Desktop() {
         wm.closeWindow(wm.activeWindow.instanceId);
         playSound("close");
       }
-      if (event.key === "Enter" && selectedIcon) {
-        const icon = desktopIcons.find((item) => item.id === selectedIcon);
+      if (event.key === "Enter" && selectedIcons.size > 0) {
+        const firstId = selectedIcons.values().next().value;
+        const icon = desktopIcons.find((item) => item.id === firstId);
         if (icon?.windowId) openWindow(icon.windowId, icon.payload);
         else if (icon?.message) notify(icon.message);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [notify, openWindow, playSound, selectedIcon, wm]);
+  }, [notify, openWindow, playSound, selectedIcons, wm]);
 
   const commonProps = useMemo(
     () => ({
@@ -500,9 +573,11 @@ export default function Desktop() {
       playSound,
       fadeOutSound,
       startScreensaver: screensaver.start,
+      setDefaultScreensaver: screensaver.setMode,
       internetConnected: dialupDone,
+      muted,
     }),
-    [notify, openWindow, playSound, fadeOutSound, screensaver.start, wm, dialupDone],
+    [notify, openWindow, playSound, fadeOutSound, screensaver.start, screensaver.setMode, wm, dialupDone, muted],
   );
 
   if (!booted) {
@@ -520,20 +595,47 @@ export default function Desktop() {
 
   const isSafeMode = bootMode === "safe";
 
+  const showDialupHint =
+    !dialupDone &&
+    wm.windows.some((item) => (item.id === "ie-browser" || item.id === "netscape") && !item.minimized);
+
   return (
     <main
       className={`h-screen w-screen overflow-hidden pb-[28px] ${isSafeMode ? "bg-[#008080]" : "floppyy-wallpaper"}`}
       onClick={() => {
+        if (suppressClickClear.current) {
+          suppressClickClear.current = false;
+          return;
+        }
         setContextMenu(null);
         setStartOpen(false);
-        setSelectedIcon(null);
+        setSelectedIcons(new Set());
       }}
       onContextMenu={(event) => {
         event.preventDefault();
         setContextMenu({ x: event.clientX, y: event.clientY });
       }}
     >
-      <div className="relative h-[calc(100vh-28px)]">
+      <div
+        ref={desktopRef}
+        className="relative h-[calc(100vh-28px)]"
+        onPointerDown={startMarquee}
+        onPointerMove={updateMarquee}
+        onPointerUp={endMarquee}
+      >
+        {marquee && (
+          <div
+            className="pointer-events-none absolute z-[10]"
+            style={{
+              left: marquee.left,
+              top: marquee.top,
+              width: marquee.width,
+              height: marquee.height,
+              background: "rgba(0, 0, 128, 0.35)",
+              border: "1px dotted #ffffff",
+            }}
+          />
+        )}
         {desktopIcons
           .filter((icon) => !binItems.has(icon.id) && !emptiedIcons.has(icon.id))
           .map((icon) => (
@@ -542,16 +644,17 @@ export default function Desktop() {
             id={icon.id}
             label={icon.label}
             icon={icon.id === "recycle" && binItems.size > 0 ? "recycle_bin_full" : icon.icon}
-            selected={selectedIcon === icon.id}
+            selected={selectedIcons.has(icon.id)}
             x={iconPositions[icon.id]?.x ?? DESKTOP_PADDING}
             y={iconPositions[icon.id]?.y ?? DESKTOP_PADDING}
             onPointerDown={(event) => {
               if (event.button !== 0) return;
               event.preventDefault();
               event.stopPropagation();
+              suppressClickClear.current = false;
               setContextMenu(null);
               setStartOpen(false);
-              setSelectedIcon(icon.id);
+              setSelectedIcons(new Set([icon.id]));
               const position = iconPositions[icon.id] ?? { x: DESKTOP_PADDING, y: DESKTOP_PADDING };
               iconDrag.current = {
                 id: icon.id,
@@ -568,7 +671,7 @@ export default function Desktop() {
             onContextMenu={(event) => {
               event.preventDefault();
               event.stopPropagation();
-              setSelectedIcon(icon.id);
+              setSelectedIcons(new Set([icon.id]));
               setContextMenu({ x: event.clientX, y: event.clientY, target: icon.id });
             }}
           />
@@ -679,6 +782,13 @@ export default function Desktop() {
       )}
 
       {notification && <NotificationBalloon message={notification} />}
+
+      {showDialupHint && (
+        <NotificationBalloon
+          message="Not connected. Open Dial-Up Networking to connect to Floppyy Net."
+          bottomOffset={notification ? 96 : 34}
+        />
+      )}
 
       <Taskbar
         windows={wm.windows}

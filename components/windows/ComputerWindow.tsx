@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
+import { ToolbarIcon } from "./ToolbarIcon";
 
 type ComputerItem = {
   id: string;
@@ -22,16 +23,16 @@ const items: ComputerItem[] = [
 ];
 
 const toolbarButtons = [
-  { label: "Back", icon: "←" },
-  { label: "Forward", icon: "→" },
-  { label: "Up", icon: "↑" },
-  { label: "Cut", icon: "✂" },
-  { label: "Copy", icon: "📋" },
-  { label: "Paste", icon: "📄" },
-  { label: "Undo", icon: "↩" },
-  { label: "Delete", icon: "✕" },
-  { label: "Properties", icon: "📝" },
-  { label: "Views", icon: "▦" },
+  { label: "Back", icon: "back" },
+  { label: "Forward", icon: "forward" },
+  { label: "Up", icon: "up" },
+  { label: "Cut", icon: "cut" },
+  { label: "Copy", icon: "copy" },
+  { label: "Paste", icon: "paste" },
+  { label: "Undo", icon: "undo" },
+  { label: "Delete", icon: "delete" },
+  { label: "Properties", icon: "properties" },
+  { label: "Views", icon: "views" },
 ];
 
 export function ComputerWindow({ notify, openWindow, playSound }: WindowComponentProps) {
@@ -56,13 +57,13 @@ export function ComputerWindow({ notify, openWindow, playSound }: WindowComponen
         {toolbarButtons.map((btn) => (
           <button
             key={btn.label}
-            className="flex flex-col items-center justify-center w-[50px] h-[44px] hover:bg-[#dfdfdf] cursor-default text-[10px]"
+            className="group flex flex-col items-center justify-center w-[50px] h-[44px] hover:bg-[#dfdfdf] cursor-default text-[10px]"
             onClick={() => {
               playSound("click");
               notify(`${btn.label} is not available.`);
             }}
           >
-            <span className="text-[16px] leading-none">{btn.icon}</span>
+            <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name={btn.icon} /></span>
             <span className="mt-[2px]">{btn.label}</span>
           </button>
         ))}

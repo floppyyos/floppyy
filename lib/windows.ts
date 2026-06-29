@@ -67,7 +67,9 @@ export type WindowComponentProps = {
   playSound: (sound: string) => void;
   fadeOutSound?: (sound: string, duration?: number) => void;
   startScreensaver: (mode?: "pipes" | "stars" | "maze" | "mystify" | "flying-windows") => void;
+  setDefaultScreensaver?: (mode: "pipes" | "stars" | "maze" | "mystify" | "flying-windows") => void;
   internetConnected?: boolean;
+  muted?: boolean;
 };
 
 export const windowDefinitions: Record<WindowId, WindowDefinition> = {
@@ -93,7 +95,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   norton: { id: "norton", title: "Norton Commander", icon: "console", width: 760, height: 500 },
   paint: { id: "paint", title: "untitled - Paint", icon: "paint", width: 800, height: 620 },
   "recycle-bin": { id: "recycle-bin", title: "Recycle Bin", icon: "trash", width: 720, height: 500 },
-  screensaver: { id: "screensaver", title: "Screensaver", icon: "monitor", width: 460, height: 330 },
+  screensaver: { id: "screensaver", title: "Display Properties", icon: "monitor", width: 420, height: 510 },
   snake: { id: "snake", title: "Snake", icon: "snake", width: 330, height: 414, minWidth: 330, minHeight: 414 },
   solitaire: { id: "solitaire", title: "Solitaire", icon: "cards", width: 720, height: 500, minWidth: 560, minHeight: 400 },
   run: { id: "run", title: "Run", icon: "run", width: 420, height: 210 },

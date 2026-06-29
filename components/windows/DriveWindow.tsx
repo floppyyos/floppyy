@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { WindowComponentProps, WindowId } from "@/lib/windows";
+import { ToolbarIcon } from "./ToolbarIcon";
 
 type DriveId = "A" | "C" | "D";
 type DriveItem = {
@@ -15,16 +16,16 @@ type DriveItem = {
 };
 
 const toolbarButtons = [
-  { label: "Back", icon: "←", action: "back" },
-  { label: "Forward", icon: "→", action: "noop" },
-  { label: "Up", icon: "↑", action: "up" },
-  { label: "Cut", icon: "✂", action: "noop" },
-  { label: "Copy", icon: "📋", action: "noop" },
-  { label: "Paste", icon: "📄", action: "noop" },
-  { label: "Undo", icon: "↩", action: "noop" },
-  { label: "Delete", icon: "✕", action: "noop" },
-  { label: "Properties", icon: "📝", action: "properties" },
-  { label: "Views", icon: "▦", action: "views" },
+  { label: "Back", icon: "back", action: "back" },
+  { label: "Forward", icon: "forward", action: "noop" },
+  { label: "Up", icon: "up", action: "up" },
+  { label: "Cut", icon: "cut", action: "noop" },
+  { label: "Copy", icon: "copy", action: "noop" },
+  { label: "Paste", icon: "paste", action: "noop" },
+  { label: "Undo", icon: "undo", action: "noop" },
+  { label: "Delete", icon: "delete", action: "noop" },
+  { label: "Properties", icon: "properties", action: "properties" },
+  { label: "Views", icon: "views", action: "views" },
 ];
 
 const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
@@ -322,10 +323,10 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
         {toolbarButtons.map((button) => (
           <button
             key={button.label}
-            className="flex h-[44px] w-[50px] cursor-default flex-col items-center justify-center text-[10px] hover:bg-[#dfdfdf]"
+            className="group flex h-[44px] w-[50px] cursor-default flex-col items-center justify-center text-[10px] hover:bg-[#dfdfdf]"
             onClick={() => runToolbar(button.action, button.label)}
           >
-            <span className="text-[16px] leading-none">{button.icon}</span>
+            <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name={button.icon} /></span>
             <span className="mt-[2px]">{button.label}</span>
           </button>
         ))}

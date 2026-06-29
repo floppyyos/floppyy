@@ -2,6 +2,7 @@
 
 import type { DesktopIconDefinition, WindowComponentProps } from "@/lib/windows";
 import { FloppyyIcon } from "@/components/desktop/FloppyyIcon";
+import { ToolbarIcon } from "./ToolbarIcon";
 
 type RecycleBinWindowProps = WindowComponentProps & {
   items?: DesktopIconDefinition[];
@@ -10,16 +11,16 @@ type RecycleBinWindowProps = WindowComponentProps & {
 };
 
 const toolbarButtons = [
-  { label: "Back", icon: "←" },
-  { label: "Forward", icon: "→" },
-  { label: "Up", icon: "↑" },
-  { label: "Cut", icon: "✂" },
-  { label: "Copy", icon: "📋" },
-  { label: "Paste", icon: "📄" },
-  { label: "Undo", icon: "↩" },
-  { label: "Delete", icon: "✕" },
-  { label: "Properties", icon: "📝" },
-  { label: "Views", icon: "▦" },
+  { label: "Back", icon: "back" },
+  { label: "Forward", icon: "forward" },
+  { label: "Up", icon: "up" },
+  { label: "Cut", icon: "cut" },
+  { label: "Copy", icon: "copy" },
+  { label: "Paste", icon: "paste" },
+  { label: "Undo", icon: "undo" },
+  { label: "Delete", icon: "delete" },
+  { label: "Properties", icon: "properties" },
+  { label: "Views", icon: "views" },
 ];
 
 export function RecycleBinWindow({ notify, playSound, items = [], onEmptyBin, onRestoreAll }: RecycleBinWindowProps) {
@@ -38,13 +39,13 @@ export function RecycleBinWindow({ notify, playSound, items = [], onEmptyBin, on
         {toolbarButtons.map((button) => (
           <button
             key={button.label}
-            className="flex h-[44px] w-[50px] flex-col items-center justify-center text-[10px] cursor-default hover:bg-[#dfdfdf]"
+            className="group flex h-[44px] w-[50px] flex-col items-center justify-center text-[10px] cursor-default hover:bg-[#dfdfdf]"
             onClick={() => {
               playSound("click");
               notify(`${button.label} is not available.`);
             }}
           >
-            <span className="text-[16px] leading-none">{button.icon}</span>
+            <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name={button.icon} /></span>
             <span className="mt-[2px]">{button.label}</span>
           </button>
         ))}

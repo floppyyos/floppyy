@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
+import { ToolbarIcon } from "./ToolbarIcon";
 
 const WAYBACK_PREFIX = "https://web.archive.org/web/1999if_/";
 const HOME_URL = "https://www.aol.com/";
@@ -121,48 +122,58 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected }: W
         <button
           onClick={goBack}
           disabled={historyIndex <= 0}
-          className="flex flex-col items-center justify-center w-[54px] h-[42px] hover:bg-[#dfdfdf] disabled:opacity-40 cursor-default"
+          className="group flex flex-col items-center justify-center w-[50px] h-[42px] hover:bg-[#dfdfdf] disabled:opacity-40 cursor-default text-[10px]"
         >
-          <span className="text-[16px]">⬅</span>
-          <span className="text-[10px]">Back</span>
+          <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name="back" /></span>
+          <span>Back</span>
         </button>
         <button
           onClick={goForward}
           disabled={historyIndex >= history.length - 1}
-          className="flex flex-col items-center justify-center w-[54px] h-[42px] hover:bg-[#dfdfdf] disabled:opacity-40 cursor-default"
+          className="group flex flex-col items-center justify-center w-[54px] h-[42px] hover:bg-[#dfdfdf] disabled:opacity-40 cursor-default text-[10px]"
         >
-          <span className="text-[16px]">➡</span>
-          <span className="text-[10px]">Forward</span>
+          <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name="forward" /></span>
+          <span>Forward</span>
         </button>
+        <div className="w-px h-[36px] bg-[#808080] mx-1" />
         <button
           onClick={() => { setLoading(false); setStatusText(internetConnected ? "Done" : "Cannot find server"); }}
-          className="flex flex-col items-center justify-center w-[42px] h-[42px] hover:bg-[#dfdfdf] cursor-default"
+          className="group flex flex-col items-center justify-center w-[42px] h-[42px] hover:bg-[#dfdfdf] cursor-default text-[10px]"
         >
-          <span className="text-[14px]">✕</span>
-          <span className="text-[10px]">Stop</span>
+          <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name="stop" /></span>
+          <span>Stop</span>
         </button>
         <button
           onClick={() => navigate(getDisplayUrl(currentUrl))}
-          className="flex flex-col items-center justify-center w-[50px] h-[42px] hover:bg-[#dfdfdf] cursor-default"
+          className="group flex flex-col items-center justify-center w-[50px] h-[42px] hover:bg-[#dfdfdf] cursor-default text-[10px]"
         >
-          <span className="text-[14px]">🔄</span>
-          <span className="text-[10px]">Refresh</span>
+          <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name="refresh" /></span>
+          <span>Refresh</span>
         </button>
         <button
           onClick={() => navigate(HOME_URL)}
-          className="flex flex-col items-center justify-center w-[42px] h-[42px] hover:bg-[#dfdfdf] cursor-default"
+          className="group flex flex-col items-center justify-center w-[42px] h-[42px] hover:bg-[#dfdfdf] cursor-default text-[10px]"
         >
-          <span className="text-[14px]">🏠</span>
-          <span className="text-[10px]">Home</span>
+          <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name="home" /></span>
+          <span>Home</span>
         </button>
         <div className="w-px h-[36px] bg-[#808080] mx-1" />
-        <button className="flex flex-col items-center justify-center w-[48px] h-[42px] hover:bg-[#dfdfdf] cursor-default">
-          <span className="text-[14px]">🔍</span>
-          <span className="text-[10px]">Search</span>
+        <button className="group flex flex-col items-center justify-center w-[48px] h-[42px] hover:bg-[#dfdfdf] cursor-default text-[10px]">
+          <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name="search" /></span>
+          <span>Search</span>
         </button>
-        <button className="flex flex-col items-center justify-center w-[56px] h-[42px] hover:bg-[#dfdfdf] cursor-default">
-          <span className="text-[14px]">⭐</span>
-          <span className="text-[10px]">Favorites</span>
+        <button className="group flex flex-col items-center justify-center w-[56px] h-[42px] hover:bg-[#dfdfdf] cursor-default text-[10px]">
+          <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name="favorites" /></span>
+          <span>Favorites</span>
+        </button>
+        <button className="group flex flex-col items-center justify-center w-[50px] h-[42px] hover:bg-[#dfdfdf] cursor-default text-[10px]">
+          <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name="history" /></span>
+          <span>History</span>
+        </button>
+        <div className="w-px h-[36px] bg-[#808080] mx-1" />
+        <button className="group flex flex-col items-center justify-center w-[42px] h-[42px] hover:bg-[#dfdfdf] cursor-default text-[10px]">
+          <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name="print" /></span>
+          <span>Print</span>
         </button>
       </div>
 

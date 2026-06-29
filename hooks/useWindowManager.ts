@@ -62,7 +62,7 @@ export function useWindowManager() {
               payload && id === "project-details"
                 ? "Project Details"
                 : payload && id === "mediaplayer"
-                  ? `Windows Media Player - ${payload}`
+                  ? payload
                   : payload && id === "drive"
                     ? payload === "A"
                       ? "3½ Floppy (A:)"

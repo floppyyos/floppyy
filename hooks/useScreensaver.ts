@@ -6,7 +6,7 @@ export type ScreensaverMode = "pipes" | "stars" | "maze" | "mystify" | "flying-w
 
 export function useScreensaver(timeoutMs = 60000) {
   const [active, setActive] = useState(false);
-  const [mode, setMode] = useState<ScreensaverMode>("stars");
+  const [mode, setMode] = useState<ScreensaverMode>("flying-windows");
   const timer = useRef<number | null>(null);
   const activatedAt = useRef(0);
 
@@ -22,7 +22,7 @@ export function useScreensaver(timeoutMs = 60000) {
     }, timeoutMs);
   }, [clear, timeoutMs]);
 
-  const start = useCallback((nextMode: ScreensaverMode = "stars") => {
+  const start = useCallback((nextMode: ScreensaverMode = "flying-windows") => {
     activatedAt.current = performance.now();
     setMode(nextMode);
     setActive(true);
@@ -52,5 +52,5 @@ export function useScreensaver(timeoutMs = 60000) {
     };
   }, [active, clear, schedule]);
 
-  return { active, mode, start, stop };
+  return { active, mode, start, stop, setMode };
 }

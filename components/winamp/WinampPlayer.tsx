@@ -46,10 +46,12 @@ function formatTotalTime(tracks: WinampTrack[]): string {
 
 export function WinampPlayer({
   playSound,
+  muted = false,
   onClose,
   onMinimize,
 }: {
   playSound: (name: string) => void;
+  muted?: boolean;
   onClose?: () => void;
   onMinimize?: () => void;
 }) {
@@ -95,7 +97,7 @@ export function WinampPlayer({
       analyserRef.current = ctx.createAnalyser();
       analyserRef.current.fftSize = 64;
       gainRef.current = ctx.createGain();
-      gainRef.current.gain.value = volume / 100;
+      gainRef.current.gain.value = muted ? 0 : volume / 100;
       pannerRef.current = ctx.createStereoPanner();
       pannerRef.current.pan.value = balance / 50;
       sourceRef.current = ctx.createMediaElementSource(audio);
@@ -108,7 +110,7 @@ export function WinampPlayer({
     if (audioCtxRef.current.state === "suspended") {
       await audioCtxRef.current.resume();
     }
-  }, [volume, balance]);
+  }, [volume, balance, muted]);
 
   // Marquee scrolling
   useEffect(() => {
@@ -184,6 +186,35 @@ export function WinampPlayer({
     };
   }, []);
 
+  // Preload metadata for every track on mount so the playlist shows real
+  // durations right away instead of 0:00.
+  useEffect(() => {
+    const probes: HTMLAudioElement[] = [];
+    DEFAULT_TRACKS.forEach((t) => {
+      if (!t.file) return;
+      const probe = new Audio();
+      probe.preload = "metadata";
+      const onMeta = () => {
+        if (probe.duration && isFinite(probe.duration)) {
+          const seconds = Math.floor(probe.duration);
+          setTracks((prev) =>
+            prev.map((track) => (track.file === t.file ? { ...track, duration: seconds } : track)),
+          );
+        }
+        probe.removeEventListener("loadedmetadata", onMeta);
+      };
+      probe.addEventListener("loadedmetadata", onMeta);
+      probe.src = t.file;
+      probes.push(probe);
+    });
+    return () => {
+      probes.forEach((probe) => {
+        probe.removeAttribute("src");
+        probe.load();
+      });
+    };
+  }, []);
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !playing || !track.file) return;
@@ -251,13 +282,16 @@ export function WinampPlayer({
   }, [playing, currentTrack, trackDuration, nextTrack]);
 
   useEffect(() => {
+    const targetVolume = muted ? 0 : volume / 100;
     if (audioRef.current) {
-      audioRef.current.volume = volume / 100;
+      audioRef.current.volume = targetVolume;
+      // Also flag the element itself in case the Web Audio graph isn't active yet.
+      audioRef.current.muted = muted;
     }
     if (gainRef.current && audioCtxRef.current) {
-      gainRef.current.gain.setTargetAtTime(volume / 100, audioCtxRef.current.currentTime, 0.01);
+      gainRef.current.gain.setTargetAtTime(targetVolume, audioCtxRef.current.currentTime, 0.01);
     }
-  }, [volume]);
+  }, [volume, muted]);
 
   useEffect(() => {
     if (pannerRef.current && audioCtxRef.current) {
