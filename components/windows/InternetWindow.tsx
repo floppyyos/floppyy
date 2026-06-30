@@ -7,6 +7,18 @@ type ConnectionPhase = "idle" | "dialing" | "verifying" | "connected";
 
 const DIALUP_SOUNDS = ["dialup-01", "dialup-02", "dialup-03"] as const;
 
+// Purely cosmetic — picking a speed changes nothing, but it's fun.
+const MAX_SPEEDS = [
+  "9,600 bps",
+  "14,400 bps",
+  "28,800 bps",
+  "33,600 bps",
+  "57,600 bps",
+  "115,200 bps",
+  "921,600 bps (turbo)",
+  "Ludicrous Speed",
+];
+
 type InternetWindowProps = WindowComponentProps & {
   onConnected?: () => void;
 };
@@ -22,6 +34,7 @@ export function InternetWindow({
   const [phase, setPhase] = useState<ConnectionPhase>("idle");
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("Ready to connect");
+  const [maxSpeed, setMaxSpeed] = useState("57,600 bps");
   const audioRef = useRef<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -41,7 +54,9 @@ export function InternetWindow({
 
       timerRef.current = setTimeout(() => {
         setPhase("connected");
-        setStatusText("Connected at 33,600 bps");
+        const speedLabel =
+          maxSpeed === "Ludicrous Speed" ? "ludicrous speed" : maxSpeed.replace(" (turbo)", "");
+        setStatusText(`Connected at ${speedLabel}`);
         setProgress(100);
 
         if (audioRef.current && fadeOutSound) {
@@ -50,7 +65,7 @@ export function InternetWindow({
 
         timerRef.current = setTimeout(() => {
           onConnected?.();
-          notify("Connected to Floppyy Net!");
+          notify("Connected to the Internet!");
           closeWindow(win.instanceId);
         }, 1200);
       }, 2000);
@@ -102,7 +117,7 @@ export function InternetWindow({
             style={{ imageRendering: "pixelated" }}
           />
           <span className="bg-[#000080] px-[4px] py-[1px] text-[12px] font-bold text-white">
-            Floppyy Net
+            Internet
           </span>
         </div>
 
@@ -190,6 +205,25 @@ export function InternetWindow({
               </div>
             </div>
           </div>
+          <div className="mt-[10px] grid grid-cols-[84px_1fr] items-center gap-[8px]">
+            <span>Maximum speed:</span>
+            <select
+              value={maxSpeed}
+              onChange={(event) => {
+                setMaxSpeed(event.target.value);
+                playSound("click");
+              }}
+              className="h-[22px] w-full bg-white px-[3px] text-[11px]"
+              style={{ boxShadow: "inset -1px -1px #ffffff, inset 1px 1px #808080" }}
+              aria-label="Maximum speed"
+            >
+              {MAX_SPEEDS.map((speed) => (
+                <option key={speed} value={speed}>
+                  {speed}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="mt-[9px] flex justify-end">
             <button className="win-button min-w-[102px]">Configure...</button>
           </div>
@@ -229,7 +263,7 @@ export function InternetWindow({
             onClick={() => {
               if (audioRef.current && fadeOutSound) fadeOutSound(audioRef.current, 500);
               onConnected?.();
-              notify("Connected to Floppyy Net!");
+              notify("Connected to the Internet!");
               closeWindow(win.instanceId);
             }}
             className="win-button min-w-[74px] font-bold"

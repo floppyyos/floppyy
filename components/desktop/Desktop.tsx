@@ -12,6 +12,7 @@ import { AboutWindow } from "@/components/windows/AboutWindow";
 import { CalculatorWindow } from "@/components/windows/CalculatorWindow";
 import { ComputerWindow } from "@/components/windows/ComputerWindow";
 import { ControlPanelWindow } from "@/components/windows/ControlPanelWindow";
+import { DateTimeWindow } from "@/components/windows/DateTimeWindow";
 import { DoomWindow } from "@/components/windows/DoomWindow";
 import { GamesWindow } from "@/components/windows/GamesWindow";
 import { InternetWindow } from "@/components/windows/InternetWindow";
@@ -21,7 +22,6 @@ import { MsDosWindow } from "@/components/windows/MsDosWindow";
 import { MediaPlayerWindow } from "@/components/windows/MediaPlayerWindow";
 import { MinesweeperWindow } from "@/components/windows/MinesweeperWindow";
 import { SolitaireWindow } from "@/components/windows/SolitaireWindow";
-import { SnakeWindow } from "@/components/windows/SnakeWindow";
 import { MusicWindow } from "@/components/windows/MusicWindow";
 import { NortonCommanderWindow } from "@/components/windows/NortonCommanderWindow";
 import { NotepadWindow } from "@/components/windows/NotepadWindow";
@@ -31,15 +31,17 @@ import { ProjectDetailsWindow } from "@/components/windows/ProjectDetailsWindow"
 import { ProjectsWindow } from "@/components/windows/ProjectsWindow";
 import { RunWindow } from "@/components/windows/RunWindow";
 import { ScreensaverWindow } from "@/components/windows/ScreensaverWindow";
-import { DukeWindow } from "@/components/windows/DukeWindow";
-import { ShadowWarriorWindow } from "@/components/windows/ShadowWarriorWindow";
 import { SettingsWindow } from "@/components/windows/SettingsWindow";
 import { ShareWindow } from "@/components/windows/ShareWindow";
 import { DefragWindow } from "@/components/windows/DefragWindow";
+import { HelpWindow } from "@/components/windows/HelpWindow";
 import { DocumentsWindow } from "@/components/windows/DocumentsWindow";
 import { DriveWindow } from "@/components/windows/DriveWindow";
 import { RecycleBinWindow } from "@/components/windows/RecycleBinWindow";
 import { ShutDownOverlay } from "@/components/windows/ShutDownOverlay";
+import { CrashSequence } from "@/components/windows/CrashSequence";
+import { Win98ErrorDialog } from "@/components/windows/Win98ErrorDialog";
+import { McAfeeVirusAlert } from "@/components/windows/McAfeeVirusAlert";
 import { ScreensaverOverlay } from "@/components/screensavers/ScreensaverOverlay";
 import { useDoubleClick } from "@/hooks/useDoubleClick";
 import { useScreensaver } from "@/hooks/useScreensaver";
@@ -161,11 +163,16 @@ export default function Desktop() {
   const [mcAfeeOpen, setMcAfeeOpen] = useState(false);
   const [shutdownOpen, setShutdownOpen] = useState(false);
   const [safeToTurnOff, setSafeToTurnOff] = useState(false);
+  const [crash, setCrash] = useState<null | { variant: "cascade" | "fatal"; message?: string }>(null);
+  const [errorPopup, setErrorPopup] = useState<null | { title: string; message: string }>(null);
+  const [virusAlertOpen, setVirusAlertOpen] = useState(false);
   const [iconPositions, setIconPositions] = useState<Record<string, IconPosition>>(() => initialIconPositions());
   const [binItems, setBinItems] = useState<Set<string>>(() => new Set());
   const [emptiedIcons, setEmptiedIcons] = useState<Set<string>>(() => new Set());
   const iconDrag = useRef<IconDrag>(null);
   const winampDrag = useRef<WindowDrag>(null);
+  // Tracks rapid, consecutive "My Computer" opens for the crash easter egg.
+  const computerSpamRef = useRef({ count: 0, last: 0 });
   const desktopRef = useRef<HTMLDivElement>(null);
   const marqueeDrag = useRef<{ startX: number; startY: number; moved: boolean } | null>(null);
   const suppressClickClear = useRef(false);
@@ -192,6 +199,25 @@ export default function Desktop() {
         playSound("click");
         return;
       }
+
+      // Easter egg: hammering "My Computer" open a few times in a row makes
+      // the whole system buckle — error cascade, blue screen, then reboot.
+      if (id === "computer") {
+        const tracker = computerSpamRef.current;
+        const nowTs = Date.now();
+        tracker.count = nowTs - tracker.last < 2000 ? tracker.count + 1 : 1;
+        tracker.last = nowTs;
+        if (tracker.count >= 4) {
+          tracker.count = 0;
+          setStartOpen(false);
+          setContextMenu(null);
+          setCrash({ variant: "cascade" });
+          return;
+        }
+      } else {
+        computerSpamRef.current.count = 0;
+      }
+
       wm.openWindow(id, payload);
       setStartOpen(false);
       setContextMenu(null);
@@ -204,6 +230,14 @@ export default function Desktop() {
     setDialupDone(true);
     setConnectedAt(Date.now());
   }, []);
+
+  // Let any window bring the whole "OS" down (used by Run, IE/Netscape, ...).
+  const crashSystem = useCallback(
+    (options?: { variant?: "cascade" | "fatal"; message?: string }) => {
+      setCrash((current) => current ?? { variant: options?.variant ?? "cascade", message: options?.message });
+    },
+    [],
+  );
 
   const handleQuickLaunch = useCallback(
     (id: string) => {
@@ -282,6 +316,17 @@ export default function Desktop() {
         // My Computer and Dial-Up Networking can't be thrown away.
         if (drag.id === "computer" || drag.id === "dialup") {
           playSound("error");
+          setErrorPopup(
+            drag.id === "computer"
+              ? {
+                  title: "Delete",
+                  message: "Cannot delete My Computer. It is required for reality to keep running.",
+                }
+              : {
+                  title: "Delete",
+                  message: "Cannot delete Dial-Up Networking. How else would you get online?",
+                },
+          );
           setIconPositions((positions) => ({
             ...positions,
             [drag.id]: { x: drag.originX, y: drag.originY },
@@ -454,6 +499,8 @@ export default function Desktop() {
         return <ComputerWindow {...props} />;
       case "control-panel":
         return <ControlPanelWindow {...props} />;
+      case "datetime":
+        return <DateTimeWindow {...props} />;
       case "projects":
         return <ProjectsWindow {...props} />;
       case "project-details":
@@ -472,8 +519,6 @@ export default function Desktop() {
         return <MinesweeperWindow {...props} />;
       case "solitaire":
         return <SolitaireWindow {...props} />;
-      case "snake":
-        return <SnakeWindow {...props} />;
       case "games":
         return <GamesWindow {...props} />;
       case "doom":
@@ -496,6 +541,8 @@ export default function Desktop() {
         return <ShareWindow {...props} />;
       case "defrag":
         return <DefragWindow {...props} />;
+      case "help":
+        return <HelpWindow {...props} />;
       case "documents":
         return <DocumentsWindow {...props} />;
       case "drive":
@@ -511,10 +558,6 @@ export default function Desktop() {
         );
       case "screensaver":
         return <ScreensaverWindow {...props} />;
-      case "duke":
-        return <DukeWindow />;
-      case "shadow-warrior":
-        return <ShadowWarriorWindow />;
       default:
         return null;
     }
@@ -550,6 +593,12 @@ export default function Desktop() {
         wm.closeWindow(wm.activeWindow.instanceId);
         playSound("close");
       }
+      // Easter egg: the "kill" combo (a stand-in for Ctrl+Alt+Del, which the
+      // browser won't let us capture) brings the whole "OS" down.
+      if (event.ctrlKey && event.altKey && (event.key === "Backspace" || event.code === "Backspace")) {
+        event.preventDefault();
+        crashSystem({ variant: "cascade" });
+      }
       if (event.key === "Enter" && selectedIcons.size > 0) {
         const firstId = selectedIcons.values().next().value;
         const icon = desktopIcons.find((item) => item.id === firstId);
@@ -559,7 +608,29 @@ export default function Desktop() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [notify, openWindow, playSound, selectedIcons, wm]);
+  }, [notify, openWindow, playSound, selectedIcons, wm, crashSystem]);
+
+  // Easter egg: a few minutes into the session, McAfee "finds a virus".
+  // Shown at most once ever per browser (persisted), even across reboots.
+  useEffect(() => {
+    if (!booted) return;
+    try {
+      if (globalThis.localStorage.getItem("floppyy-mcafee-prank") === "done") return;
+    } catch {
+      /* localStorage unavailable — just skip the prank */
+      return;
+    }
+    const delay = 180000 + Math.random() * 120000; // 3–5 minutes
+    const timer = window.setTimeout(() => {
+      try {
+        globalThis.localStorage.setItem("floppyy-mcafee-prank", "done");
+      } catch {
+        /* ignore */
+      }
+      setVirusAlertOpen(true);
+    }, delay);
+    return () => window.clearTimeout(timer);
+  }, [booted]);
 
   const commonProps = useMemo(
     () => ({
@@ -574,10 +645,11 @@ export default function Desktop() {
       fadeOutSound,
       startScreensaver: screensaver.start,
       setDefaultScreensaver: screensaver.setMode,
+      crashSystem,
       internetConnected: dialupDone,
       muted,
     }),
-    [notify, openWindow, playSound, fadeOutSound, screensaver.start, screensaver.setMode, wm, dialupDone, muted],
+    [notify, openWindow, playSound, fadeOutSound, screensaver.start, screensaver.setMode, crashSystem, wm, dialupDone, muted],
   );
 
   if (!booted) {
@@ -785,7 +857,7 @@ export default function Desktop() {
 
       {showDialupHint && (
         <NotificationBalloon
-          message="Not connected. Open Dial-Up Networking to connect to Floppyy Net."
+          message="Not connected. Open Dial-Up Networking to connect to the Internet."
           bottomOffset={notification ? 96 : 34}
         />
       )}
@@ -810,6 +882,7 @@ export default function Desktop() {
           playSound("open");
         }}
         onToggleMute={() => setMuted((value) => !value)}
+        onClockOpen={() => openWindow("datetime")}
         onQuickLaunch={handleQuickLaunch}
         onShowDesktop={handleShowDesktop}
       />
@@ -839,7 +912,7 @@ export default function Desktop() {
             setDialupDone(false);
             setConnectedAt(null);
             setConnectionStatusOpen(false);
-            notify("Disconnected from Floppyy Net.");
+            notify("Disconnected from the Internet.");
           }}
         />
       )}
@@ -854,6 +927,27 @@ export default function Desktop() {
       )}
 
       {screensaver.active && <ScreensaverOverlay mode={screensaver.mode} onExit={screensaver.stop} />}
+
+      {crash && (
+        <CrashSequence
+          variant={crash.variant}
+          message={crash.message}
+          playSound={playSound}
+          onReboot={() => window.location.reload()}
+        />
+      )}
+
+      {errorPopup && (
+        <Win98ErrorDialog
+          title={errorPopup.title}
+          message={errorPopup.message}
+          onClose={() => setErrorPopup(null)}
+        />
+      )}
+
+      {virusAlertOpen && (
+        <McAfeeVirusAlert playSound={playSound} onClose={() => setVirusAlertOpen(false)} />
+      )}
 
       {isSafeMode && (
         <>
@@ -1003,7 +1097,7 @@ function ConnectionStatusDialog({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex h-[20px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] px-[2px] pl-[4px]">
-          <span className="text-[11px] font-bold text-white">Floppyy Net Status</span>
+          <span className="text-[11px] font-bold text-white">Internet Status</span>
           <button
             className="flex h-[16px] w-[16px] items-center justify-center"
             style={{
@@ -1031,7 +1125,7 @@ function ConnectionStatusDialog({
             />
           </span>
           <div className="min-w-0 flex-1 text-[11px] leading-[15px]">
-            <p className="mb-[8px] font-bold">Connected to Floppyy Net</p>
+            <p className="mb-[8px] font-bold">Connected to the Internet</p>
             <div className="grid grid-cols-[88px_1fr] gap-x-2 gap-y-[3px]">
               <span>Speed:</span>
               <span>33.6 kbps</span>

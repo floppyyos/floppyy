@@ -126,6 +126,7 @@ function PanelContent({
         <h2 className="text-[20px] font-bold">Discover Floppyy</h2>
         <p>Boot up, click around, remember everything — minus the dial-up wait. Mostly.</p>
         <p>Pixel windows, floppy disks, BIOS boot screens, Winamp vibes, classic games, and the early web are rebuilt here as a playful browser desktop.</p>
+        <p>No AI, no AI agents, no social media. That was the golden era.</p>
         <p>Not an emulator. Not a productivity tool. Just a small machine for good old internet memories.</p>
       </section>
     );
@@ -135,8 +136,6 @@ function PanelContent({
     return (
       <section className="relative max-w-[315px] space-y-[10px]">
         <h2 className="text-[20px] font-bold">Credits</h2>
-        <p><strong>Floppyy</strong> is made for everyone who still remembers the magic of opening a folder just to see what was inside.</p>
-        <p>No AI, no AI agents, no social media. That was the golden era.</p>
         <p className="border-t border-[#d0d0d0] pt-[8px] text-[11px] leading-[1.5] text-[#333333]">
           All rights to logos, names, music, games, and other materials belong to their respective
           owners. This project was created purely as a tribute to the 1990s. If you would like to add

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { commands, isUrl } from "@/lib/commands";
 import type { WindowComponentProps, WindowId } from "@/lib/windows";
 
-export function RunWindow({ window: win, openWindow, closeWindow, notify, playSound, startScreensaver }: WindowComponentProps) {
+export function RunWindow({ window: win, openWindow, closeWindow, notify, playSound, startScreensaver, crashSystem }: WindowComponentProps) {
   const [value, setValue] = useState("");
   const [history, setHistory] = useState<string[]>([]);
 
@@ -32,6 +32,15 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
     }
     remember(trimmed);
 
+    // Easter egg: classic "destroy the machine" commands take Floppyy down.
+    const lowered = trimmed.toLowerCase();
+    if (/(^|\s)(format|deltree|del|erase|rd|rmdir|fdisk)(\s|$)/.test(lowered) || lowered.includes("*.*")) {
+      playSound("error");
+      closeWindow(win.instanceId);
+      crashSystem?.({ variant: "cascade" });
+      return;
+    }
+
     // URL → open in IE browser via archive.org
     if (isUrl(trimmed)) {
       openWindow("ie-browser", trimmed);
@@ -40,6 +49,13 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
     }
 
     const normalized = trimmed.toLowerCase();
+
+    // Show the list of commands (the Help window opens via the "help" command).
+    if (normalized === "commands" || normalized === "?") {
+      notify("Commands: about, computer, winamp, ie, netscape, notepad, paint, calc, cmd, doom, projects, games, music, screensaver, defrag, help. Some old words still work.");
+      return;
+    }
+
     const easterEggs: Record<string, () => void> = {
       llama: () => {
         notify("It really whips the llama.");
@@ -77,32 +93,44 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
       notify(`Cannot find '${trimmed}'. Make sure you typed the name correctly.`);
       return;
     }
-    if (command === "help") {
-      notify("Commands: about, computer, winamp, ie, netscape, notepad, paint, calc, cmd, doom, duke, sw, projects, games, music, screensaver, defrag, help. Some old words still work.");
-      return;
-    }
     openWindow(command as WindowId);
     closeWindow(win.instanceId);
   };
 
   return (
     <form
-      className="flex h-full flex-col gap-4"
+      className="flex h-full flex-col gap-[12px] px-[6px] py-[4px] text-[11px]"
       onSubmit={(event) => {
         event.preventDefault();
         run();
       }}
     >
-      <div className="flex gap-3">
-        <div className="text-3xl">▣</div>
-        <p>Type the name of a program, folder, document, or internet resource, and Floppyy will open it for you.</p>
+      <div className="flex items-start gap-[12px]">
+        <img
+          src="/icons/run.png"
+          alt=""
+          width={32}
+          height={32}
+          className="mt-[2px] shrink-0"
+          style={{ imageRendering: "pixelated" }}
+          draggable={false}
+        />
+        <p className="leading-[15px]">
+          Type the name of a program, folder, document, or Internet resource, and Floppyy will open it for you.
+        </p>
       </div>
-      <label className="grid grid-cols-[52px_1fr] items-center gap-2">
-        <span>Open:</span>
-        <div className="flex min-w-0">
-          <input className="win-bevel-inset min-w-0 flex-1 bg-white px-2 py-1" value={value} onChange={(event) => setValue(event.target.value)} autoFocus />
+      <div className="flex items-center gap-[8px]">
+        <label htmlFor="run-open" className="shrink-0">Open:</label>
+        <div className="flex h-[22px] min-w-0 flex-1">
+          <input
+            id="run-open"
+            className="win-bevel-inset h-full min-w-0 flex-1 bg-white px-[4px] text-[11px]"
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            autoFocus
+          />
           <select
-            className="win-button h-[26px] w-[28px] px-0 text-[10px]"
+            className="win-button h-full w-[17px] px-0 text-[8px]"
             aria-label="Run history"
             value=""
             onChange={(event) => {
@@ -118,13 +146,23 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
             ))}
           </select>
         </div>
-      </label>
-      <div className="mt-auto flex justify-end gap-2">
-        <button type="submit" className="win-button min-w-20">
+      </div>
+      <div className="mt-auto flex justify-end gap-[6px]">
+        <button type="submit" className="win-button min-w-[75px]">
           OK
         </button>
-        <button type="button" className="win-button min-w-20" onClick={() => closeWindow(win.instanceId)}>
+        <button type="button" className="win-button min-w-[75px]" onClick={() => closeWindow(win.instanceId)}>
           Cancel
+        </button>
+        <button
+          type="button"
+          className="win-button min-w-[75px]"
+          onClick={() => {
+            playSound("click");
+            notify("There's nothing to browse — just type a name and press OK.");
+          }}
+        >
+          Browse...
         </button>
       </div>
     </form>

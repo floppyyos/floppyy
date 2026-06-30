@@ -389,7 +389,7 @@ button {
 .start-logo span:nth-child(3) { background: #0000ff; }
 .start-logo span:nth-child(4) { background: #ffff00; }
 
-/* Scrollbar styling for Floppyy */
+/* Scrollbar styling for Floppyy (Win98 look) */
 ::-webkit-scrollbar {
   width: 16px;
   height: 16px;
@@ -410,7 +410,9 @@ button {
 }
 
 ::-webkit-scrollbar-button {
-  background: #c0c0c0;
+  background-color: #c0c0c0;
+  background-repeat: no-repeat;
+  background-position: center;
   box-shadow:
     inset -1px -1px #0a0a0a,
     inset 1px 1px #ffffff,
@@ -419,6 +421,34 @@ button {
   display: block;
   height: 16px;
   width: 16px;
+}
+
+/* Arrow glyphs for the single button at each end */
+::-webkit-scrollbar-button:vertical:decrement {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M8 5 L11 10 L5 10 Z' fill='%23000'/></svg>");
+}
+::-webkit-scrollbar-button:vertical:increment {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M5 6 L11 6 L8 11 Z' fill='%23000'/></svg>");
+}
+::-webkit-scrollbar-button:horizontal:decrement {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M10 5 L10 11 L5 8 Z' fill='%23000'/></svg>");
+}
+::-webkit-scrollbar-button:horizontal:increment {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16'><path d='M6 5 L6 11 L11 8 Z' fill='%23000'/></svg>");
+}
+
+/* Hide the phantom second button at the start/end so the track doesn't show
+   transparent gaps */
+::-webkit-scrollbar-button:vertical:start:increment,
+::-webkit-scrollbar-button:vertical:end:decrement,
+::-webkit-scrollbar-button:horizontal:start:increment,
+::-webkit-scrollbar-button:horizontal:end:decrement {
+  display: none;
+}
+
+/* Where vertical and horizontal scrollbars meet */
+::-webkit-scrollbar-corner {
+  background: #c0c0c0;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -825,6 +855,10 @@ button {
   color: #ffffff;
 }
 
+.winamp-pl-item.playing {
+  color: #ffffff;
+}
+
 .winamp-pl-item-num {
   color: inherit;
   min-width: 18px;
@@ -907,4 +941,119 @@ button {
   0% { opacity: 1; }
   50% { opacity: 0; }
   100% { opacity: 1; }
+}
+
+/* Date/Time Properties dialog */
+.datetime-tabstrip {
+  display: flex;
+  padding-left: 6px;
+  position: relative;
+  z-index: 2;
+}
+
+.datetime-tab {
+  padding: 3px 11px 4px;
+  background: #c0c0c0;
+  font-family: var(--font-floppyy);
+  font-size: 11px;
+  border: 1px solid;
+  border-color: #ffffff #808080 #c0c0c0 #ffffff;
+  border-bottom: 0;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  margin-bottom: -1px;
+}
+
+.datetime-panel {
+  background: #c0c0c0;
+  border: 1px solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+  box-shadow:
+    inset -1px -1px #808080,
+    inset 1px 1px #dfdfdf;
+  padding: 12px;
+}
+
+.datetime-fieldset {
+  border: 1px solid #ffffff;
+  border-top-color: #808080;
+  border-left-color: #808080;
+  padding: 6px 10px 12px;
+}
+
+.datetime-fieldset > legend {
+  font-size: 11px;
+  padding: 0 3px;
+}
+
+.datetime-input {
+  background: #ffffff;
+  padding: 2px 4px;
+  font-family: var(--font-floppyy);
+  font-size: 11px;
+  box-shadow:
+    inset -1px -1px #ffffff,
+    inset 1px 1px #808080,
+    inset -2px -2px #dfdfdf,
+    inset 2px 2px #0a0a0a;
+}
+
+.datetime-calendar {
+  background: #ffffff;
+  padding: 4px 6px 6px;
+  box-shadow:
+    inset -1px -1px #ffffff,
+    inset 1px 1px #808080,
+    inset -2px -2px #dfdfdf,
+    inset 2px 2px #0a0a0a;
+}
+
+.datetime-spin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 11px;
+  font-size: 7px;
+  line-height: 1;
+  background: #c0c0c0;
+  box-shadow:
+    inset -1px -1px #0a0a0a,
+    inset 1px 1px #ffffff,
+    inset -2px -2px #808080,
+    inset 2px 2px #dfdfdf;
+}
+
+.datetime-spin:active {
+  box-shadow:
+    inset -1px -1px #ffffff,
+    inset 1px 1px #0a0a0a,
+    inset -2px -2px #dfdfdf,
+    inset 2px 2px #808080;
+}
+
+/* Game start/over call-to-action buttons.
+   Defined as classes so they beat the global unlayered `button { background:transparent }`
+   reset (which otherwise renders Tailwind-styled game buttons invisible). */
+.game-button {
+  display: inline-block;
+  border: 2px solid #888888;
+  background: #222222;
+  color: #ffffff;
+  padding: 10px 28px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.game-button:hover {
+  background: #3a3a3a;
+}
+
+.game-button-danger {
+  border-color: #b91c1c;
+  background: #7f1d1d;
+}
+
+.game-button-danger:hover {
+  background: #b91c1c;
 }

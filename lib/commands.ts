@@ -1,6 +1,6 @@
 import type { WindowId } from "./windows";
 
-export const commands: Record<string, WindowId | "help"> = {
+export const commands: Record<string, WindowId> = {
   about: "about",
   projects: "projects",
   games: "games",
@@ -22,14 +22,9 @@ export const commands: Record<string, WindowId | "help"> = {
   explorer: "ie-browser",
   netscape: "netscape",
   doom: "doom",
-  duke: "duke",
-  duke3d: "duke",
-  shadowwarrior: "shadow-warrior",
-  sw: "shadow-warrior",
   minesweeper: "minesweeper",
   mine: "minesweeper",
   solitaire: "solitaire",
-  snake: "snake",
   contact: "outlook",
   help: "help",
 };

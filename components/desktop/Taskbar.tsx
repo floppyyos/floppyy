@@ -15,11 +15,12 @@ type Props = {
   onDisconnectRequest: () => void;
   onMcAfeeOpen: () => void;
   onToggleMute: () => void;
+  onClockOpen: () => void;
   onQuickLaunch?: (id: string) => void;
   onShowDesktop?: () => void;
 };
 
-export function Taskbar({ windows, activeId, startOpen, internetConnected, muted, onStart, onTask, onDisconnectRequest, onMcAfeeOpen, onToggleMute, onQuickLaunch, onShowDesktop }: Props) {
+export function Taskbar({ windows, activeId, startOpen, internetConnected, muted, onStart, onTask, onDisconnectRequest, onMcAfeeOpen, onToggleMute, onClockOpen, onQuickLaunch, onShowDesktop }: Props) {
   return (
     <div
       className="fixed bottom-0 left-0 z-[4000] flex h-[28px] w-screen items-center gap-[3px] bg-[#c0c0c0] px-[2px]"
@@ -116,6 +117,7 @@ export function Taskbar({ windows, activeId, startOpen, internetConnected, muted
         onDisconnectRequest={onDisconnectRequest}
         onMcAfeeOpen={onMcAfeeOpen}
         onToggleMute={onToggleMute}
+        onClockOpen={onClockOpen}
       />
     </div>
   );

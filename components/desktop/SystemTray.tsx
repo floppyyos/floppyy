@@ -8,12 +8,14 @@ export function SystemTray({
   onDisconnectRequest,
   onMcAfeeOpen,
   onToggleMute,
+  onClockOpen,
 }: {
   internetConnected: boolean;
   muted: boolean;
   onDisconnectRequest: () => void;
   onMcAfeeOpen: () => void;
   onToggleMute: () => void;
+  onClockOpen: () => void;
 }) {
   const time = useClock();
   return (
@@ -25,9 +27,9 @@ export function SystemTray({
     >
       {internetConnected && (
         <button
-          aria-label="Disconnect Floppyy Net"
+          aria-label="Disconnect Internet"
           className="desktop-icon-button flex items-center"
-          title={"Floppyy Net: Connected\nSpeed: 33.6 kbps"}
+          title={"Internet: Connected\nSpeed: 56 kbps"}
           onDoubleClick={(event) => {
             event.stopPropagation();
             onDisconnectRequest();
@@ -81,7 +83,17 @@ export function SystemTray({
           </span>
         )}
       </button>
-      <span className="min-w-[52px] text-center tabular-nums">{time}</span>
+      <button
+        className="desktop-icon-button min-w-[52px] text-center tabular-nums"
+        title="Double-click to open Date/Time"
+        aria-label={`Time ${time}. Double-click to open Date and Time properties.`}
+        onDoubleClick={(event) => {
+          event.stopPropagation();
+          onClockOpen();
+        }}
+      >
+        {time}
+      </button>
     </div>
   );
 }

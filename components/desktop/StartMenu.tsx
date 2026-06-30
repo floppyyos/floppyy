@@ -22,9 +22,6 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
   const games: Array<[WindowId, string, string, string?]> = [
     ["solitaire", "Solitaire", "cards"],
     ["doom", "Doom", "doom"],
-    ["duke", "Duke Nukem 3D", "doom"],
-    ["shadow-warrior", "Shadow Warrior", "doom"],
-    ["snake", "Snake", "snake"],
     ["minesweeper", "Minesweeper", "mine"],
   ];
 
@@ -98,7 +95,7 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
         </div>
 
         <div className="group/games relative">
-          <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("games")}>
+          <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={(event) => event.preventDefault()}>
             <FloppyyIcon type="directory_check" size={16} />
             <span>Games</span>
             <span className="ml-auto w-[10px] text-center text-[7px] leading-none">▶</span>
@@ -195,6 +192,10 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
         <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("defrag")}>
           <FloppyyIcon type="defrag" size={16} />
           <span>Disk Defragmenter</span>
+        </button>
+        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("help")}>
+          <img src="/icons/help.png" alt="" width={16} height={16} style={{ imageRendering: "pixelated" }} draggable={false} />
+          <span>Help</span>
         </button>
         <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("run")}>
           <FloppyyIcon type="run" size={16} />

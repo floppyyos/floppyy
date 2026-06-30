@@ -8,7 +8,7 @@ Mostly.
 
 > The web you grew up on.
 
-![Floppyy](https://img.shields.io/badge/Floppyy-v2.9-008080?style=flat-square)
+![Floppyy](https://img.shields.io/badge/Floppyy-v3.0-008080?style=flat-square)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square&logo=typescript)
 ![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react)
@@ -34,12 +34,12 @@ Just a small machine for good old internet memories.
 - Right-click context menu (Arrange Icons, Line Up, Refresh, Properties, Empty Recycle Bin)
 - Window management — open, close, minimize, maximize, drag, resize, z-order
 - Start Menu with program list and Shut Down
-- Taskbar with Start button, quick launch, window buttons, system tray clock
-- Keyboard shortcuts — Ctrl+Esc, Alt+F4, Enter to open
+- Taskbar with Start button, quick launch, window buttons, and a live system tray clock (double-click to open Date/Time)
+- Keyboard shortcuts — Ctrl+Esc (Start), Alt+F4 (close), Enter (open), Ctrl+Alt+Backspace (restart)
 
 ### Applications
 - **Notepad** — text editor with File/Edit/Search/Format menus, word wrap
-- **Paint** — full drawing app with pencil, brush, eraser, fill, shapes, color palette, undo
+- **Paint** — drawing app with an authentic toolbox (pencil, brush, airbrush, eraser, fill, color picker, text, line, shapes), per-tool size/width options, color palette, and undo
 - **Calculator** — functional calculator
 - **Internet Explorer** — loads real 1998 websites via Wayback Machine
 - **Netscape Navigator** — retro alternative browser
@@ -51,18 +51,17 @@ Just a small machine for good old internet memories.
 - **My Computer / My Documents / Local Disk** — file system browsing
 - **Projects** — portfolio browser with project details
 - **Control Panel & Display Settings** — system configuration
+- **Date/Time Properties** — live clock with analog face, calendar, and time zone (double-click the taskbar clock)
 - **Disk Defragmenter** — animated defrag utility
 - **Recycle Bin** — holds deleted desktop icons, restore or empty
 - **Run** dialog, **Share** dialog, and **About / Credits**
+- **Help** — Floppyy Help (getting started, platform-aware keyboard shortcuts, and the full list of secrets)
 - **Screensavers** — Pipes, Starfield, Maze, Mystify, Flying Windows
 
 ### Games
 - **Doom** — 3D raycasting FPS with enemies, weapons, 3 levels
-- **Duke Nukem 3D** — raycasting shooter
-- **Shadow Warrior** — raycasting shooter
 - **Minesweeper** — classic mine-clearing puzzle
-- **Solitaire** — card game
-- **Snake** — arcade snake game
+- **Solitaire** — card game (drag or click-to-move)
 
 ### System
 - Sound effects via Web Audio API with oscillator fallback
@@ -71,6 +70,19 @@ Just a small machine for good old internet memories.
 - Safe Mode boot option
 - Shut Down with "It's now safe to turn off your computer" screen
 - Share dialog for social sharing
+
+## Easter Eggs
+
+Floppyy occasionally fights back. A few things to try — the full list lives in **Start → Help → Tips & Secrets**:
+
+- Open **My Computer** four times in a row to trigger a cascade of errors → blue screen → reboot
+- Press **Ctrl+Alt+Backspace** (⌃ + ⌥ + ⌫ on Mac) for an on-demand crash & restart
+- Type `format c:`, `del *.*`, or `deltree` into the **Run** dialog... and say goodbye
+- Internet Explorer and Netscape occasionally throw a fatal error mid-browse (true to the era)
+- A few minutes into a session, McAfee "finds a virus" — once per machine, and it's bluffing
+- Lose at Minesweeper and the computer may rub it in
+- Secret **Run** words: `llama`, `nostalgia`, `clouds`, `stars`, `floppyy`
+- Drag My Computer onto the Recycle Bin — Floppyy will refuse
 
 ## Tech Stack
 

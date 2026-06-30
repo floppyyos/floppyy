@@ -59,7 +59,7 @@ const FILES: Record<string, string[]> = {
   ],
 };
 
-export function MsDosWindow({ window: win, closeWindow, openWindow, playSound }: WindowComponentProps) {
+export function MsDosWindow({ window: win, closeWindow, openWindow, playSound, crashSystem }: WindowComponentProps) {
   const [lines, setLines] = useState<Line[]>([
     { text: "Microsoft(R) Windows 98", type: "output" },
     { text: "   (C)Copyright Microsoft Corp 1981-1999.", type: "output" },
@@ -86,6 +86,14 @@ export function MsDosWindow({ window: win, closeWindow, openWindow, playSound }:
 
       // Add the input line to history
       setLines((prev) => [...prev, { text: `C:\\>${trimmed}`, type: "input" }]);
+
+      // Easter egg: classic "destroy the machine" commands bring Floppyy down.
+      const lowered = trimmed.toLowerCase();
+      if (/(^|\s)(format|deltree|erase|fdisk|del|rd|rmdir)(\s|$)/.test(lowered) || lowered.includes("*.*")) {
+        playSound("error");
+        crashSystem?.({ variant: "cascade" });
+        return;
+      }
 
       switch (command) {
         case "":
@@ -146,7 +154,7 @@ export function MsDosWindow({ window: win, closeWindow, openWindow, playSound }:
           }
           // Program name
           const prog = commands[args.toLowerCase()];
-          if (prog && prog !== "help") {
+          if (prog) {
             addOutput([`Starting ${args}...`, ""]);
             openWindow(prog as WindowId);
           } else {
@@ -164,7 +172,7 @@ export function MsDosWindow({ window: win, closeWindow, openWindow, playSound }:
           break;
       }
     },
-    [addOutput, closeWindow, openWindow, playSound, win.instanceId],
+    [addOutput, closeWindow, openWindow, playSound, crashSystem, win.instanceId],
   );
 
   const handleSubmit = (e: React.FormEvent) => {

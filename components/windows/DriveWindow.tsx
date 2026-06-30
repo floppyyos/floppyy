@@ -120,10 +120,7 @@ const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
     Games: [
       { id: "mines", label: "Minesweeper.exe", icon: "mine", description: "Application", kind: "file" },
       { id: "solitaire", label: "Solitaire.exe", icon: "cards", description: "Application", kind: "file" },
-      { id: "snake", label: "Snake.exe", icon: "snake", description: "Application", kind: "file" },
       { id: "doom", label: "Doom.exe", icon: "doom", description: "Application", kind: "file" },
-      { id: "duke", label: "Duke3D.exe", icon: "doom", description: "Application", kind: "file" },
-      { id: "shadow-warrior", label: "ShadowWarrior.exe", icon: "doom", description: "Application", kind: "file" },
     ],
   },
   D: {
@@ -272,10 +269,7 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
     if (label.includes("winamp")) openWindow("music");
     else if (label.includes("minesweeper")) openWindow("minesweeper");
     else if (label.includes("solitaire")) openWindow("solitaire");
-    else if (label.includes("snake")) openWindow("snake");
     else if (label.includes("doom")) openWindow("doom");
-    else if (label.includes("duke")) openWindow("duke");
-    else if (label.includes("shadowwarrior") || label.includes("shadow warrior")) openWindow("shadow-warrior");
     else if (label.includes("netscape")) openWindow("netscape");
     else if (label.includes("internet explorer") || label.endsWith(".url") || label.endsWith(".htm")) openWindow("ie-browser", "https://www.aol.com/");
     else if (label.includes("norton") || label === "nc.exe") openWindow("norton");

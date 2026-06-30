@@ -82,6 +82,8 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
   const [won, setWon] = useState(false);
   const [backIndex, setBackIndex] = useState<number>(() => randomBack());
   const dragRef = useRef<DragSource | null>(null);
+  // Click-to-move selection (works alongside drag-and-drop, and on touch).
+  const [selected, setSelected] = useState<DragSource | null>(null);
 
   const newGame = useCallback(() => {
     setGame(deal());
@@ -89,6 +91,7 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
     setSeconds(0);
     setStarted(false);
     setWon(false);
+    setSelected(null);
     setBackIndex(randomBack());
     playSound("click");
   }, [playSound]);
@@ -114,6 +117,7 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
   // Draw from stock to waste (draw one), recycle when empty
   const drawStock = useCallback(() => {
     begin();
+    setSelected(null);
     playSound("click");
     setGame((prev) => {
       if (prev.stock.length === 0) {
@@ -168,11 +172,8 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
     return top.suit === card.suit && top.rank === card.rank - 1;
   };
 
-  const tryDrop = useCallback(
-    (dest: { kind: "tableau" | "foundation"; pile: number }) => {
-      const src = dragRef.current;
-      dragRef.current = null;
-      if (!src) return;
+  const performMove = useCallback(
+    (src: DragSource, dest: { kind: "tableau" | "foundation"; pile: number }) => {
       setGame((prev) => {
         const moving = cardsFromSource(prev, src);
         if (moving.length === 0) return prev;
@@ -202,6 +203,66 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
     },
     [checkWin, playSound],
   );
+
+  const tryDrop = useCallback(
+    (dest: { kind: "tableau" | "foundation"; pile: number }) => {
+      const src = dragRef.current;
+      dragRef.current = null;
+      if (!src) return;
+      performMove(src, dest);
+    },
+    [performMove],
+  );
+
+  // ===== Click-to-move =====
+  // Returns true if `selected` can legally move onto the given destination pile.
+  const canMoveTo = useCallback(
+    (src: DragSource, dest: { kind: "tableau" | "foundation"; pile: number }) => {
+      if (src.kind === dest.kind && src.pile === dest.pile) return false;
+      const moving = cardsFromSource(game, src);
+      if (moving.length === 0) return false;
+      return dest.kind === "tableau"
+        ? canDropTableau(game.tableau[dest.pile], moving)
+        : canDropFoundation(game.foundations[dest.pile], moving);
+    },
+    [game],
+  );
+
+  // Click a card: place the current selection here if legal, otherwise (re)select it.
+  const handleCardClick = useCallback(
+    (src: DragSource) => {
+      begin();
+      if (selected && (src.kind === "tableau" || src.kind === "foundation")) {
+        if (selected.kind === src.kind && selected.pile === src.pile) {
+          setSelected(null);
+          return;
+        }
+        if (canMoveTo(selected, { kind: src.kind, pile: src.pile })) {
+          performMove(selected, { kind: src.kind, pile: src.pile });
+          setSelected(null);
+          return;
+        }
+      }
+      // toggle selection
+      setSelected((curr) =>
+        curr && curr.kind === src.kind && curr.pile === src.pile && curr.index === src.index ? null : src,
+      );
+    },
+    [begin, selected, canMoveTo, performMove],
+  );
+
+  // Click a pile background / empty slot: drop the selection there if legal.
+  const handlePileClick = useCallback(
+    (dest: { kind: "tableau" | "foundation"; pile: number }) => {
+      if (!selected) return;
+      if (canMoveTo(selected, dest)) performMove(selected, dest);
+      setSelected(null);
+    },
+    [selected, canMoveTo, performMove],
+  );
+
+  const isSelected = (kind: PileKind, pile: number, index: number) =>
+    !!selected && selected.kind === kind && selected.pile === pile && index >= selected.index;
 
   // Double-click: auto-send a card to a valid foundation
   const autoToFoundation = useCallback(
@@ -275,6 +336,8 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
             <CardFace
               card={game.waste[game.waste.length - 1]}
               draggable
+              selected={isSelected("waste", 0, game.waste.length - 1)}
+              onClick={() => handleCardClick({ kind: "waste", pile: 0, index: game.waste.length - 1 })}
               onDragStart={() => handleDragStart({ kind: "waste", pile: 0, index: game.waste.length - 1 })}
               onDoubleClick={() => autoToFoundation({ kind: "waste", pile: 0, index: game.waste.length - 1 })}
             />
@@ -289,6 +352,7 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
             style={{ left: foundationX(i), top: TOP_Y, width: CARD_W, height: CARD_H }}
             onDragOver={allowDrop}
             onDrop={() => tryDrop({ kind: "foundation", pile: i })}
+            onClick={() => handlePileClick({ kind: "foundation", pile: i })}
           >
             {pile.length === 0 ? (
               <EmptySlot suit={i} />
@@ -296,6 +360,8 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
               <CardFace
                 card={pile[pile.length - 1]}
                 draggable
+                selected={isSelected("foundation", i, pile.length - 1)}
+                onClick={() => handleCardClick({ kind: "foundation", pile: i, index: pile.length - 1 })}
                 onDragStart={() => handleDragStart({ kind: "foundation", pile: i, index: pile.length - 1 })}
               />
             )}
@@ -310,6 +376,7 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
             style={{ left: tableauX(col), top: TABLEAU_Y, width: CARD_W, height: CARD_H + pile.length * FACE_UP_OFFSET }}
             onDragOver={allowDrop}
             onDrop={() => tryDrop({ kind: "tableau", pile: col })}
+            onClick={() => handlePileClick({ kind: "tableau", pile: col })}
           >
             {pile.length === 0 && <EmptySlot />}
             {pile.map((card, idx) => {
@@ -320,6 +387,8 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
                     <CardFace
                       card={card}
                       draggable
+                      selected={isSelected("tableau", col, idx)}
+                      onClick={() => handleCardClick({ kind: "tableau", pile: col, index: idx })}
                       onDragStart={() => handleDragStart({ kind: "tableau", pile: col, index: idx })}
                       onDoubleClick={() => idx === pile.length - 1 && autoToFoundation({ kind: "tableau", pile: col, index: idx })}
                     />
@@ -354,17 +423,25 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
 function CardFace({
   card,
   draggable,
+  selected,
+  onClick,
   onDragStart,
   onDoubleClick,
 }: {
   card: Card;
   draggable?: boolean;
+  selected?: boolean;
+  onClick?: () => void;
   onDragStart?: () => void;
   onDoubleClick?: () => void;
 }) {
   return (
     <div
       draggable={draggable}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
       onDragStart={(e) => {
         e.dataTransfer.setData("text/plain", card.id);
         e.dataTransfer.effectAllowed = "move";
@@ -377,7 +454,7 @@ function CardFace({
       style={{
         width: CARD_W,
         height: CARD_H,
-        boxShadow: "0 0 0 1px #808080",
+        boxShadow: selected ? "0 0 0 2px #1e90ff, 0 0 6px #1e90ff" : "0 0 0 1px #808080",
         backgroundImage: "url('/game-assets/solitaire/cards.png')",
         backgroundPosition: `${-(card.rank - 1) * CARD_W}px ${-card.suit * CARD_H}px`,
         backgroundRepeat: "no-repeat",

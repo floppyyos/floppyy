@@ -96,7 +96,6 @@ const initialFs: FileSystem = {
     GAMES: [
       { name: "MINES.EXE", kind: "file", size: 40960, date: "06-01-26", content: "Minesweeper launcher." },
       { name: "SOL.EXE", kind: "file", size: 65536, date: "06-01-26", content: "Solitaire launcher." },
-      { name: "SNAKE.EXE", kind: "file", size: 24576, date: "06-01-26", content: "Snake launcher." },
     ],
     WINAMP: [
       { name: "WINAMP.EXE", kind: "file", size: 524288, date: "06-01-26", content: "It really whips the llama." },
@@ -284,10 +283,6 @@ export function NortonCommanderWindow({ window: win, closeWindow, openWindow, no
       }
       if (name === "SOL.EXE") {
         openWindow("games", "solitaire");
-        return true;
-      }
-      if (name === "SNAKE.EXE") {
-        openWindow("games", "snake");
         return true;
       }
       if (name === "SETUP.EXE") {

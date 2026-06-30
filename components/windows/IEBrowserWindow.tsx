@@ -11,7 +11,6 @@ const FAVORITES = [
   ["Yahoo!", "https://www.yahoo.com/"],
   ["GeoCities", "https://www.geocities.com/"],
   ["Space Jam", "https://www.spacejam.com/1996/"],
-  ["Floppyy", "https://www.floppyy.com/"],
 ] as const;
 
 function toWaybackUrl(url: string): string {
@@ -43,7 +42,7 @@ function getDisplayUrl(url: string): string {
   return url;
 }
 
-export function IEBrowserWindow({ playSound, window: win, internetConnected }: WindowComponentProps) {
+export function IEBrowserWindow({ playSound, window: win, internetConnected, crashSystem }: WindowComponentProps) {
   const initialUrl = win.payload && win.payload.trim() ? win.payload.trim() : HOME_URL;
   const [address, setAddress] = useState(initialUrl);
   const [currentUrl, setCurrentUrl] = useState(toWaybackUrl(initialUrl));
@@ -58,6 +57,16 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected }: W
       setLoading(false);
       setStatusText("Cannot find server");
       playSound("error");
+      return;
+    }
+    // Easter egg: a nod to '90s browser instability — pages occasionally
+    // take the whole system down with a blue screen.
+    if (Math.random() < 0.08) {
+      playSound("error");
+      crashSystem?.({
+        variant: "fatal",
+        message: "Internet Explorer has caused a fatal error in MSHTML.DLL and will be terminated.",
+      });
       return;
     }
     const waybackUrl = toWaybackUrl(url);
@@ -259,7 +268,7 @@ function NoInternetPage({ browser, address }: { browser: string; address: string
       </div>
       <p className="mb-3">The computer is not connected to the Internet.</p>
       <ul className="mb-4 ml-6 list-disc">
-        <li>Open Dial-Up Networking and connect to Floppyy Net.</li>
+        <li>Open Dial-Up Networking and connect to the Internet.</li>
         <li>After the connection is established, click Refresh.</li>
         <li>Make sure the address is typed correctly: <strong>{address}</strong></li>
       </ul>

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
+import { PaintToolIcon } from "./PaintToolIcon";
 
 type Tool = "pencil" | "brush" | "eraser" | "fill" | "line" | "rect" | "filledRect" | "ellipse" | "filledEllipse" | "spray" | "picker" | "text" | "select";
 
@@ -12,21 +13,25 @@ const COLORS = [
   "#ffff80", "#00ff80", "#80ffff", "#8080ff", "#ff0080", "#ff8040",
 ];
 
-const TOOLS: { id: Tool; label: string; icon: string }[] = [
-  { id: "select", label: "Select", icon: "✣" },
-  { id: "eraser", label: "Eraser", icon: "▣" },
-  { id: "picker", label: "Pick Color", icon: "⌇" },
-  { id: "fill", label: "Fill", icon: "◈" },
-  { id: "pencil", label: "Pencil", icon: "✎" },
-  { id: "brush", label: "Brush", icon: "♜" },
-  { id: "spray", label: "Airbrush", icon: "◒" },
-  { id: "text", label: "Text", icon: "A" },
-  { id: "line", label: "Line", icon: "╲" },
-  { id: "rect", label: "Rectangle", icon: "□" },
-  { id: "filledRect", label: "Filled Rectangle", icon: "▱" },
-  { id: "ellipse", label: "Ellipse", icon: "○" },
-  { id: "filledEllipse", label: "Filled Ellipse", icon: "▭" },
+const TOOLS: { id: Tool; label: string }[] = [
+  { id: "select", label: "Select" },
+  { id: "eraser", label: "Eraser/Color Eraser" },
+  { id: "picker", label: "Pick Color" },
+  { id: "fill", label: "Fill With Color" },
+  { id: "pencil", label: "Pencil" },
+  { id: "brush", label: "Brush" },
+  { id: "spray", label: "Airbrush" },
+  { id: "text", label: "Text" },
+  { id: "line", label: "Line" },
+  { id: "rect", label: "Rectangle" },
+  { id: "filledRect", label: "Filled Rectangle" },
+  { id: "ellipse", label: "Ellipse" },
+  { id: "filledEllipse", label: "Filled Ellipse" },
 ];
+
+// Tools that show a size/width picker underneath the toolbox.
+const DOT_TOOLS = new Set<Tool>(["pencil", "brush", "eraser", "spray"]);
+const WIDTH_TOOLS = new Set<Tool>(["line", "rect", "filledRect", "ellipse", "filledEllipse"]);
 
 const BRUSH_SIZES = [1, 2, 3, 5, 8];
 
@@ -350,13 +355,13 @@ export function PaintWindow({ window: win }: WindowComponentProps) {
       {/* Main area */}
       <div className="flex min-h-0 flex-1">
         {/* Toolbox */}
-        <aside className="w-[58px] shrink-0 border-r border-[#808080] bg-[#c0c0c0] p-[3px]">
+        <aside className="w-[60px] shrink-0 border-r border-[#808080] bg-[#c0c0c0] p-[4px]">
           <div className="grid grid-cols-2 gap-[1px]">
             {TOOLS.map((t) => (
               <button
                 key={t.id}
-                className={`flex h-[24px] w-[24px] items-center justify-center text-[13px] ${
-                  tool === t.id ? "win-button active p-0" : "win-button p-0"
+                className={`flex h-[25px] w-[25px] items-center justify-center p-0 win-button ${
+                  tool === t.id ? "active" : ""
                 }`}
                 title={t.label}
                 onClick={() => {
@@ -364,33 +369,51 @@ export function PaintWindow({ window: win }: WindowComponentProps) {
                   setStatusText(t.label);
                 }}
               >
-                {t.icon}
+                <span className={tool === t.id ? "translate-x-[0.5px] translate-y-[0.5px]" : ""}>
+                  <PaintToolIcon tool={t.id} />
+                </span>
               </button>
             ))}
           </div>
 
-          {/* Brush size selector */}
-          <div className="mt-[6px] border border-[#808080] bg-[#c0c0c0] p-[3px]">
-            {BRUSH_SIZES.map((size) => (
-              <button
-                key={size}
-                className={`mb-[2px] flex w-full items-center justify-center h-[14px] ${
-                  brushSize === size ? "bg-[#000080]" : "bg-white"
-                }`}
-                onClick={() => setBrushSize(size)}
-                title={`Size ${size}`}
-              >
-                <div
-                  className="rounded-full"
-                  style={{
-                    width: Math.min(size * 2, 16),
-                    height: Math.min(size * 2, 16),
-                    backgroundColor: brushSize === size ? "#ffffff" : "#000000",
-                  }}
-                />
-              </button>
-            ))}
-          </div>
+          {/* Tool options: size dots for freehand tools, line widths for shapes */}
+          {(DOT_TOOLS.has(tool) || WIDTH_TOOLS.has(tool)) && (
+            <div
+              className="mt-[8px] flex flex-col items-center gap-[3px] bg-[#c0c0c0] px-[4px] py-[6px]"
+              style={{ boxShadow: "inset -1px -1px #ffffff, inset 1px 1px #808080, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a" }}
+            >
+              {BRUSH_SIZES.map((size) => {
+                const selected = brushSize === size;
+                return (
+                  <button
+                    key={size}
+                    className={`flex h-[15px] w-full items-center justify-center ${selected ? "bg-[#000080]" : ""}`}
+                    onClick={() => setBrushSize(size)}
+                    title={`Size ${size}`}
+                  >
+                    {WIDTH_TOOLS.has(tool) ? (
+                      <div
+                        style={{
+                          width: "78%",
+                          height: Math.max(1, size),
+                          backgroundColor: selected ? "#ffffff" : "#000000",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        className="rounded-full"
+                        style={{
+                          width: Math.min(size * 2, 14),
+                          height: Math.min(size * 2, 14),
+                          backgroundColor: selected ? "#ffffff" : "#000000",
+                        }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </aside>
 
         {/* Canvas area */}

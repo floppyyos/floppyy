@@ -11,7 +11,6 @@ const BOOKMARKS = [
   ["AltaVista", "https://www.altavista.com/"],
   ["GeoCities", "https://www.geocities.com/"],
   ["Space Jam", "https://www.spacejam.com/1996/"],
-  ["Floppyy", "https://www.floppyy.com/"],
 ] as const;
 
 function toWaybackUrl(url: string): string {
@@ -38,7 +37,7 @@ function getDisplayUrl(url: string): string {
   return url;
 }
 
-export function NetscapeWindow({ playSound, internetConnected }: WindowComponentProps) {
+export function NetscapeWindow({ playSound, internetConnected, crashSystem }: WindowComponentProps) {
   const [address, setAddress] = useState(HOME_URL);
   const [currentUrl, setCurrentUrl] = useState(toWaybackUrl(HOME_URL));
   const [history, setHistory] = useState<string[]>([toWaybackUrl(HOME_URL)]);
@@ -52,6 +51,16 @@ export function NetscapeWindow({ playSound, internetConnected }: WindowComponent
       setLoading(false);
       setStatusText("Document: Cannot find server");
       playSound("error");
+      return;
+    }
+    // Easter egg: a nod to '90s browser instability — pages occasionally
+    // take the whole system down with a blue screen.
+    if (Math.random() < 0.08) {
+      playSound("error");
+      crashSystem?.({
+        variant: "fatal",
+        message: "Netscape Navigator has performed an illegal operation and will be shut down.",
+      });
       return;
     }
     const waybackUrl = toWaybackUrl(url);
@@ -245,7 +254,7 @@ function NetscapeOfflinePage({ address }: { address: string }) {
       <p className="mb-3">There is no active dial-up connection.</p>
       <ul className="mb-4 ml-6 list-disc">
         <li>Connect using Dial-Up Networking.</li>
-        <li>Try Reload after Floppyy Net is connected.</li>
+        <li>Try Reload after you&apos;re connected to the Internet.</li>
         <li>Check the location: <strong>{address}</strong></li>
       </ul>
       <div className="mt-6 border-t border-[#c0c0c0] pt-3 text-[12px] text-[#666666]">

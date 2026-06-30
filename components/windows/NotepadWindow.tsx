@@ -203,8 +203,9 @@ export function NotepadWindow({ window: win, closeWindow, notify, playSound }: W
           ref={textareaRef}
           className="notepad-textarea h-full w-full resize-none border-0 bg-white p-1 outline-none"
           style={{
-            fontFamily: "\"Fixedsys\", \"Courier New\", monospace",
-            fontSize: "13px",
+            fontFamily: "Menlo, Monaco, Consolas, \"Lucida Console\", \"Courier New\", monospace",
+            fontSize: "14px",
+            lineHeight: "1.35",
             color: "#000000",
             whiteSpace: wordWrap ? "pre-wrap" : "pre",
             overflowWrap: wordWrap ? "break-word" : "normal",

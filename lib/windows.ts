@@ -5,7 +5,9 @@ export type WindowId =
   | "calculator"
   | "computer"
   | "control-panel"
+  | "datetime"
   | "defrag"
+  | "help"
   | "documents"
   | "doom"
   | "drive"
@@ -24,13 +26,10 @@ export type WindowId =
   | "paint"
   | "recycle-bin"
   | "screensaver"
-  | "snake"
   | "solitaire"
   | "run"
   | "settings"
   | "share"
-  | "duke"
-  | "shadow-warrior"
   | "project-details";
 
 export type DesktopWindow = {
@@ -68,6 +67,7 @@ export type WindowComponentProps = {
   fadeOutSound?: (sound: string, duration?: number) => void;
   startScreensaver: (mode?: "pipes" | "stars" | "maze" | "mystify" | "flying-windows") => void;
   setDefaultScreensaver?: (mode: "pipes" | "stars" | "maze" | "mystify" | "flying-windows") => void;
+  crashSystem?: (options?: { variant?: "cascade" | "fatal"; message?: string }) => void;
   internetConnected?: boolean;
   muted?: boolean;
 };
@@ -77,11 +77,13 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   calculator: { id: "calculator", title: "Calculator", icon: "calculator", width: 260, height: 270 },
   computer: { id: "computer", title: "My Computer", icon: "computer", width: 720, height: 520 },
   "control-panel": { id: "control-panel", title: "Control Panel", icon: "control-panel", width: 600, height: 420 },
+  datetime: { id: "datetime", title: "Date/Time Properties", icon: "datetime", width: 418, height: 430, minWidth: 418, minHeight: 430 },
   defrag: { id: "defrag", title: "Defragmenting Drive C", icon: "computer", width: 500, height: 340 },
+  help: { id: "help", title: "Floppyy Help", icon: "help", width: 560, height: 440, minWidth: 460, minHeight: 360 },
   documents: { id: "documents", title: "My Documents", icon: "documents", width: 720, height: 500 },
   doom: { id: "doom", title: "DOOM", icon: "doom", width: 680, height: 510, minWidth: 480, minHeight: 360 },
   drive: { id: "drive", title: "Local Disk", icon: "drive-c", width: 780, height: 550 },
-  internet: { id: "internet", title: "Floppyy Net", icon: "dialup", width: 355, height: 470 },
+  internet: { id: "internet", title: "Internet", icon: "dialup", width: 360, height: 508 },
   "ie-browser": { id: "ie-browser", title: "Microsoft Internet Explorer", icon: "ie", width: 840, height: 580 },
   netscape: { id: "netscape", title: "Netscape Navigator", icon: "netscape", width: 760, height: 520 },
   msdos: { id: "msdos", title: "MS-DOS Prompt", icon: "prompt", width: 640, height: 400 },
@@ -96,13 +98,10 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   paint: { id: "paint", title: "untitled - Paint", icon: "paint", width: 800, height: 620 },
   "recycle-bin": { id: "recycle-bin", title: "Recycle Bin", icon: "trash", width: 720, height: 500 },
   screensaver: { id: "screensaver", title: "Display Properties", icon: "monitor", width: 420, height: 510 },
-  snake: { id: "snake", title: "Snake", icon: "snake", width: 330, height: 414, minWidth: 330, minHeight: 414 },
   solitaire: { id: "solitaire", title: "Solitaire", icon: "cards", width: 720, height: 500, minWidth: 560, minHeight: 400 },
-  run: { id: "run", title: "Run", icon: "run", width: 420, height: 210 },
+  run: { id: "run", title: "Run", icon: "run", width: 400, height: 192 },
   settings: { id: "settings", title: "Settings", icon: "gears", width: 520, height: 380 },
   share: { id: "share", title: "Send to a Friend", icon: "garfield", width: 400, height: 555 },
-  duke: { id: "duke", title: "Duke Nukem 3D", icon: "doom", width: 720, height: 560, minWidth: 480, minHeight: 380 },
-  "shadow-warrior": { id: "shadow-warrior", title: "Shadow Warrior", icon: "doom", width: 720, height: 560, minWidth: 480, minHeight: 380 },
   "project-details": {
     id: "project-details",
     title: "Project Details",

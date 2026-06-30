@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { GameMenuBar } from "./GameChrome";
+import { Win98ErrorDialog } from "@/components/windows/Win98ErrorDialog";
 
 const cols = 16;
 const rows = 16;
@@ -108,6 +109,7 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
   const [startedAt, setStartedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
   const [face, setFace] = useState<Face>("happy");
+  const [prankError, setPrankError] = useState(false);
 
   const counts = useMemo(() => computeCounts(mines), [mines]);
   const won = !lost && started && open.size >= totalCells - totalMines;
@@ -138,6 +140,7 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
     setStartedAt(nextNow);
     setNow(nextNow);
     setFace("happy");
+    setPrankError(false);
     playSound("click");
   };
 
@@ -147,6 +150,13 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
     setLost(true);
     setFace("lost");
     playSound("error");
+    // Easter egg: sometimes rub it in with a fake "data lost" error.
+    if (Math.random() < 0.3) {
+      window.setTimeout(() => {
+        playSound("error");
+        setPrankError(true);
+      }, 500);
+    }
   };
 
   const openCell = (index: number) => {
@@ -302,6 +312,14 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
           })}
         </div>
       </div>
+
+      {prankError && (
+        <Win98ErrorDialog
+          title="Minesweeper"
+          message="Your progress has been lost. Forever."
+          onClose={() => setPrankError(false)}
+        />
+      )}
     </div>
   );
 }

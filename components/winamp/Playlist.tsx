@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { WinampTrack } from "./WinampPlayer";
 
 type Props = {
@@ -17,6 +18,10 @@ function formatDuration(seconds: number): string {
 }
 
 export function WinampPlaylist({ tracks, currentTrack, onSelect, elapsed, totalTime }: Props) {
+  // Single click highlights a row; double click actually plays it (like real Winamp).
+  const [selected, setSelected] = useState(currentTrack);
+  useEffect(() => setSelected(currentTrack), [currentTrack]);
+
   return (
     <div className="winamp-pl w-[275px] mt-0">
       {/* Playlist Title bar */}
@@ -31,8 +36,12 @@ export function WinampPlaylist({ tracks, currentTrack, onSelect, elapsed, totalT
           {tracks.map((track, index) => (
             <button
               key={index}
-              className={`winamp-pl-item ${index === currentTrack ? "active" : ""}`}
-              onClick={() => onSelect(index)}
+              className={`winamp-pl-item ${index === selected ? "active" : ""} ${index === currentTrack ? "playing" : ""}`}
+              onClick={() => setSelected(index)}
+              onDoubleClick={() => {
+                setSelected(index);
+                onSelect(index);
+              }}
             >
               <span className="winamp-pl-item-num">{index + 1}.</span>
               <span className="winamp-pl-item-title truncate">

@@ -712,7 +712,7 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
 
         <button
           onClick={startGame}
-          className="mb-6 border-2 border-red-700 bg-red-900 px-8 py-3 text-lg font-bold text-white transition-colors hover:bg-red-700"
+          className="game-button game-button-danger mb-6 text-lg"
         >
           NEW GAME
         </button>
@@ -740,7 +740,7 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
         {hudState.won && <p className="mb-4 text-yellow-400">All demons vanquished!</p>}
         <button
           onClick={startGame}
-          className="border-2 border-red-700 bg-red-900 px-6 py-2 font-bold text-white transition-colors hover:bg-red-700"
+          className="game-button game-button-danger"
         >
           PLAY AGAIN
         </button>
