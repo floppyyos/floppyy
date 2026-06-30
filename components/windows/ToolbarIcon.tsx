@@ -1,11 +1,13 @@
 "use client";
 
 /**
- * Faithful recreations of the Windows 98 Explorer "Standard Buttons" toolbar
- * icons, drawn as crisp inline SVG so they render sharply at any size.
+ * Windows 98 Explorer "Standard Buttons" toolbar icons.
  *
- * To use real bitmap icons instead, drop PNGs in /public/icons and swap the
- * relevant case below for an <img src="/icons/..." /> tag.
+ * The common, shared icons (back, forward, up, cut, copy, paste, undo, delete,
+ * properties, refresh, views) are the real bitmaps sliced out of the original
+ * /public/icons-ui.png strip into /public/icons/toolbar/*.png (see BITMAP_ICONS
+ * below). Browser-only icons (stop, home, search, favorites, history, print,
+ * security) still use the hand-drawn inline SVG recreations further down.
  */
 
 type Props = {
@@ -13,7 +15,34 @@ type Props = {
   size?: number;
 };
 
+const BITMAP_ICONS = new Set([
+  "back",
+  "forward",
+  "up",
+  "cut",
+  "copy",
+  "paste",
+  "undo",
+  "delete",
+  "properties",
+  "refresh",
+  "views",
+]);
+
 export function ToolbarIcon({ name, size = 20 }: Props) {
+  if (BITMAP_ICONS.has(name)) {
+    return (
+      <img
+        src={`/icons/toolbar/${name}.png`}
+        alt=""
+        width={size}
+        height={size}
+        draggable={false}
+        style={{ imageRendering: "pixelated", display: "block", width: size, height: size }}
+      />
+    );
+  }
+
   const common = {
     width: size,
     height: size,
