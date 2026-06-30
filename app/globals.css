@@ -60,6 +60,10 @@ summary,
   cursor: var(--cursor-default) !important;
 }
 
+.cursor-hand {
+  cursor: pointer !important;
+}
+
 input,
 textarea,
 .cursor-text {

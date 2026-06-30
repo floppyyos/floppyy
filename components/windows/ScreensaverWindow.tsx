@@ -14,7 +14,7 @@ const OPTIONS: { value: Mode; label: string }[] = [
   { value: "mystify", label: "Mystify Your Mind" },
 ];
 
-const TABS = ["Background", "Screen Saver", "Appearance", "Settings"];
+const TABS = ["Background", "Screen Saver"];
 
 function MonitorPreview({ children }: { children: ReactNode }) {
   const bevelRaised =
@@ -169,7 +169,7 @@ export function ScreensaverWindow({
   };
 
   return (
-    <div className="flex h-full flex-col bg-[#c0c0c0] p-[10px] text-[11px]">
+    <div className="flex h-full flex-col bg-[#c0c0c0] p-[14px] text-[11px]">
       {/* Tab strip */}
       <div className="relative z-[2] flex gap-[5px] px-[2px]">
         {TABS.map((tab) => {
@@ -191,8 +191,8 @@ export function ScreensaverWindow({
 
       {/* Body panel */}
       <div
-        className="-mt-px flex flex-1 flex-col bg-[#c0c0c0] p-[12px]"
-        style={{ boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf" }}
+        className="-mt-px flex flex-1 flex-col bg-[#c0c0c0]"
+        style={{ boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf", padding: "16px 24px" }}
       >
         <div className="mb-[12px] flex justify-center">
           <MonitorPreview>
@@ -230,10 +230,6 @@ export function ScreensaverWindow({
               })}
             </div>
           </fieldset>
-        )}
-
-        {(activeTab === "Appearance" || activeTab === "Settings") && (
-          <div className="mb-[10px] flex-1 text-[#404040]">This tab is just for show in Floppyy.</div>
         )}
 
         {activeTab === "Screen Saver" && (

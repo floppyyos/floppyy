@@ -13,8 +13,8 @@ const TITLES = ["Error", "System Error", "Fatal Error", "MyComputer.exe"];
 
 const MESSAGES = [
   "Fail.",
-  "MyComputer.exe has stopped responding.",
-  "Too many clicks. The system cannot handle this much enthusiasm.",
+  "SYSTEM.exe has stopped responding.",
+  "A fatal error has occurred. The system cannot handle this much enthusiasm.",
   "A fatal exception 0E has occurred at C0DE:F100PPY.",
   "Cannot find REASON.DLL. Reality will now reboot.",
   "Error: Success failed successfully.",

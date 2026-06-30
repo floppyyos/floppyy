@@ -99,7 +99,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   norton: { id: "norton", title: "Norton Commander", icon: "console", width: 760, height: 500 },
   paint: { id: "paint", title: "untitled - Paint", icon: "paint", width: 800, height: 620 },
   "recycle-bin": { id: "recycle-bin", title: "Recycle Bin", icon: "trash", width: 720, height: 500 },
-  screensaver: { id: "screensaver", title: "Display Properties", icon: "monitor", width: 440, height: 640 },
+  screensaver: { id: "screensaver", title: "Display Properties", icon: "monitor", width: 440, height: 580 },
   solitaire: { id: "solitaire", title: "Solitaire", icon: "cards", width: 720, height: 500, minWidth: 560, minHeight: 400 },
   run: { id: "run", title: "Run", icon: "run", width: 400, height: 192 },
   settings: { id: "settings", title: "Settings", icon: "gears", width: 520, height: 380 },
