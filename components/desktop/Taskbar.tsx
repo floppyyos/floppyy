@@ -10,6 +10,8 @@ type Props = {
   startOpen: boolean;
   internetConnected: boolean;
   muted: boolean;
+  volume: number;
+  onVolumeChange: (value: number) => void;
   onStart: () => void;
   onTask: (instanceId: string) => void;
   onDisconnectRequest: () => void;
@@ -20,7 +22,7 @@ type Props = {
   onShowDesktop?: () => void;
 };
 
-export function Taskbar({ windows, activeId, startOpen, internetConnected, muted, onStart, onTask, onDisconnectRequest, onMcAfeeOpen, onToggleMute, onClockOpen, onQuickLaunch, onShowDesktop }: Props) {
+export function Taskbar({ windows, activeId, startOpen, internetConnected, muted, volume, onVolumeChange, onStart, onTask, onDisconnectRequest, onMcAfeeOpen, onToggleMute, onClockOpen, onQuickLaunch, onShowDesktop }: Props) {
   return (
     <div
       className="fixed bottom-0 left-0 z-[4000] flex h-[28px] w-screen items-center gap-[3px] bg-[#c0c0c0] px-[2px]"
@@ -114,6 +116,8 @@ export function Taskbar({ windows, activeId, startOpen, internetConnected, muted
       <SystemTray
         internetConnected={internetConnected}
         muted={muted}
+        volume={volume}
+        onVolumeChange={onVolumeChange}
         onDisconnectRequest={onDisconnectRequest}
         onMcAfeeOpen={onMcAfeeOpen}
         onToggleMute={onToggleMute}

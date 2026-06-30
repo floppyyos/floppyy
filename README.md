@@ -8,7 +8,7 @@ Mostly.
 
 > The web you grew up on.
 
-![Floppyy](https://img.shields.io/badge/Floppyy-v3.0-008080?style=flat-square)
+![Floppyy](https://img.shields.io/badge/Floppyy-v3.1-008080?style=flat-square)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square&logo=typescript)
 ![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react)
@@ -50,7 +50,7 @@ Just a small machine for good old internet memories.
 - **Winamp** — music player (frameless, authentic skin)
 - **My Computer / My Documents / Local Disk** — file system browsing
 - **Projects** — portfolio browser with project details
-- **Control Panel & Display Settings** — system configuration
+- **Control Panel & Display Properties** — system configuration, plus switchable wallpapers (the classic Windows 98 set: Clouds, Space, Underwater, Baseball, and more) and screensaver selection
 - **Date/Time Properties** — live clock with analog face, calendar, and time zone (double-click the taskbar clock)
 - **Disk Defragmenter** — animated defrag utility
 - **Recycle Bin** — holds deleted desktop icons, restore or empty

@@ -61,7 +61,7 @@ export function WindowFrame({ window, active, children, onFocus, onClose, onMini
         onMaximize={onMaximize}
         onClose={onClose}
         onPointerDown={(event) => {
-          if (window.maximized || globalThis.window.innerWidth < 640) return;
+          if (window.maximized) return;
           onFocus();
           drag.current = { dx: event.clientX - window.x, dy: event.clientY - window.y };
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -75,7 +75,7 @@ export function WindowFrame({ window, active, children, onFocus, onClose, onMini
       {/* Resize grip */}
       {!window.maximized && (
         <div
-          className="absolute bottom-0 right-0 h-[16px] w-[16px] cursor-se-resize"
+          className="absolute bottom-0 right-0 h-[16px] w-[16px] cursor-se-resize touch-none"
           onPointerDown={(event) => {
             event.stopPropagation();
             onFocus();

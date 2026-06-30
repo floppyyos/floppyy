@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
+import { WALLPAPER_LIST, WALLPAPERS, type WallpaperId, isWallpaperId, wallpaperSwatchStyle } from "@/lib/wallpapers";
 
 type Mode = "pipes" | "stars" | "maze" | "mystify" | "flying-windows";
 
@@ -15,7 +16,7 @@ const OPTIONS: { value: Mode; label: string }[] = [
 
 const TABS = ["Background", "Screen Saver", "Appearance", "Settings"];
 
-function MonitorPreview({ mode }: { mode: Mode }) {
+function MonitorPreview({ children }: { children: ReactNode }) {
   const bevelRaised =
     "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf";
   return (
@@ -25,7 +26,7 @@ function MonitorPreview({ mode }: { mode: Mode }) {
         {/* sunken screen frame */}
         <div className="field-border bg-black p-[2px]">
           <div className="relative overflow-hidden" style={{ height: 104, background: "#000" }}>
-            <PreviewContent mode={mode} />
+            {children}
           </div>
         </div>
       </div>
@@ -35,6 +36,32 @@ function MonitorPreview({ mode }: { mode: Mode }) {
       <div className="h-[6px] w-[96px] bg-[#c0c0c0]" style={{ boxShadow: bevelRaised }} />
     </div>
   );
+}
+
+/** Fills the monitor screen with the given wallpaper. */
+function WallpaperScreen({ id }: { id: WallpaperId }) {
+  const wp = WALLPAPERS[id];
+  if (wp.className === "floppyy-wallpaper") {
+    return (
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: "url('/clouds.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+    );
+  }
+  if (wp.image) {
+    return (
+      <div
+        className="absolute inset-0"
+        style={{ backgroundImage: `url('${wp.image}')`, backgroundSize: "cover", backgroundPosition: "center" }}
+      />
+    );
+  }
+  return <div className="absolute inset-0" style={{ background: wp.color ?? "#008080" }} />;
 }
 
 function PreviewContent({ mode }: { mode: Mode }) {
@@ -119,32 +146,45 @@ export function ScreensaverWindow({
   window: win,
   notify,
   playSound,
+  wallpaper,
+  setWallpaper,
 }: WindowComponentProps) {
+  const [activeTab, setActiveTab] = useState("Background");
   const [selected, setSelected] = useState<Mode>("flying-windows");
   const [waitMinutes, setWaitMinutes] = useState(1);
   const [passwordProtected, setPasswordProtected] = useState(false);
+  const [selectedWallpaper, setSelectedWallpaper] = useState<WallpaperId>(() =>
+    isWallpaperId(wallpaper) ? wallpaper : "clouds",
+  );
 
   const apply = () => {
     setDefaultScreensaver?.(selected);
     playSound("click");
   };
 
+  const pickWallpaper = (id: WallpaperId) => {
+    setSelectedWallpaper(id);
+    setWallpaper?.(id);
+    playSound("click");
+  };
+
   return (
     <div className="flex h-full flex-col bg-[#c0c0c0] p-[10px] text-[11px]">
       {/* Tab strip */}
-      <div className="relative z-[2] flex gap-[2px] px-[2px]">
+      <div className="relative z-[2] flex gap-[5px] px-[2px]">
         {TABS.map((tab) => {
-          const active = tab === "Screen Saver";
+          const active = tab === activeTab;
           return (
-            <div
+            <button
               key={tab}
-              className={`px-[10px] text-[11px] ${active ? "relative z-[3] bg-[#c0c0c0] pt-[4px] pb-[5px]" : "mt-[2px] bg-[#c0c0c0] pt-[2px] pb-[3px]"}`}
+              onClick={() => setActiveTab(tab)}
+              className={`rounded-t-[3px] px-[12px] text-[11px] ${active ? "relative z-[3] bg-[#c0c0c0] pt-[4px] pb-[5px]" : "mt-[2px] bg-[#c0c0c0] pt-[2px] pb-[3px]"}`}
               style={{
-                boxShadow: "inset 1px 1px #ffffff, inset -1px -1px #808080, inset -2px 0 #404040",
+                boxShadow: "inset 1px 1px #ffffff, inset -1px -1px #808080",
               }}
             >
               {tab}
-            </div>
+            </button>
           );
         })}
       </div>
@@ -155,9 +195,49 @@ export function ScreensaverWindow({
         style={{ boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf" }}
       >
         <div className="mb-[12px] flex justify-center">
-          <MonitorPreview mode={selected} />
+          <MonitorPreview>
+            {activeTab === "Screen Saver" ? (
+              <PreviewContent mode={selected} />
+            ) : (
+              <WallpaperScreen id={selectedWallpaper} />
+            )}
+          </MonitorPreview>
         </div>
 
+        {activeTab === "Background" && (
+          <fieldset className="mb-[10px] flex min-h-0 flex-1 flex-col border border-[#808080] px-[10px] pb-[10px] pt-[2px]">
+            <legend className="px-[4px]">Wallpaper</legend>
+            <div
+              className="min-h-0 flex-1 overflow-y-auto bg-white p-[2px]"
+              style={{ boxShadow: "inset 1px 1px #0a0a0a, inset -1px -1px #dfdfdf" }}
+            >
+              {WALLPAPER_LIST.map((wp) => {
+                const active = wp.id === selectedWallpaper;
+                return (
+                  <button
+                    key={wp.id}
+                    onClick={() => pickWallpaper(wp.id)}
+                    className="flex w-full items-center gap-[8px] px-[6px] py-[3px] text-left text-[12px]"
+                    style={{ background: active ? "#000080" : "transparent", color: active ? "#ffffff" : "#000000" }}
+                  >
+                    <span
+                      className="h-[14px] w-[18px] shrink-0 border border-[#808080]"
+                      style={wallpaperSwatchStyle(wp)}
+                    />
+                    {wp.label}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+        )}
+
+        {(activeTab === "Appearance" || activeTab === "Settings") && (
+          <div className="mb-[10px] flex-1 text-[#404040]">This tab is just for show in Floppyy.</div>
+        )}
+
+        {activeTab === "Screen Saver" && (
+          <>
         {/* Screen Saver group */}
         <fieldset className="mb-[10px] border border-[#808080] px-[10px] pb-[10px] pt-[2px]">
           <legend className="px-[4px]">Screen Saver</legend>
@@ -236,6 +316,8 @@ export function ScreensaverWindow({
             </div>
           </div>
         </fieldset>
+          </>
+        )}
 
         {/* Action buttons */}
         <div className="mt-auto flex justify-end gap-[6px] pt-[10px]">

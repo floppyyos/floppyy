@@ -6,9 +6,41 @@ import { soundFiles, toneMap } from "@/lib/sounds";
 export function useSound() {
   const [enabled, setEnabled] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
   const audioContext = useRef<AudioContext | null>(null);
   const audioCache = useRef<Record<string, HTMLAudioElement>>({});
   const fadeTimers = useRef<Set<ReturnType<typeof setInterval>>>(new Set());
+
+  // Load persisted sound settings once on mount (client only).
+  useEffect(() => {
+    try {
+      const m = globalThis.localStorage.getItem("floppyy-muted");
+      if (m !== null) setMuted(m === "1");
+      const v = globalThis.localStorage.getItem("floppyy-volume");
+      if (v !== null) {
+        const n = Number(v);
+        if (!Number.isNaN(n)) setVolume(Math.min(1, Math.max(0, n)));
+      }
+    } catch {
+      /* localStorage unavailable */
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      globalThis.localStorage.setItem("floppyy-muted", muted ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [muted]);
+
+  useEffect(() => {
+    try {
+      globalThis.localStorage.setItem("floppyy-volume", String(volume));
+    } catch {
+      /* ignore */
+    }
+  }, [volume]);
 
   useEffect(() => {
     const enable = () => setEnabled(true);
@@ -24,7 +56,7 @@ export function useSound() {
     };
   }, []);
 
-  // Apply the mute state globally to every media element on the page,
+  // Apply mute + volume globally to every media element on the page,
   // including ones mounted later (Winamp, Media Player, games, etc.).
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -32,9 +64,11 @@ export function useSound() {
     const applyTo = (node: Node) => {
       if (node instanceof HTMLMediaElement) {
         node.muted = muted;
+        node.volume = volume;
       } else if (node instanceof Element) {
         node.querySelectorAll("audio, video").forEach((el) => {
           (el as HTMLMediaElement).muted = muted;
+          (el as HTMLMediaElement).volume = volume;
         });
       }
     };
@@ -44,6 +78,7 @@ export function useSound() {
     // Also cover the in-memory audio elements used for UI sound effects.
     Object.values(audioCache.current).forEach((audio) => {
       audio.muted = muted;
+      audio.volume = volume;
     });
 
     const observer = new MutationObserver((mutations) => {
@@ -53,7 +88,7 @@ export function useSound() {
     });
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
-  }, [muted]);
+  }, [muted, volume]);
 
   const playTone = useCallback((name: string) => {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -84,13 +119,13 @@ export function useSound() {
         audioCache.current[name] ??= new Audio(src);
         const audio = audioCache.current[name];
         audio.currentTime = 0;
-        audio.volume = 1;
+        audio.volume = volume;
         audio.play().catch(() => playTone(name));
         return;
       }
       playTone(name);
     },
-    [enabled, muted, playTone],
+    [enabled, muted, volume, playTone],
   );
 
   const fadeOutSound = useCallback(
@@ -115,7 +150,7 @@ export function useSound() {
     [],
   );
 
-  return { playSound, fadeOutSound, muted, setMuted, enabled };
+  return { playSound, fadeOutSound, muted, setMuted, volume, setVolume, enabled };
 }
 
 declare global {

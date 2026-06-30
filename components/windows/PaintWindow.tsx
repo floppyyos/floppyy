@@ -103,6 +103,23 @@ export function PaintWindow({ window: win }: WindowComponentProps) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, [bgColor, saveUndo]);
 
+  const saveImage = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    try {
+      const url = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "untitled.png";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setStatusText("Saved untitled.png to your downloads.");
+    } catch {
+      setStatusText("Could not save image.");
+    }
+  }, []);
+
   const getCanvasPos = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -485,7 +502,9 @@ export function PaintWindow({ window: win }: WindowComponentProps) {
       <div className="status-bar">
         <p className="status-bar-field flex-[2]">{statusText}</p>
         <p className="status-bar-field max-w-[120px] text-center">{coords}</p>
-        <p className="status-bar-field max-w-[100px] text-center">
+        <p className="status-bar-field max-w-[150px] text-center">
+          <button className="text-[10px] underline" onClick={saveImage} title="Save as PNG">Save</button>
+          {" | "}
           <button className="text-[10px] underline" onClick={undo} title="Undo (Ctrl+Z)">Undo</button>
           {" | "}
           <button className="text-[10px] underline" onClick={clearCanvas} title="Clear canvas">Clear</button>

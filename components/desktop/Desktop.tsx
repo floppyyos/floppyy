@@ -49,6 +49,7 @@ import { useSound } from "@/hooks/useSound";
 import { useWindowManager } from "@/hooks/useWindowManager";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 import { desktopIcons, WindowComponentProps, WindowId } from "@/lib/windows";
+import { DEFAULT_WALLPAPER, isWallpaperId, WALLPAPERS, WallpaperId, wallpaperStyle } from "@/lib/wallpapers";
 
 type MenuState = { x: number; y: number; target?: string } | null;
 type IconPosition = { x: number; y: number };
@@ -167,19 +168,57 @@ export default function Desktop() {
   const [errorPopup, setErrorPopup] = useState<null | { title: string; message: string }>(null);
   const [virusAlertOpen, setVirusAlertOpen] = useState(false);
   const [iconPositions, setIconPositions] = useState<Record<string, IconPosition>>(() => initialIconPositions());
+  const [wallpaper, setWallpaper] = useState<WallpaperId>(DEFAULT_WALLPAPER);
   const [binItems, setBinItems] = useState<Set<string>>(() => new Set());
   const [emptiedIcons, setEmptiedIcons] = useState<Set<string>>(() => new Set());
   const iconDrag = useRef<IconDrag>(null);
   const winampDrag = useRef<WindowDrag>(null);
   // Tracks rapid, consecutive "My Computer" opens for the crash easter egg.
   const computerSpamRef = useRef({ count: 0, last: 0 });
+  const iconPositionsLoaded = useRef(false);
   const desktopRef = useRef<HTMLDivElement>(null);
   const marqueeDrag = useRef<{ startX: number; startY: number; moved: boolean } | null>(null);
   const suppressClickClear = useRef(false);
   const wm = useWindowManager();
-  const { playSound, fadeOutSound, muted, setMuted } = useSound();
+  const { playSound, fadeOutSound, muted, setMuted, volume, setVolume } = useSound();
   const screensaver = useScreensaver(60000);
   useServiceWorker();
+
+  // Load persisted desktop icon layout + wallpaper once on mount.
+  useEffect(() => {
+    try {
+      const savedWallpaper = globalThis.localStorage.getItem("floppyy-wallpaper");
+      if (isWallpaperId(savedWallpaper)) setWallpaper(savedWallpaper);
+      const savedIcons = globalThis.localStorage.getItem("floppyy-icon-positions");
+      if (savedIcons) {
+        const parsed = JSON.parse(savedIcons) as Record<string, IconPosition>;
+        if (parsed && typeof parsed === "object") {
+          setIconPositions((current) => ({ ...current, ...parsed }));
+        }
+      }
+    } catch {
+      /* ignore corrupt storage */
+    }
+    iconPositionsLoaded.current = true;
+  }, []);
+
+  // Persist wallpaper + icon layout when they change (after initial load).
+  useEffect(() => {
+    try {
+      globalThis.localStorage.setItem("floppyy-wallpaper", wallpaper);
+    } catch {
+      /* ignore */
+    }
+  }, [wallpaper]);
+
+  useEffect(() => {
+    if (!iconPositionsLoaded.current) return;
+    try {
+      globalThis.localStorage.setItem("floppyy-icon-positions", JSON.stringify(iconPositions));
+    } catch {
+      /* ignore */
+    }
+  }, [iconPositions]);
 
   const notify = useCallback(
     (message: string) => {
@@ -480,11 +519,13 @@ export default function Desktop() {
   }, []);
 
   const showProperties = useCallback(() => {
-    if (contextMenu?.target) {
-      const icon = desktopIcons.find((item) => item.id === contextMenu.target);
-      notify(`${icon?.label ?? "Shortcut"} properties are not installed.`);
+    const target = contextMenu?.target;
+    // Both the desktop and My Computer open Display Properties (Win98 style).
+    if (!target || target === "computer") {
+      openWindow("screensaver");
     } else {
-      openWindow("settings");
+      const icon = desktopIcons.find((item) => item.id === target);
+      notify(`${icon?.label ?? "Shortcut"} properties are not installed.`);
     }
     setContextMenu(null);
   }, [contextMenu, notify, openWindow]);
@@ -646,10 +687,14 @@ export default function Desktop() {
       startScreensaver: screensaver.start,
       setDefaultScreensaver: screensaver.setMode,
       crashSystem,
+      wallpaper,
+      setWallpaper: (id: string) => {
+        if (isWallpaperId(id)) setWallpaper(id);
+      },
       internetConnected: dialupDone,
       muted,
     }),
-    [notify, openWindow, playSound, fadeOutSound, screensaver.start, screensaver.setMode, crashSystem, wm, dialupDone, muted],
+    [notify, openWindow, playSound, fadeOutSound, screensaver.start, screensaver.setMode, crashSystem, wallpaper, wm, dialupDone, muted],
   );
 
   if (!booted) {
@@ -671,9 +716,14 @@ export default function Desktop() {
     !dialupDone &&
     wm.windows.some((item) => (item.id === "ie-browser" || item.id === "netscape") && !item.minimized);
 
+  const activeWallpaper = WALLPAPERS[wallpaper] ?? WALLPAPERS[DEFAULT_WALLPAPER];
+  const wallpaperClass = isSafeMode ? "" : activeWallpaper.className ?? "";
+  const desktopWallpaperStyle = !isSafeMode ? wallpaperStyle(activeWallpaper) : undefined;
+
   return (
     <main
-      className={`h-screen w-screen overflow-hidden pb-[28px] ${isSafeMode ? "bg-[#008080]" : "floppyy-wallpaper"}`}
+      className={`h-screen w-screen overflow-hidden pb-[28px] ${isSafeMode ? "bg-[#008080]" : wallpaperClass}`}
+      style={desktopWallpaperStyle}
       onClick={() => {
         if (suppressClickClear.current) {
           suppressClickClear.current = false;
@@ -776,7 +826,7 @@ export default function Desktop() {
               }}
             >
               <div
-                className="relative"
+                className="relative touch-none"
                 onPointerDown={(event) => {
                   const target = event.target as HTMLElement;
                   if (target.closest("button,input")) return;
@@ -868,6 +918,8 @@ export default function Desktop() {
         startOpen={startOpen}
         internetConnected={dialupDone}
         muted={muted}
+        volume={volume}
+        onVolumeChange={setVolume}
         onStart={() => {
           setStartOpen((value) => !value);
           playSound("click");

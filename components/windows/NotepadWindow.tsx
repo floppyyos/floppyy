@@ -75,8 +75,23 @@ export function NotepadWindow({ window: win, closeWindow, notify, playSound }: W
           break;
         }
         case "save": {
-          notify("Save is not available in browser.");
-          playSound("error");
+          try {
+            const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const name = (win.title || "Untitled").replace(/\s*-\s*Notepad$/i, "").trim() || "Untitled";
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = name.toLowerCase().endsWith(".txt") ? name : `${name}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+            playSound("click");
+            notify("Saved to your downloads.");
+          } catch {
+            playSound("error");
+            notify("Save failed.");
+          }
           break;
         }
         case "exit": {

@@ -81,6 +81,7 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
           <li><b>Delete things</b> — drag a desktop icon onto the Recycle Bin.</li>
           <li><b>Check the date &amp; time</b> — double-click the clock in the taskbar tray.</li>
           <li><b>Right-click the desktop</b> for arrange, refresh and properties.</li>
+          <li><b>Change the wallpaper</b> — right-click the desktop (or My Computer) → Properties → Background, and pick from the classic Windows 98 wallpapers.</li>
           <li><b>Go online</b> — open Dial-Up Networking, connect, then browse with Internet Explorer or Netscape.</li>
         </ul>
       ),
@@ -164,7 +165,7 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
       body: (
         <div className="space-y-[10px]">
           <p><b>Floppyy</b> — the web you grew up on.</p>
-          <p>Version 3.0</p>
+          <p>Version 3.1</p>
           <p>
             Built with a lot of nostalgia. For the full story and credits, open{" "}
             <button className="text-[#0000ff] underline" onClick={() => openWindow("about", "welcome")}>

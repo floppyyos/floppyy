@@ -5,15 +5,32 @@ import { useEffect, useMemo, useState } from "react";
 import { GameMenuBar } from "./GameChrome";
 import { Win98ErrorDialog } from "@/components/windows/Win98ErrorDialog";
 
-const cols = 16;
-const rows = 16;
-const totalMines = 40;
-const totalCells = cols * rows;
 const cellSize = 16;
+
+type Difficulty = "beginner" | "intermediate" | "expert";
+type Config = { cols: number; rows: number; mines: number };
+
+const DIFFICULTIES: Record<Difficulty, Config> = {
+  beginner: { cols: 9, rows: 9, mines: 10 },
+  intermediate: { cols: 16, rows: 16, mines: 40 },
+  expert: { cols: 30, rows: 16, mines: 99 },
+};
+
+const DIFFICULTY_LABEL: Record<Difficulty, string> = {
+  beginner: "Beginner",
+  intermediate: "Intermediate",
+  expert: "Expert",
+};
+
+const emptyBest = (): Record<Difficulty, number | null> => ({
+  beginner: null,
+  intermediate: null,
+  expert: null,
+});
 
 type Face = "happy" | "pressed" | "lost" | "won";
 
-function neighbors(index: number) {
+function neighbors(index: number, cols: number, rows: number): number[] {
   const x = index % cols;
   const y = Math.floor(index / cols);
   const result: number[] = [];
@@ -29,22 +46,30 @@ function neighbors(index: number) {
 }
 
 /** Place mines randomly, never on an excluded cell (first-click safety). */
-function placeMines(exclude: Set<number>): Set<number> {
+function placeMines(exclude: Set<number>, cols: number, rows: number, mineCount: number): Set<number> {
+  const total = cols * rows;
   const mines = new Set<number>();
-  while (mines.size < totalMines) {
-    const cell = Math.floor(Math.random() * totalCells);
+  while (mines.size < mineCount) {
+    const cell = Math.floor(Math.random() * total);
     if (!exclude.has(cell)) mines.add(cell);
   }
   return mines;
 }
 
-function computeCounts(mines: Set<number>): number[] {
-  return Array.from({ length: totalCells }, (_, index) =>
-    neighbors(index).filter((neighbor) => mines.has(neighbor)).length,
+function computeCounts(mines: Set<number>, cols: number, rows: number): number[] {
+  return Array.from({ length: cols * rows }, (_, index) =>
+    neighbors(index, cols, rows).filter((neighbor) => mines.has(neighbor)).length,
   );
 }
 
-function revealEmpty(start: number, counts: number[], mines: Set<number>, current: Set<number>) {
+function revealEmpty(
+  start: number,
+  counts: number[],
+  mines: Set<number>,
+  current: Set<number>,
+  cols: number,
+  rows: number,
+) {
   const next = new Set(current);
   const queue = [start];
 
@@ -54,7 +79,7 @@ function revealEmpty(start: number, counts: number[], mines: Set<number>, curren
     next.add(cell);
 
     if (counts[cell] === 0) {
-      neighbors(cell).forEach((neighbor) => {
+      neighbors(cell, cols, rows).forEach((neighbor) => {
         if (!next.has(neighbor)) queue.push(neighbor);
       });
     }
@@ -99,6 +124,8 @@ function FaceButton({ face, onClick }: { face: Face; onClick: () => void }) {
 }
 
 export function Minesweeper({ playSound }: { playSound: (name: string) => void }) {
+  const [difficulty, setDifficulty] = useState<Difficulty>("intermediate");
+  const [bestTimes, setBestTimes] = useState<Record<Difficulty, number | null>>(emptyBest);
   const [mines, setMines] = useState<Set<number>>(new Set());
   const [open, setOpen] = useState<Set<number>>(new Set());
   const [flags, setFlags] = useState<Set<number>>(new Set());
@@ -111,9 +138,25 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
   const [face, setFace] = useState<Face>("happy");
   const [prankError, setPrankError] = useState(false);
 
-  const counts = useMemo(() => computeCounts(mines), [mines]);
+  const { cols, rows, mines: totalMines } = DIFFICULTIES[difficulty];
+  const totalCells = cols * rows;
+
+  const counts = useMemo(() => computeCounts(mines, cols, rows), [mines, cols, rows]);
   const won = !lost && started && open.size >= totalCells - totalMines;
   const elapsed = Math.min(999, Math.floor((now - startedAt) / 1000));
+
+  // Load best times once.
+  useEffect(() => {
+    try {
+      const saved = globalThis.localStorage.getItem("floppyy-mines-best");
+      if (saved) {
+        const parsed = JSON.parse(saved) as Partial<Record<Difficulty, number | null>>;
+        setBestTimes((prev) => ({ ...prev, ...parsed }));
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   useEffect(() => {
     if (!started || lost || won) return;
@@ -122,13 +165,41 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
   }, [started, lost, won]);
 
   useEffect(() => {
-    if (won) {
-      setFace("won");
-      playSound("notification");
-    }
-  }, [won, playSound]);
+    if (!won) return;
+    setFace("won");
+    playSound("notification");
+    const finalTime = Math.max(1, Math.floor((Date.now() - startedAt) / 1000));
+    setBestTimes((prev) => {
+      const current = prev[difficulty];
+      if (current !== null && current <= finalTime) return prev;
+      const next = { ...prev, [difficulty]: finalTime };
+      try {
+        globalThis.localStorage.setItem("floppyy-mines-best", JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, [won, playSound, difficulty, startedAt]);
 
   const reset = () => {
+    const nextNow = Date.now();
+    setMines(new Set());
+    setOpen(new Set());
+    setFlags(new Set());
+    setQuestions(new Set());
+    setLost(false);
+    setDeathCell(null);
+    setStarted(false);
+    setStartedAt(nextNow);
+    setNow(nextNow);
+    setFace("happy");
+    setPrankError(false);
+    playSound("click");
+  };
+
+  const changeDifficulty = (level: Difficulty) => {
+    setDifficulty(level);
     const nextNow = Date.now();
     setMines(new Set());
     setOpen(new Set());
@@ -166,7 +237,7 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
     if (open.has(index)) {
       const count = counts[index];
       if (count <= 0) return;
-      const nbrs = neighbors(index);
+      const nbrs = neighbors(index, cols, rows);
       const flaggedCount = nbrs.filter((n) => flags.has(n)).length;
       if (flaggedCount !== count) return;
 
@@ -177,7 +248,7 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
         return;
       }
       let next = open;
-      for (const n of toReveal) next = revealEmpty(n, counts, mines, next);
+      for (const n of toReveal) next = revealEmpty(n, counts, mines, next, cols, rows);
       if (next !== open) {
         setOpen(next);
         playSound("click");
@@ -188,8 +259,8 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
     // First click: generate mines avoiding this cell and its neighbors
     let activeMines = mines;
     if (!started) {
-      const exclude = new Set<number>([index, ...neighbors(index)]);
-      activeMines = placeMines(exclude);
+      const exclude = new Set<number>([index, ...neighbors(index, cols, rows)]);
+      activeMines = placeMines(exclude, cols, rows, totalMines);
       setMines(activeMines);
       setStarted(true);
       const t = Date.now();
@@ -202,8 +273,8 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
       return;
     }
 
-    const activeCounts = computeCounts(activeMines);
-    setOpen((current) => revealEmpty(index, activeCounts, activeMines, current));
+    const activeCounts = computeCounts(activeMines, cols, rows);
+    setOpen((current) => revealEmpty(index, activeCounts, activeMines, current, cols, rows));
     setFace("happy");
     playSound("click");
   };
@@ -251,6 +322,21 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
   return (
     <div className="inline-flex flex-col bg-[#c0c0c0] text-[11px]">
       <GameMenuBar items={[{ label: "Game", onClick: reset }, { label: "Help", onClick: () => playSound("click") }]} />
+
+      <div className="flex items-center gap-[3px] px-[6px] py-[3px] text-[10px]">
+        {(["beginner", "intermediate", "expert"] as Difficulty[]).map((level) => (
+          <button
+            key={level}
+            className={`win-button px-[6px] py-0 ${difficulty === level ? "active" : ""}`}
+            onClick={() => changeDifficulty(level)}
+          >
+            {DIFFICULTY_LABEL[level]}
+          </button>
+        ))}
+        <span className="ml-auto tabular-nums">
+          Best: {bestTimes[difficulty] !== null ? `${bestTimes[difficulty]}s` : "—"}
+        </span>
+      </div>
 
       <div
         className="bg-[#c0c0c0] p-[6px]"

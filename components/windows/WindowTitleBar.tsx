@@ -19,7 +19,7 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
 
   return (
     <div
-      className={`flex h-[20px] items-center px-[2px] cursor-move select-none ${
+      className={`flex h-[20px] items-center px-[2px] cursor-move select-none touch-none ${
         active
           ? "bg-gradient-to-r from-[#000080] to-[#1084d0]"
           : "bg-gradient-to-r from-[#808080] to-[#b5b5b5]"
@@ -27,7 +27,10 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
       onPointerDown={onPointerDown}
     >
       {/* Icon + Title */}
-      <div className="flex flex-1 items-center gap-[3px] min-w-0">
+      <div
+        className="flex flex-1 items-center gap-[3px] min-w-0"
+        onDoubleClick={onMaximize}
+      >
         <FloppyyIcon type={window.icon} size={14} />
         <span className="truncate text-[11px] font-bold text-white">{window.title}</span>
       </div>
