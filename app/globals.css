@@ -18,8 +18,9 @@
   --desktop: #008080;
   --font-floppyy: "W95FA", "Pixelated MS Sans Serif", "MS Sans Serif", "Tahoma", sans-serif;
   --font-shutdown: var(--font-pixelify), "Pixelify Sans", sans-serif;
-  --cursor-default: url("/cursor-small.png") 0 0, default;
-  --cursor-loading: url("/cursor-load-small.png") 0 0, wait;
+  --cursor-default: url("/icons/cursor-small.png") 0 0, default;
+  --cursor-loading: url("/icons/cursor-load-small.png") 0 0, wait;
+  --cursor-pointer: url("/icons/cursor-pointer-small.png") 0 0, pointer;
 }
 
 * {
@@ -55,13 +56,13 @@ label,
 select,
 summary,
 [role="button"],
-.cursor-default,
-.cursor-pointer {
+.cursor-default {
   cursor: var(--cursor-default) !important;
 }
 
-.cursor-hand {
-  cursor: pointer !important;
+.cursor-hand,
+.cursor-pointer {
+  cursor: var(--cursor-pointer) !important;
 }
 
 input,
@@ -291,7 +292,7 @@ button {
 
 .floppyy-wallpaper {
   background-color: #9fc4dc;
-  background-image: url("/clouds.jpg");
+  background-image: url("/wallpapers/clouds.jpg");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;

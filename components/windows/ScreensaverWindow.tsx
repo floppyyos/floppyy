@@ -46,7 +46,7 @@ function WallpaperScreen({ id }: { id: WallpaperId }) {
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: "url('/clouds.jpg')",
+          backgroundImage: "url('/wallpapers/clouds.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}

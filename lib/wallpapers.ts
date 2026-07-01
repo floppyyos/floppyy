@@ -67,7 +67,7 @@ export function wallpaperStyle(wp: Wallpaper): CSSProperties | undefined {
 /** Small swatch style for the wallpaper picker list. */
 export function wallpaperSwatchStyle(wp: Wallpaper): CSSProperties {
   if (wp.className === "floppyy-wallpaper") {
-    return { backgroundImage: "url('/clouds.jpg')", backgroundSize: "cover", backgroundPosition: "center" };
+    return { backgroundImage: "url('/wallpapers/clouds.jpg')", backgroundSize: "cover", backgroundPosition: "center" };
   }
   if (wp.image) {
     return { backgroundImage: `url('${wp.image}')`, backgroundSize: "cover", backgroundPosition: "center" };

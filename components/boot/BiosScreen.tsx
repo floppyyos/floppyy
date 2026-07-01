@@ -199,7 +199,7 @@ export function BiosScreen({ onComplete }: BiosScreenProps) {
     >
       {(phase === "bios" || phase === "booting") && (
         <img
-          src="/Energy.png"
+          src="/misc/Energy.png"
           alt=""
           aria-hidden="true"
           className="pointer-events-none absolute right-[16px] top-[10px] h-auto"

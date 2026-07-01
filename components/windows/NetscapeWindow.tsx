@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 import { ToolbarIcon } from "./ToolbarIcon";
 
@@ -44,6 +44,20 @@ export function NetscapeWindow({ playSound, internetConnected, crashSystem }: Wi
   const [historyIndex, setHistoryIndex] = useState(0);
   const [loading, setLoading] = useState(Boolean(internetConnected));
   const [statusText, setStatusText] = useState(internetConnected ? "Document: Loading..." : "Document: Cannot find server");
+  const [progress, setProgress] = useState(0);
+
+  // Animate the classic status-bar progress meter while a page loads.
+  useEffect(() => {
+    if (!loading) {
+      setProgress(0);
+      return;
+    }
+    setProgress(8);
+    const id = setInterval(() => {
+      setProgress((p) => (p >= 90 ? p : p + Math.max(1, Math.round((90 - p) * 0.12))));
+    }, 180);
+    return () => clearInterval(id);
+  }, [loading]);
 
   const navigate = (url: string) => {
     if (!internetConnected) {
@@ -234,8 +248,39 @@ export function NetscapeWindow({ playSound, internetConnected, crashSystem }: Wi
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center h-[20px] px-2 border-t border-[#808080] bg-[#c0c0c0]">
-        <span className="text-[10px]">{statusText}</span>
+      <div className="flex items-center h-[20px] gap-[2px] border-t border-[#dfdfdf] bg-[#c0c0c0] pl-2 pr-[2px]">
+        <span className="text-[10px] flex-1 min-w-0 truncate">{statusText}</span>
+
+        {/* Loading progress meter */}
+        <div className="flex h-[16px] w-[110px] items-center border border-[#808080] border-t-[#404040] border-l-[#404040] bg-[#c0c0c0] px-[2px]">
+          <div className="flex h-[10px] w-full gap-[1px] overflow-hidden">
+            {Array.from({ length: 16 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-full flex-1"
+                style={{
+                  background: loading && progress >= ((i + 1) / 16) * 100 ? "#000080" : "transparent",
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Zone indicators */}
+        <div className="h-[16px] w-[26px] border border-[#808080] border-t-[#404040] border-l-[#404040] bg-[#c0c0c0]" />
+        <div className="h-[16px] w-[26px] border border-[#808080] border-t-[#404040] border-l-[#404040] bg-[#c0c0c0]" />
+
+        <div className="flex h-[16px] items-center gap-1 border border-[#808080] border-t-[#404040] border-l-[#404040] bg-[#c0c0c0] px-2">
+          <img
+            src="/icons/world.png"
+            alt=""
+            width={14}
+            height={14}
+            style={{ imageRendering: "pixelated" }}
+            draggable={false}
+          />
+          <span className="text-[10px]">{internetConnected ? "Internet" : "Offline"}</span>
+        </div>
       </div>
     </div>
   );

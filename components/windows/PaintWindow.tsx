@@ -78,7 +78,7 @@ export function PaintWindow({ window: win }: WindowComponentProps) {
       undoStack.current = [ctx.getImageData(0, 0, canvas.width, canvas.height)];
       setStatusText("Clouds.bmp");
     };
-    image.src = "/clouds-painted.png";
+    image.src = "/misc/clouds-painted.png";
   }, [win.payload]);
 
   const undo = useCallback(() => {

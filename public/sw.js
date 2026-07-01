@@ -4,7 +4,7 @@ const OFFLINE_URLS = [
   "/",
   "/favicon.ico",
   "/favicon.png",
-  "/clouds.jpg",
+  "/wallpapers/clouds.jpg",
 ];
 
 self.addEventListener("install", (event) => {

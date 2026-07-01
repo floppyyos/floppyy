@@ -59,7 +59,7 @@ export function ShutDownOverlay({ safe, onRestart, onShutdown, onCancel }: { saf
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: "url('/clouds.jpg')",
+            backgroundImage: "url('/wallpapers/clouds.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             filter: "brightness(0.2)",
@@ -121,7 +121,7 @@ export function ShutDownOverlay({ safe, onRestart, onShutdown, onCancel }: { saf
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: "url('/clouds.jpg')",
+          backgroundImage: "url('/wallpapers/clouds.jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           filter: "brightness(0.3)",

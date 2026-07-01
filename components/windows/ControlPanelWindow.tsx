@@ -13,7 +13,7 @@ type ControlItem = {
 const controlItems: ControlItem[] = [
   { id: "display", label: "Display", icon: "monitor_windows", description: "Change wallpaper, appearance, and screen saver settings." },
   { id: "sounds", label: "Sounds", icon: "speaker", description: "Assign sounds to Windows and program events." },
-  { id: "mouse", label: "Mouse", icon: "computer", description: "Change pointer speed, buttons, and cursor scheme." },
+  { id: "mouse", label: "Mouse", icon: "mouse_ms", description: "Change pointer speed, buttons, and cursor scheme." },
   { id: "modems", label: "Modems", icon: "dialup", description: "Install and configure dial-up modems." },
   { id: "network", label: "Network", icon: "network", description: "Configure network components and identification." },
   { id: "add-remove", label: "Add/Remove Programs", icon: "gears", description: "Install or remove programs from this computer." },
@@ -28,7 +28,7 @@ export function ControlPanelWindow({ notify, playSound, openWindow }: WindowComp
   const openApplet = (item: ControlItem) => {
     playSound("open");
     if (item.id === "display") {
-      openWindow("settings");
+      openWindow("screensaver");
       return;
     }
     if (item.id === "sounds") {

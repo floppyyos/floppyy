@@ -26,7 +26,7 @@ export function AboutWindow({ window, closeWindow, notify, playSound }: WindowCo
       <div
         className="relative h-[100px] shrink-0 overflow-hidden border-b border-[#d7d7d7]"
         style={{
-          backgroundImage: "url('/clouds.jpg')",
+          backgroundImage: "url('/wallpapers/clouds.jpg')",
           backgroundPosition: "center 36%",
           backgroundSize: "cover",
         }}
