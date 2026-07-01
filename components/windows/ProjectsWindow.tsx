@@ -43,9 +43,7 @@ export function ProjectsWindow({ openWindow, notify }: WindowComponentProps) {
             ))}
           </div>
           <div className="mt-auto flex items-center gap-4 border-t border-[#dfdfdf] px-3 py-4">
-            <a href="https://github.com/madeburo" target="_blank" rel="noopener noreferrer" className="shrink-0 cursor-hand">
               <img src="/misc/author.png" alt="Umid" className="h-[40px] w-[40px] rounded-sm" style={{ imageRendering: "pixelated" }} />
-            </a>
             <div className="flex-1 text-[11px] text-[#404040]">
               <p className="mb-1 font-bold text-black">Hi, I&apos;m Umid</p>
               <p>Software engineer and open source enthusiast. Feel free to explore, fork or contribute.</p>

@@ -115,7 +115,7 @@ function BlueScreen() {
           00010E36. The current application will be terminated.
         </p>
 
-        <p className="mb-2">*  You opened My Computer one too many times.</p>
+        <p className="mb-2">*  A fatal error has occurred. The system cannot handle this much enthusiasm.</p>
         <p className="mb-2">*  Press any key to terminate the current application.</p>
         <p className="mb-4">
           *  Press CTRL+ALT+DEL again to restart your computer. You will lose any
