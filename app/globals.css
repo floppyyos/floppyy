@@ -98,6 +98,67 @@ button {
   padding: 0;
 }
 
+/* Windows 98 checkboxes & radio buttons */
+input[type="checkbox"],
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  background: #ffffff;
+  cursor: var(--cursor-default) !important;
+  image-rendering: pixelated;
+  /* Classic sunken 3D field border */
+  box-shadow:
+    inset 1px 1px #808080,
+    inset -1px -1px #ffffff,
+    inset 2px 2px #0a0a0a,
+    inset -2px -2px #dfdfdf;
+}
+
+input[type="radio"] {
+  border-radius: 50%;
+}
+
+/* Pixel checkmark */
+input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='7'%20height='8'%20shape-rendering='crispEdges'%3E%3Cg%20fill='black'%3E%3Crect%20x='0'%20y='3'%20width='1'%20height='2'/%3E%3Crect%20x='1'%20y='4'%20width='1'%20height='2'/%3E%3Crect%20x='2'%20y='5'%20width='1'%20height='2'/%3E%3Crect%20x='3'%20y='4'%20width='1'%20height='2'/%3E%3Crect%20x='4'%20y='3'%20width='1'%20height='2'/%3E%3Crect%20x='5'%20y='2'%20width='1'%20height='2'/%3E%3Crect%20x='6'%20y='1'%20width='1'%20height='2'/%3E%3C/g%3E%3C/svg%3E") no-repeat center;
+}
+
+/* Radio dot */
+input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #0a0a0a;
+}
+
+/* Disabled state: grey face + grey mark */
+input[type="checkbox"]:disabled,
+input[type="radio"]:disabled {
+  background: #c0c0c0;
+}
+
+input[type="checkbox"]:disabled:checked::after {
+  background: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='7'%20height='8'%20shape-rendering='crispEdges'%3E%3Cg%20fill='%23808080'%3E%3Crect%20x='0'%20y='3'%20width='1'%20height='2'/%3E%3Crect%20x='1'%20y='4'%20width='1'%20height='2'/%3E%3Crect%20x='2'%20y='5'%20width='1'%20height='2'/%3E%3Crect%20x='3'%20y='4'%20width='1'%20height='2'/%3E%3Crect%20x='4'%20y='3'%20width='1'%20height='2'/%3E%3Crect%20x='5'%20y='2'%20width='1'%20height='2'/%3E%3Crect%20x='6'%20y='1'%20width='1'%20height='2'/%3E%3C/g%3E%3C/svg%3E") no-repeat center;
+}
+
+input[type="radio"]:disabled:checked::after {
+  background: #808080;
+}
+
 /* Floppyy beveled panel */
 .win-bevel {
   background: #c0c0c0;

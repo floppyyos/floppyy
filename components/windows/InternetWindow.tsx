@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
+import { Win98Select } from "@/components/ui/Win98Select";
 
 type ConnectionPhase = "idle" | "dialing" | "verifying" | "connected";
 
@@ -207,22 +208,16 @@ export function InternetWindow({
           </div>
           <div className="mt-[10px] grid grid-cols-[84px_1fr] items-center gap-[8px]">
             <span>Maximum speed:</span>
-            <select
+            <Win98Select
+              className="w-full"
               value={maxSpeed}
-              onChange={(event) => {
-                setMaxSpeed(event.target.value);
+              onChange={(v) => {
+                setMaxSpeed(v);
                 playSound("click");
               }}
-              className="h-[22px] w-full bg-white px-[3px] text-[11px]"
-              style={{ boxShadow: "inset -1px -1px #ffffff, inset 1px 1px #808080" }}
-              aria-label="Maximum speed"
-            >
-              {MAX_SPEEDS.map((speed) => (
-                <option key={speed} value={speed}>
-                  {speed}
-                </option>
-              ))}
-            </select>
+              ariaLabel="Maximum speed"
+              options={MAX_SPEEDS.map((speed) => ({ value: speed, label: speed }))}
+            />
           </div>
           <div className="mt-[9px] flex justify-end">
             <button className="win-button min-w-[102px]">Configure...</button>

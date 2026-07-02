@@ -26,6 +26,11 @@ const DEFAULT_TRACKS: WinampTrack[] = [
   { title: "Wannabe", artist: "Spice Girls", duration: 0, file: "/winamp/SpiceGirls.mp3" },
   { title: "The Kids Aren't Alright", artist: "The Offspring", duration: 0, file: "/winamp/TheOffspring.mp3" },
   { title: "Its My Life", artist: "Dr. Alban", duration: 0, file: "/winamp/DrAlban.mp3" },
+  { title: "The Bad Touch", artist: "Bloodhound Gang", duration: 0, file: "/winamp/BloodhoundGang.mp3" },
+  { title: "The Rockafeller Skank", artist: "Fatboy Slim", duration: 0, file: "/winamp/FatboySlim.mp3" },
+  { title: "Thunderstruck", artist: "AC/DC", duration: 0, file: "/winamp/ACDC.mp3" },
+  { title: "It's Tricky", artist: "Run DMC", duration: 0, file: "/winamp/RunDMC.mp3" },
+  { title: "Ice Ice Baby", artist: "Vanilla Ice", duration: 0, file: "/winamp/VanillaIce.mp3" },
   { title: "Never Gonna Give You Up", artist: "Rick Astley", duration: 0, file: "/winamp/RickAstley.mp3" },
 ];
 

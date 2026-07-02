@@ -31,9 +31,9 @@ Just a small machine for good old internet memories.
 - BIOS POST → boot sequence → desktop
 - Draggable desktop icons with grid snapping
 - Drag icons onto the Recycle Bin to delete them (with empty/full bin states and Empty Recycle Bin)
-- Right-click context menu (Arrange Icons, Line Up, Refresh, Properties, Empty Recycle Bin)
+- Right-click desktop context menu with Windows 98 style fly-out submenus (Active Desktop, Arrange Icons, Line Up, Refresh, New, Properties, Empty Recycle Bin)
 - Window management — open, close, minimize, maximize, drag, resize, z-order
-- Start Menu with program list and Shut Down
+- Start Menu with programs, Settings (Control Panel, Display Settings, Windows Update), and Shut Down
 - Taskbar with Start button, quick launch, window buttons, and a live system tray clock (double-click to open Date/Time)
 - Keyboard shortcuts — Ctrl+Esc (Start), Alt+F4 (close), Enter (open), Ctrl+Alt+Backspace (restart)
 

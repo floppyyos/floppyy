@@ -63,7 +63,6 @@ export function DocumentsWindow({ notify, openWindow, playSound }: WindowCompone
 
     if (item.action === "image") {
       openWindow("paint", "clouds");
-      notify("Clouds.bmp opened in Paint.");
       return;
     }
 

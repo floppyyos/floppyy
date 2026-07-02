@@ -7,9 +7,10 @@ type Props = {
   onOpen: (id: WindowId, payload?: string) => void;
   onScreensaver: () => void;
   onShutdown: () => void;
+  onNotify: (message: string, options?: { icon?: string; titleIcon?: string; persistent?: boolean }) => void;
 };
 
-export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
+export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props) {
   const programs: Array<[WindowId, string, string]> = [
     ["internet", "Dial-Up Networking", "dialup"],
     ["music", "Winamp", "winamp"],
@@ -167,7 +168,7 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
               <FloppyyIcon type="control-panel" size={16} />
               <span>Control Panel</span>
             </button>
-            <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("settings")}>
+            <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("screensaver", "settings")}>
               <FloppyyIcon type="gears" size={16} />
               <span>Display Settings</span>
             </button>
@@ -178,6 +179,19 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown }: Props) {
             <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={onScreensaver}>
               <FloppyyIcon type="monitor_windows" size={16} />
               <span>Screensaver</span>
+            </button>
+            <div className="mx-[3px] my-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
+            <button
+              className="menu-command flex items-center gap-[8px] py-[3px]"
+              onClick={() =>
+                onNotify(
+                  "Windows Update: No updates required. This is already the most nostalgic OS ever made.",
+                  { icon: "/favicon.png", titleIcon: "/icons/windows_update.png", persistent: true },
+                )
+              }
+            >
+              <img src="/icons/windows_update.png" alt="" width={16} height={16} style={{ imageRendering: "pixelated" }} draggable={false} />
+              <span>Windows Update...</span>
             </button>
           </div>
         </div>

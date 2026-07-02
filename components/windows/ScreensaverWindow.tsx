@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 import { WALLPAPER_LIST, WALLPAPERS, type WallpaperId, isWallpaperId, wallpaperSwatchStyle } from "@/lib/wallpapers";
+import { Win98Select } from "@/components/ui/Win98Select";
 
 type Mode = "pipes" | "stars" | "maze" | "mystify" | "flying-windows";
 
@@ -14,7 +15,15 @@ const OPTIONS: { value: Mode; label: string }[] = [
   { value: "mystify", label: "Mystify Your Mind" },
 ];
 
-const TABS = ["Background", "Screen Saver"];
+const TABS = ["Background", "Screen Saver", "Settings"];
+
+const RESOLUTIONS = [
+  "640 by 480 pixels",
+  "800 by 600 pixels",
+  "1024 by 768 pixels",
+  "1152 by 864 pixels",
+  "1280 by 1024 pixels",
+];
 
 function MonitorPreview({ children }: { children: ReactNode }) {
   const bevelRaised =
@@ -149,10 +158,14 @@ export function ScreensaverWindow({
   wallpaper,
   setWallpaper,
 }: WindowComponentProps) {
-  const [activeTab, setActiveTab] = useState("Background");
+  const [activeTab, setActiveTab] = useState(() =>
+    win.payload === "settings" ? "Settings" : win.payload === "screensaver" ? "Screen Saver" : "Background",
+  );
   const [selected, setSelected] = useState<Mode>("flying-windows");
   const [waitMinutes, setWaitMinutes] = useState(1);
   const [passwordProtected, setPasswordProtected] = useState(false);
+  const [colorDepth, setColorDepth] = useState("High Color (16 bit)");
+  const [resIndex, setResIndex] = useState(1);
   const [selectedWallpaper, setSelectedWallpaper] = useState<WallpaperId>(() =>
     isWallpaperId(wallpaper) ? wallpaper : "clouds",
   );
@@ -238,17 +251,13 @@ export function ScreensaverWindow({
         <fieldset className="mb-[10px] border border-[#808080] px-[10px] pb-[10px] pt-[2px]">
           <legend className="px-[4px]">Screen Saver</legend>
           <div className="flex items-center gap-[6px]">
-            <select
+            <Win98Select
               value={selected}
-              onChange={(event) => setSelected(event.target.value as Mode)}
-              className="field-border h-[21px] flex-1 bg-white px-[4px] text-[11px] text-black"
-            >
-              {OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setSelected(v as Mode)}
+              options={OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+              ariaLabel="Screen saver"
+              className="flex-1"
+            />
             <button
               className="win-button min-w-[72px]"
               onClick={() => notify("Screen saver settings are not available.")}
@@ -315,6 +324,60 @@ export function ScreensaverWindow({
           </>
         )}
 
+        {activeTab === "Settings" && (
+          <>
+            <div className="mb-[10px] text-[11px]">
+              <div>Display:</div>
+              <div className="font-bold">Default Monitor on S3 Trio32/64 PCI (732/764)</div>
+            </div>
+            <div className="flex gap-[12px]">
+              <fieldset className="flex-1 border border-[#808080] px-[10px] pb-[10px] pt-[2px]">
+                <legend className="px-[4px]">Colors</legend>
+                <Win98Select
+                  value={colorDepth}
+                  onChange={setColorDepth}
+                  ariaLabel="Colors"
+                  className="w-full"
+                  options={[
+                    { value: "16 Color", label: "16 Color" },
+                    { value: "256 Color", label: "256 Color" },
+                    { value: "High Color (16 bit)", label: "High Color (16 bit)" },
+                    { value: "True Color (24 bit)", label: "True Color (24 bit)" },
+                  ]}
+                />
+                <div
+                  className="mt-[10px] h-[12px] w-full border border-[#808080]"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #000000, #7f0000, #ff0000, #ff7f00, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ffffff)",
+                  }}
+                />
+              </fieldset>
+              <fieldset className="flex-1 border border-[#808080] px-[10px] pb-[10px] pt-[2px]">
+                <legend className="px-[4px]">Screen area</legend>
+                <div className="flex items-center justify-between text-[11px]">
+                  <span>Less</span>
+                  <span>More</span>
+                </div>
+                <ScreenAreaSlider index={resIndex} count={RESOLUTIONS.length} onChange={setResIndex} />
+                <div className="text-center text-[11px]">{RESOLUTIONS[resIndex]}</div>
+              </fieldset>
+            </div>
+            <label className="mt-[12px] flex items-center gap-[5px] text-[#808080]">
+              <input type="checkbox" checked readOnly disabled />
+              Extend my Windows desktop onto this monitor.
+            </label>
+            <div className="mt-[10px] flex justify-end">
+              <button
+                className="win-button min-w-[92px]"
+                onClick={() => notify("Advanced display properties are not available.")}
+              >
+                Advanced...
+              </button>
+            </div>
+          </>
+        )}
+
         {/* Action buttons */}
         <div className="mt-auto flex justify-end gap-[6px] pt-[10px]">
           <button
@@ -334,6 +397,64 @@ export function ScreensaverWindow({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Windows 98 horizontal trackbar for the "Screen area" resolution stepper. */
+function ScreenAreaSlider({ index, count, onChange }: { index: number; count: number; onChange: (i: number) => void }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [dragging, setDragging] = useState(false);
+
+  const setFromX = useCallback(
+    (clientX: number) => {
+      const el = trackRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const ratio = (clientX - rect.left) / rect.width;
+      const i = Math.round(ratio * (count - 1));
+      onChange(Math.max(0, Math.min(count - 1, i)));
+    },
+    [count, onChange],
+  );
+
+  useEffect(() => {
+    if (!dragging) return;
+    const move = (e: PointerEvent) => setFromX(e.clientX);
+    const up = () => setDragging(false);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+    };
+  }, [dragging, setFromX]);
+
+  const pct = count > 1 ? (index / (count - 1)) * 100 : 0;
+
+  return (
+    <div
+      ref={trackRef}
+      className="relative my-[6px] h-[22px] cursor-default select-none"
+      onPointerDown={(e) => {
+        e.preventDefault();
+        setDragging(true);
+        setFromX(e.clientX);
+      }}
+    >
+      {/* groove */}
+      <div
+        className="absolute left-0 right-0 top-1/2 h-[4px] -translate-y-1/2"
+        style={{ background: "#808080", boxShadow: "inset -1px -1px #ffffff, inset 1px 1px #0a0a0a" }}
+      />
+      {/* thumb */}
+      <div
+        className="absolute top-1/2 h-[18px] w-[11px] -translate-x-1/2 -translate-y-1/2 bg-[#c0c0c0]"
+        style={{
+          left: `${pct}%`,
+          boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+        }}
+      />
     </div>
   );
 }

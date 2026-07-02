@@ -5,6 +5,7 @@ import { BootScreen, BootMode } from "@/components/boot/BootScreen";
 import { ContextMenu } from "./ContextMenu";
 import { DesktopIcon } from "./DesktopIcon";
 import { NotificationBalloon } from "./NotificationBalloon";
+import { NotificationDialog } from "./NotificationDialog";
 import { StartMenu } from "./StartMenu";
 import { Taskbar } from "./Taskbar";
 import { WindowFrame } from "@/components/windows/WindowFrame";
@@ -158,7 +159,7 @@ export default function Desktop() {
   const [marquee, setMarquee] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
   const [contextMenu, setContextMenu] = useState<MenuState>(null);
   const [startOpen, setStartOpen] = useState(false);
-  const [notification, setNotification] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ message: string; icon?: string; titleIcon?: string; persistent?: boolean } | null>(null);
   const [connectionStatusOpen, setConnectionStatusOpen] = useState(false);
   const [connectedAt, setConnectedAt] = useState<number | null>(null);
   const [mcAfeeOpen, setMcAfeeOpen] = useState(false);
@@ -221,10 +222,12 @@ export default function Desktop() {
   }, [iconPositions]);
 
   const notify = useCallback(
-    (message: string) => {
-      setNotification(message);
+    (message: string, options?: { icon?: string; titleIcon?: string; persistent?: boolean }) => {
+      setNotification({ message, icon: options?.icon, titleIcon: options?.titleIcon, persistent: options?.persistent });
       playSound("notification");
-      window.setTimeout(() => setNotification(null), 2800);
+      if (!options?.persistent) {
+        window.setTimeout(() => setNotification((current) => (current?.message === message ? null : current)), 2800);
+      }
     },
     [playSound],
   );
@@ -661,7 +664,7 @@ export default function Desktop() {
       /* localStorage unavailable — just skip the prank */
       return;
     }
-    const delay = 180000 + Math.random() * 120000; // 3–5 minutes
+    const delay = 240000; // 4 minutes
     const timer = window.setTimeout(() => {
       try {
         globalThis.localStorage.setItem("floppyy-mcafee-prank", "done");
@@ -878,6 +881,10 @@ export default function Desktop() {
             setStartOpen(false);
             setShutdownOpen(true);
           }}
+          onNotify={(message, options) => {
+            setStartOpen(false);
+            notify(message, options);
+          }}
         />
       )}
 
@@ -899,16 +906,24 @@ export default function Desktop() {
           onRefresh={refreshDesktop}
           onProperties={showProperties}
           onEmptyRecycleBin={emptyRecycleBin}
+          onNotify={notify}
           onClose={() => setContextMenu(null)}
         />
       )}
 
-      {notification && <NotificationBalloon message={notification} />}
+      {notification && (
+        <NotificationDialog
+          message={notification.message}
+          icon={notification.icon}
+          titleIcon={notification.titleIcon}
+          onClose={() => setNotification(null)}
+        />
+      )}
 
       {showDialupHint && (
         <NotificationBalloon
           message="Not connected. Open Dial-Up Networking to connect to the Internet."
-          bottomOffset={notification ? 96 : 34}
+          bottomOffset={34}
         />
       )}
 

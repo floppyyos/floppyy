@@ -7,6 +7,7 @@ import type { WindowComponentProps, WindowId } from "@/lib/windows";
 export function RunWindow({ window: win, openWindow, closeWindow, notify, playSound, startScreensaver, crashSystem }: WindowComponentProps) {
   const [value, setValue] = useState("");
   const [history, setHistory] = useState<string[]>([]);
+  const [histOpen, setHistOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -66,7 +67,6 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
         openWindow("about", "welcome");
       },
       clouds: () => {
-        notify("Clouds.bmp opened in Paint.");
         openWindow("paint");
       },
       stars: () => {
@@ -121,7 +121,7 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
       </div>
       <div className="flex items-center gap-[8px]">
         <label htmlFor="run-open" className="shrink-0">Open:</label>
-        <div className="flex h-[22px] min-w-0 flex-1">
+        <div className="relative flex h-[22px] min-w-0 flex-1">
           <input
             id="run-open"
             className="win-bevel-inset h-full min-w-0 flex-1 bg-white px-[4px] text-[11px]"
@@ -129,22 +129,37 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
             onChange={(event) => setValue(event.target.value)}
             autoFocus
           />
-          <select
+          <button
+            type="button"
             className="win-button h-full w-[17px] px-0 text-[8px]"
             aria-label="Run history"
-            value=""
-            onChange={(event) => {
-              setValue(event.target.value);
-              event.currentTarget.value = "";
-            }}
+            onClick={() => history.length > 0 && setHistOpen((o) => !o)}
           >
-            <option value="">▼</option>
-            {history.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
+            ▼
+          </button>
+          {histOpen && history.length > 0 && (
+            <>
+              <div className="fixed inset-0 z-[6000]" onMouseDown={() => setHistOpen(false)} />
+              <ul
+                className="absolute left-0 right-0 top-full z-[6001] mt-[1px] max-h-[160px] overflow-auto bg-white py-[1px] text-[11px] text-black"
+                style={{ border: "1px solid #0a0a0a" }}
+              >
+                {history.map((item) => (
+                  <li
+                    key={item}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      setValue(item);
+                      setHistOpen(false);
+                    }}
+                    className="cursor-default truncate px-[5px] py-[1px] hover:bg-[#000080] hover:text-white"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </div>
       </div>
       <div className="mt-auto flex justify-end gap-[6px]">

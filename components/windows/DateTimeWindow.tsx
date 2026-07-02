@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
+import { Win98Select } from "@/components/ui/Win98Select";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -150,19 +151,16 @@ export function DateTimeWindow({ window: win, closeWindow, notify, playSound }: 
             <fieldset className="datetime-fieldset flex-1">
               <legend>Date</legend>
               <div className="flex items-start gap-[6px]">
-                <select
-                  className="datetime-input flex-1"
-                  value={viewMonth}
-                  onChange={(e) => {
-                    setViewMonth(Number(e.target.value));
+                <Win98Select
+                  className="flex-1"
+                  value={String(viewMonth)}
+                  onChange={(v) => {
+                    setViewMonth(Number(v));
                     playSound("click");
                   }}
-                  aria-label="Month"
-                >
-                  {MONTHS.map((m, i) => (
-                    <option key={m} value={i}>{m}</option>
-                  ))}
-                </select>
+                  ariaLabel="Month"
+                  options={MONTHS.map((m, i) => ({ value: String(i), label: m }))}
+                />
                 <div className="flex">
                   <input
                     className="datetime-input w-[42px] text-right"
