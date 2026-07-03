@@ -67,12 +67,10 @@ export function WindowFrame({ window, active, children, onFocus, onClose, onMini
           event.currentTarget.setPointerCapture(event.pointerId);
         }}
       />
-      {/* Window body */}
       <div className="min-h-0 flex-1 overflow-auto bg-[#c0c0c0] mt-[1px] p-[4px]">
         {children}
       </div>
 
-      {/* Resize grip */}
       {!window.maximized && (
         <div
           className="absolute bottom-0 right-0 h-[16px] w-[16px] cursor-se-resize touch-none"

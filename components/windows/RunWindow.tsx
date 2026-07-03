@@ -51,7 +51,6 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
 
     const normalized = trimmed.toLowerCase();
 
-    // Show the list of commands (the Help window opens via the "help" command).
     if (normalized === "commands" || normalized === "?") {
       notify("Commands: about, computer, winamp, ie, netscape, notepad, paint, calc, cmd, doom, projects, games, music, screensaver, defrag, help. Some old words still work.");
       return;

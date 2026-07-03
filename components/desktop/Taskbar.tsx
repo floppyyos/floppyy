@@ -32,7 +32,6 @@ export function Taskbar({ windows, activeId, startOpen, internetConnected, muted
       }}
       onClick={(event) => event.stopPropagation()}
     >
-      {/* Start Button */}
       <button
         className={`win-button flex h-[22px] items-center gap-[4px] px-[6px] font-bold text-[11px] ${startOpen ? "active" : ""}`}
         onClick={onStart}
@@ -50,10 +49,8 @@ export function Taskbar({ windows, activeId, startOpen, internetConnected, muted
         <span>Start</span>
       </button>
 
-      {/* Divider */}
       <div className="h-[22px] w-[2px] flex-shrink-0" style={{ borderLeft: "1px solid #808080", borderRight: "1px solid #ffffff" }} />
 
-      {/* Quick Launch area */}
       <div className="flex items-center gap-[2px] pr-[4px]">
         <button
           className="flex h-[20px] w-[20px] items-center justify-center hover:bg-white/20 active:translate-x-px active:translate-y-px"
@@ -92,10 +89,8 @@ export function Taskbar({ windows, activeId, startOpen, internetConnected, muted
         </button>
       </div>
 
-      {/* Divider */}
       <div className="h-[22px] w-[2px] flex-shrink-0" style={{ borderLeft: "1px solid #808080", borderRight: "1px solid #ffffff" }} />
 
-      {/* Window buttons */}
       <div className="flex min-w-0 flex-1 gap-[2px] overflow-hidden">
         {windows.map((window) => (
           <button
@@ -112,7 +107,6 @@ export function Taskbar({ windows, activeId, startOpen, internetConnected, muted
         ))}
       </div>
 
-      {/* System Tray */}
       <SystemTray
         internetConnected={internetConnected}
         muted={muted}

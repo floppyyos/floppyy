@@ -81,7 +81,6 @@ export function ToolbarIcon({ name, size = 20 }: Props) {
     case "up":
       return (
         <svg {...common} aria-hidden="true">
-          {/* folder */}
           <path
             d="M2 7 L2 16 L18 16 L18 6 L9 6 L7.5 4.5 L3 4.5 Z"
             fill="#f7c14b"
@@ -89,17 +88,14 @@ export function ToolbarIcon({ name, size = 20 }: Props) {
             strokeWidth="1"
             strokeLinejoin="round"
           />
-          {/* up arrow */}
           <path d="M10 6 L13.5 10 L11.5 10 L11.5 14 L8.5 14 L8.5 10 L6.5 10 Z" fill="#1b50a8" stroke="#0e2d63" strokeWidth="0.8" strokeLinejoin="round" />
         </svg>
       );
     case "cut":
       return (
         <svg {...common} aria-hidden="true">
-          {/* blades */}
           <line x1="7" y1="7" x2="17" y2="15" stroke="#9aa6b2" strokeWidth="1.6" />
           <line x1="7" y1="13" x2="17" y2="5" stroke="#9aa6b2" strokeWidth="1.6" />
-          {/* handles */}
           <circle cx="5" cy="6" r="2.4" fill="none" stroke="#3a3a3a" strokeWidth="1.4" />
           <circle cx="5" cy="14" r="2.4" fill="none" stroke="#3a3a3a" strokeWidth="1.4" />
         </svg>
@@ -117,10 +113,8 @@ export function ToolbarIcon({ name, size = 20 }: Props) {
     case "paste":
       return (
         <svg {...common} aria-hidden="true">
-          {/* clipboard */}
           <rect x="3" y="4" width="12" height="14" fill="#caa46a" stroke="#6e5326" strokeWidth="1" />
           <rect x="6" y="3" width="6" height="3" fill="#c0c0c0" stroke="#5a5a5a" strokeWidth="0.8" />
-          {/* page */}
           <rect x="8" y="8" width="9" height="10" fill="#ffffff" stroke="#3a3a3a" strokeWidth="1" />
           <line x1="10" y1="11" x2="15" y2="11" stroke="#1b50a8" strokeWidth="1" />
           <line x1="10" y1="13.5" x2="15" y2="13.5" stroke="#1b50a8" strokeWidth="1" />
@@ -158,7 +152,6 @@ export function ToolbarIcon({ name, size = 20 }: Props) {
           <line x1="6" y1="6" x2="13" y2="6" stroke="#1b50a8" strokeWidth="1" />
           <line x1="6" y1="8.5" x2="13" y2="8.5" stroke="#1b50a8" strokeWidth="1" />
           <line x1="6" y1="11" x2="11" y2="11" stroke="#1b50a8" strokeWidth="1" />
-          {/* check mark */}
           <path d="M11 13.5 L13 16 L18 10" fill="none" stroke="#2f8f3a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );

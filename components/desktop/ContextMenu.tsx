@@ -81,7 +81,6 @@ export function ContextMenu({
 
       {!target && (
         <>
-          {/* Active Desktop */}
           <div className="group relative">
             <button className="menu-command flex items-center justify-between gap-[16px]">
               <span>Active Desktop</span>
@@ -105,7 +104,6 @@ export function ContextMenu({
 
           <Separator />
 
-          {/* Arrange Icons */}
           <div className="group relative">
             <button className="menu-command flex items-center justify-between gap-[16px]">
               <span>Arrange Icons</span>
@@ -152,7 +150,6 @@ export function ContextMenu({
 
           <Separator />
 
-          {/* New */}
           <div className="group relative">
             <button className="menu-command flex items-center justify-between gap-[16px]">
               <span>New</span>

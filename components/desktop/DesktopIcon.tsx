@@ -28,14 +28,12 @@ export function DesktopIcon({ label, icon, selected, x, y, onPointerDown, onPoin
       onContextMenu={onContextMenu}
       aria-label={label}
     >
-      {/* Icon with selection mask */}
       <span
         className="flex items-center justify-center p-[2px]"
         style={selected ? { background: "rgba(0, 0, 128, 0.4)", mixBlendMode: "normal" } : undefined}
       >
         <FloppyyIcon type={icon} size={32} />
       </span>
-      {/* Label */}
       <span
         className={`desktop-icon-label max-w-[72px] break-words text-center text-[11px] leading-[13px] px-[2px] py-[1px] ${
           selected

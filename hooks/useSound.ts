@@ -11,7 +11,6 @@ export function useSound() {
   const audioCache = useRef<Record<string, HTMLAudioElement>>({});
   const fadeTimers = useRef<Set<ReturnType<typeof setInterval>>>(new Set());
 
-  // Load persisted sound settings once on mount (client only).
   useEffect(() => {
     try {
       const m = globalThis.localStorage.getItem("floppyy-muted");
@@ -22,7 +21,6 @@ export function useSound() {
         if (!Number.isNaN(n)) setVolume(Math.min(1, Math.max(0, n)));
       }
     } catch {
-      /* localStorage unavailable */
     }
   }, []);
 
@@ -30,7 +28,6 @@ export function useSound() {
     try {
       globalThis.localStorage.setItem("floppyy-muted", muted ? "1" : "0");
     } catch {
-      /* ignore */
     }
   }, [muted]);
 
@@ -38,7 +35,6 @@ export function useSound() {
     try {
       globalThis.localStorage.setItem("floppyy-volume", String(volume));
     } catch {
-      /* ignore */
     }
   }, [volume]);
 
@@ -56,8 +52,6 @@ export function useSound() {
     };
   }, []);
 
-  // Apply mute + volume globally to every media element on the page,
-  // including ones mounted later (Winamp, Media Player, games, etc.).
   useEffect(() => {
     if (typeof document === "undefined") return;
 

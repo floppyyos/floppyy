@@ -117,7 +117,6 @@ export function WinampPlayer({
     }
   }, [volume, balance, muted]);
 
-  // Marquee scrolling
   useEffect(() => {
     const timer = window.setInterval(() => {
       setMarqueeOffset((prev) => (prev + 1) % (displayText.length * 6));
@@ -125,7 +124,6 @@ export function WinampPlayer({
     return () => window.clearInterval(timer);
   }, [displayText]);
 
-  // Visualizer animation
   useEffect(() => {
     if (!playing) {
       // Reset bars on the next frame rather than synchronously during the
@@ -134,7 +132,6 @@ export function WinampPlayer({
       return () => cancelAnimationFrame(reset);
     }
 
-    // If we have an analyser, use real data
     if (analyserRef.current) {
       const analyser = analyserRef.current;
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -154,7 +151,6 @@ export function WinampPlayer({
       return () => cancelAnimationFrame(animFrameRef.current);
     }
 
-    // Fallback: fake visualizer
     const timer = window.setInterval(() => {
       setVisBars(Array.from({ length: 19 }, () => 2 + Math.random() * 14));
     }, 100);
@@ -360,9 +356,7 @@ export function WinampPlayer({
 
   return (
     <div className="winamp-container flex flex-col items-center select-none">
-      {/* Main Player Window */}
       <div className="winamp-main w-[275px] relative">
-        {/* Title bar area */}
         <div className="winamp-titlebar flex items-center justify-between h-[14px] px-[3px]">
           <div className="flex items-center gap-[2px]" />
           <span className="winamp-title-text text-[8px] font-bold tracking-wider">WINAMP</span>

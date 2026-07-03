@@ -63,7 +63,6 @@ export function SystemTray({
         <img src="/icons/McAfee.png" alt="" width={16} height={16} draggable={false} style={{ imageRendering: "pixelated" }} />
       </button>
 
-      {/* Volume */}
       <div className="relative flex items-center">
         <button
           aria-label="Volume"
@@ -120,10 +119,6 @@ export function SystemTray({
   );
 }
 
-/**
- * Authentic Windows 98 vertical trackbar for the tray volume flyout:
- * a thin sunken groove, tick marks on both sides, and a beveled 3D thumb.
- */
 function Win98VolumeSlider({ value, onChange }: { value: number; onChange: (value: number) => void }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -179,7 +174,6 @@ function Win98VolumeSlider({ value, onChange }: { value: number; onChange: (valu
         if (e.key === "ArrowDown" || e.key === "ArrowLeft") { e.preventDefault(); onChange(clamp(value - 5)); }
       }}
     >
-      {/* Tick marks on both sides */}
       <div className="absolute left-0 top-0 flex flex-col justify-between" style={{ height: TRACK_H, paddingTop: THUMB_H / 2, paddingBottom: THUMB_H / 2 }}>
         {Array.from({ length: TICKS }).map((_, i) => (
           <div key={i} className="h-px w-[5px] bg-[#404040]" />
@@ -191,7 +185,6 @@ function Win98VolumeSlider({ value, onChange }: { value: number; onChange: (valu
         ))}
       </div>
 
-      {/* Sunken groove */}
       <div
         className="absolute left-1/2 top-0 -translate-x-1/2"
         style={{
@@ -202,7 +195,6 @@ function Win98VolumeSlider({ value, onChange }: { value: number; onChange: (valu
         }}
       />
 
-      {/* Beveled thumb */}
       <div
         className="absolute left-1/2 -translate-x-1/2"
         style={{
@@ -213,7 +205,6 @@ function Win98VolumeSlider({ value, onChange }: { value: number; onChange: (valu
           boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
         }}
       >
-        {/* center grip line */}
         <div className="absolute left-[3px] right-[3px] top-1/2 -translate-y-1/2 h-px bg-[#808080] shadow-[0_1px_#ffffff]" />
       </div>
     </div>

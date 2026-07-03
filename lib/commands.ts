@@ -29,7 +29,6 @@ export const commands: Record<string, WindowId> = {
   help: "help",
 };
 
-/** URL-like patterns that should open in the browser */
 export function isUrl(value: string): boolean {
   const v = value.trim().toLowerCase();
   return (

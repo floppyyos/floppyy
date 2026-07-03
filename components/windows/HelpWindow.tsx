@@ -192,7 +192,6 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
 
   return (
     <div className="flex h-full flex-col bg-[#c0c0c0] text-[11px] text-black">
-      {/* Menu bar */}
       <div className="flex items-center gap-[12px] border-b border-[#808080] px-[6px] py-[2px]">
         <span className="cursor-default"><span className="underline">F</span>ile</span>
         <span className="cursor-default"><span className="underline">E</span>dit</span>
@@ -202,7 +201,6 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
       </div>
 
       <div className="flex min-h-0 flex-1 gap-[6px] p-[6px]">
-        {/* Contents pane */}
         <div
           className="w-[170px] shrink-0 overflow-auto bg-white p-[3px]"
           style={{ boxShadow: "inset -1px -1px #ffffff, inset 1px 1px #808080, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a" }}
@@ -228,7 +226,6 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
           ))}
         </div>
 
-        {/* Topic pane */}
         <div
           className="min-w-0 flex-1 overflow-auto bg-white p-[12px] leading-[16px]"
           style={{ boxShadow: "inset -1px -1px #ffffff, inset 1px 1px #808080, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a" }}

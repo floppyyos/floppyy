@@ -128,7 +128,6 @@ export function ShutDownOverlay({ safe, onRestart, onShutdown, onCancel }: { saf
         }}
       />
 
-      {/* Dialog */}
       <div
         className="relative w-[340px] bg-[#c0c0c0] p-[3px]"
         style={{

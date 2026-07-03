@@ -84,7 +84,6 @@ export function MsDosWindow({ window: win, closeWindow, openWindow, playSound, c
       const command = parts[0].toLowerCase();
       const args = parts.slice(1).join(" ");
 
-      // Add the input line to history
       setLines((prev) => [...prev, { text: `C:\\>${trimmed}`, type: "input" }]);
 
       // Easter egg: classic "destroy the machine" commands bring Floppyy down.
@@ -146,13 +145,11 @@ export function MsDosWindow({ window: win, closeWindow, openWindow, playSound, c
             addOutput(["Usage: start <program|url>", ""]);
             break;
           }
-          // URL → open in browser
           if (isUrl(args)) {
             addOutput([`Starting ${args}...`, ""]);
             openWindow("ie-browser", args);
             break;
           }
-          // Program name
           const prog = commands[args.toLowerCase()];
           if (prog) {
             addOutput([`Starting ${args}...`, ""]);
@@ -181,14 +178,12 @@ export function MsDosWindow({ window: win, closeWindow, openWindow, playSound, c
     setInput("");
   };
 
-  // Auto-scroll
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
   }, [lines]);
 
-  // Focus input on click
   const focusInput = () => inputRef.current?.focus();
 
   return (

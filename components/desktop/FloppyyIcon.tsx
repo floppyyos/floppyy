@@ -11,7 +11,6 @@ export function FloppyyIcon({ type, size = 32 }: Props) {
   const [useFallback, setUseFallback] = useState(false);
   const s = size;
 
-  // Try to load from /icons/ directory first
   if (!useFallback) {
     return (
       <span aria-hidden="true" className="inline-flex items-center justify-center" style={{ width: s, height: s }}>
@@ -28,7 +27,6 @@ export function FloppyyIcon({ type, size = 32 }: Props) {
     );
   }
 
-  // Fallback SVG icons
   return (
     <span aria-hidden="true" className="inline-flex items-center justify-center" style={{ width: s, height: s }}>
       <FallbackSVG type={type} size={s} />

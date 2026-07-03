@@ -66,7 +66,7 @@ export function InternetWindow({
 
         timerRef.current = setTimeout(() => {
           onConnected?.();
-          notify("Connected to the Internet!");
+          notify("Connected to the Internet!", { balloon: true });
           closeWindow(win.instanceId);
         }, 1200);
       }, 2000);
@@ -258,7 +258,7 @@ export function InternetWindow({
             onClick={() => {
               if (audioRef.current && fadeOutSound) fadeOutSound(audioRef.current, 500);
               onConnected?.();
-              notify("Connected to the Internet!");
+              notify("Connected to the Internet!", { balloon: true });
               closeWindow(win.instanceId);
             }}
             className="win-button min-w-[74px] font-bold"

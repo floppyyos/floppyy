@@ -30,18 +30,14 @@ function MonitorPreview({ children }: { children: ReactNode }) {
     "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf";
   return (
     <div className="flex flex-col items-center">
-      {/* monitor shell */}
       <div className="bg-[#c0c0c0] p-[10px] pb-[14px]" style={{ width: 188, boxShadow: bevelRaised }}>
-        {/* sunken screen frame */}
         <div className="field-border bg-black p-[2px]">
           <div className="relative overflow-hidden" style={{ height: 104, background: "#000" }}>
             {children}
           </div>
         </div>
       </div>
-      {/* neck */}
       <div className="h-[8px] w-[58px] bg-[#c0c0c0]" style={{ boxShadow: bevelRaised }} />
-      {/* base */}
       <div className="h-[6px] w-[96px] bg-[#c0c0c0]" style={{ boxShadow: bevelRaised }} />
     </div>
   );
@@ -139,7 +135,6 @@ function PreviewContent({ mode }: { mode: Mode }) {
       </div>
     );
   }
-  // mystify
   return (
     <svg viewBox="0 0 184 104" className="absolute inset-0 h-full w-full">
       <polygon points="30,20 150,35 120,90 40,70" fill="none" stroke="#33ffff" strokeWidth="2" />
@@ -183,7 +178,6 @@ export function ScreensaverWindow({
 
   return (
     <div className="flex h-full flex-col bg-[#c0c0c0] p-[14px] text-[11px]">
-      {/* Tab strip */}
       <div className="relative z-[2] flex gap-[5px] px-[2px]">
         {TABS.map((tab) => {
           const active = tab === activeTab;
@@ -202,7 +196,6 @@ export function ScreensaverWindow({
         })}
       </div>
 
-      {/* Body panel */}
       <div
         className="-mt-px flex flex-1 flex-col bg-[#c0c0c0]"
         style={{ boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf", padding: "16px 24px" }}
@@ -247,7 +240,6 @@ export function ScreensaverWindow({
 
         {activeTab === "Screen Saver" && (
           <>
-        {/* Screen Saver group */}
         <fieldset className="mb-[10px] border border-[#808080] px-[10px] pb-[10px] pt-[2px]">
           <legend className="px-[4px]">Screen Saver</legend>
           <div className="flex items-center gap-[6px]">
@@ -295,7 +287,6 @@ export function ScreensaverWindow({
           </div>
         </fieldset>
 
-        {/* Energy saving group (decorative) */}
         <fieldset className="border border-[#808080] px-[10px] pb-[10px] pt-[2px] text-[#808080]">
           <legend className="px-[4px] text-[#404040]">Energy saving features of monitor</legend>
           <div className="flex items-start gap-[10px]">
@@ -378,7 +369,6 @@ export function ScreensaverWindow({
           </>
         )}
 
-        {/* Action buttons */}
         <div className="mt-auto flex justify-end gap-[6px] pt-[10px]">
           <button
             className="win-button min-w-[72px]"
@@ -442,12 +432,10 @@ function ScreenAreaSlider({ index, count, onChange }: { index: number; count: nu
         setFromX(e.clientX);
       }}
     >
-      {/* groove */}
       <div
         className="absolute left-0 right-0 top-1/2 h-[4px] -translate-y-1/2"
         style={{ background: "#808080", boxShadow: "inset -1px -1px #ffffff, inset 1px 1px #0a0a0a" }}
       />
-      {/* thumb */}
       <div
         className="absolute top-1/2 h-[18px] w-[11px] -translate-x-1/2 -translate-y-1/2 bg-[#c0c0c0]"
         style={{

@@ -14,9 +14,7 @@ const FAVORITES = [
 ] as const;
 
 function toWaybackUrl(url: string): string {
-  // If already a wayback URL, return as-is
   if (url.startsWith("https://web.archive.org/")) return url;
-  // Strip protocol if present
   let cleanUrl = url.trim();
   // Block dangerous URL schemes
   const lower = cleanUrl.toLowerCase();

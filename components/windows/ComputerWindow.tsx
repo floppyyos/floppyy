@@ -42,7 +42,6 @@ export function ComputerWindow({ notify, openWindow, playSound }: WindowComponen
 
   return (
     <div className="flex h-full flex-col bg-[#c0c0c0] text-[11px]">
-      {/* Menu bar */}
       <div className="flex items-center h-[20px] px-1 border-b border-[#808080] bg-[#c0c0c0]">
         <span className="px-2 hover:underline cursor-default">File</span>
         <span className="px-2 hover:underline cursor-default">Edit</span>
@@ -52,7 +51,6 @@ export function ComputerWindow({ notify, openWindow, playSound }: WindowComponen
         <span className="px-2 hover:underline cursor-default">Help</span>
       </div>
 
-      {/* Toolbar */}
       <div className="flex items-center h-[50px] px-1 gap-0 border-b border-[#808080] bg-[#c0c0c0]">
         {toolbarButtons.map((btn) => (
           <button
@@ -69,7 +67,6 @@ export function ComputerWindow({ notify, openWindow, playSound }: WindowComponen
         ))}
       </div>
 
-      {/* Address bar */}
       <div className="flex items-center h-[24px] px-2 gap-1 border-b border-[#808080] bg-[#c0c0c0]">
         <span className="text-[11px] font-bold mr-1">Address</span>
         <div className="flex-1 flex items-center h-[18px] border border-[#808080] bg-white px-1">
@@ -85,9 +82,7 @@ export function ComputerWindow({ notify, openWindow, playSound }: WindowComponen
         </div>
       </div>
 
-      {/* Main content area */}
       <div className="flex flex-1 min-h-0 bg-white border-t border-[#dfdfdf]">
-        {/* Left panel */}
         <aside className="w-[140px] shrink-0 border-r border-[#c0c0c0] bg-white p-3 flex flex-col">
           <img
             src="/icons/computer.png"
@@ -103,7 +98,6 @@ export function ComputerWindow({ notify, openWindow, playSound }: WindowComponen
           </p>
         </aside>
 
-        {/* Icons grid */}
         <div className="flex-1 overflow-auto p-4">
           <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-x-2 gap-y-1 content-start">
             {items.map((item) => (
@@ -163,7 +157,6 @@ export function ComputerWindow({ notify, openWindow, playSound }: WindowComponen
         </div>
       </div>
 
-      {/* Status bar */}
       <div className="flex items-center h-[20px] px-2 border-t border-[#808080] bg-[#c0c0c0]">
         <div className="flex-1 text-[10px] border-r border-[#808080] pr-2">
           {items.length} object(s)

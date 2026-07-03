@@ -8,6 +8,7 @@ export const soundFiles: Record<string, string> = {
   "dialup-02": "/sounds/dialup-modem-02.mp3",
   "dialup-03": "/sounds/dialup-modem-03.mp3",
   floppy: "/sounds/floppy.mp3",
+  icq: "/sounds/icq.mp3",
 };
 
 export const toneMap: Record<string, [number, number, OscillatorType]> = {
@@ -23,4 +24,5 @@ export const toneMap: Record<string, [number, number, OscillatorType]> = {
   "dialup-01": [1000, 2000, "sawtooth"],
   "dialup-02": [1000, 2000, "sawtooth"],
   "dialup-03": [1000, 2000, "sawtooth"],
+  icq: [660, 440, "sine"],
 };

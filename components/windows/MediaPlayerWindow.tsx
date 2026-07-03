@@ -26,7 +26,6 @@ export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
     video.muted = false;
     setMuted(false);
     video.play().catch(() => {
-      // If unmuted play fails, switch to YouTube embed
       setUseEmbed(true);
     });
   }, []);
@@ -65,17 +64,14 @@ export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
   };
 
   const handleVideoError = () => {
-    // If local video fails to load, switch to YouTube embed
     setVideoError(true);
     setUseEmbed(true);
   };
 
-  // YouTube embed URL (Rick Astley - Never Gonna Give You Up)
   const youtubeEmbedUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0";
 
   return (
     <div className="flex flex-col h-full" style={{ background: "#c0c0c0" }}>
-      {/* Menu bar */}
       <div className="window-menu-bar">
         <button className="window-menu-item">File</button>
         <button className="window-menu-item">View</button>
@@ -85,11 +81,9 @@ export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
         <button className="window-menu-item">Help</button>
       </div>
 
-      {/* Video/Display area */}
       <div className="flex-1 flex items-center justify-center mx-[3px] mt-[3px] relative overflow-hidden min-h-0" style={{ background: "#000" }}>
         {hasVideo ? (
           useEmbed || videoError ? (
-            /* YouTube embed fallback */
             <iframe
               src={youtubeEmbedUrl}
               className="w-full h-full border-0"
@@ -98,7 +92,6 @@ export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
               title="Rick Astley - Never Gonna Give You Up"
             />
           ) : (
-            /* Native video player */
             <>
               <video
                 ref={videoRef}
@@ -168,7 +161,6 @@ export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
         )}
       </div>
 
-      {/* Track info bar */}
       <div
         className="flex items-center h-[20px] mx-[3px] mt-[3px] px-2 text-[10px]"
         style={{ background: "#fff", boxShadow: "inset 1px 1px #808080, inset -1px -1px #dfdfdf" }}
@@ -182,7 +174,6 @@ export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
         )}
       </div>
 
-      {/* Transport controls */}
       <div className="flex items-center gap-[2px] mx-[3px] mt-[3px] mb-[2px] px-[2px] h-[26px]">
         <button
           onClick={useEmbed ? undefined : play}
@@ -211,14 +202,12 @@ export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
 
         <div className="flex-1" />
 
-        {/* Volume */}
         <span className="text-[12px] ml-1">🔊</span>
         <div className="w-[60px] h-[6px] ml-1 relative" style={{ border: "1px solid #808080", background: "#fff" }}>
           <div className="h-full" style={{ width: `${volume}%`, background: "#000080" }} />
         </div>
       </div>
 
-      {/* Seek/Progress bar */}
       {!useEmbed && (
         <div
           className="mx-[3px] mb-[3px] h-[10px] cursor-pointer relative"

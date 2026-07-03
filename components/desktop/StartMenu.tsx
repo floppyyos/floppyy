@@ -18,6 +18,7 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
     ["netscape", "Netscape Navigator", "netscape"],
     ["msdos", "MS-DOS Prompt", "prompt"],
     ["outlook", "Outlook Express", "msoutlook"],
+    ["guestbook", "Guest Book", "guestbook"],
   ];
 
   const games: Array<[WindowId, string, string, string?]> = [
@@ -43,7 +44,6 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
       }}
       onClick={(event) => event.stopPropagation()}
     >
-      {/* Side banner */}
       <div
         className="relative flex w-[26px] items-end justify-center bg-[#000080]"
         style={{ paddingBottom: "24px" }}
@@ -55,7 +55,6 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
         </div>
       </div>
 
-      {/* Menu items */}
       <div className="flex-1 py-[3px]">
         <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("about", "welcome")}>
           <FloppyyIcon type="credits" size={16} />
@@ -217,7 +216,6 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
         </button>
         <div className="mx-[3px] my-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
 
-        {/* Shut Down */}
         <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={onShutdown}>
           <img src="/icons/shutdown.png" alt="" width={16} height={16} style={{ imageRendering: "pixelated" }} draggable={false} />
           <span>Shut Down...</span>

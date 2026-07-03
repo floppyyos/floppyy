@@ -16,6 +16,7 @@ import { ControlPanelWindow } from "@/components/windows/ControlPanelWindow";
 import { DateTimeWindow } from "@/components/windows/DateTimeWindow";
 import { DoomWindow } from "@/components/windows/DoomWindow";
 import { GamesWindow } from "@/components/windows/GamesWindow";
+import { GuestbookWindow } from "@/components/windows/GuestbookWindow";
 import { InternetWindow } from "@/components/windows/InternetWindow";
 import { IEBrowserWindow } from "@/components/windows/IEBrowserWindow";
 import { NetscapeWindow } from "@/components/windows/NetscapeWindow";
@@ -159,7 +160,7 @@ export default function Desktop() {
   const [marquee, setMarquee] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
   const [contextMenu, setContextMenu] = useState<MenuState>(null);
   const [startOpen, setStartOpen] = useState(false);
-  const [notification, setNotification] = useState<{ message: string; icon?: string; titleIcon?: string; persistent?: boolean } | null>(null);
+  const [notification, setNotification] = useState<{ message: string; icon?: string; titleIcon?: string; persistent?: boolean; balloon?: boolean } | null>(null);
   const [connectionStatusOpen, setConnectionStatusOpen] = useState(false);
   const [connectedAt, setConnectedAt] = useState<number | null>(null);
   const [mcAfeeOpen, setMcAfeeOpen] = useState(false);
@@ -222,8 +223,8 @@ export default function Desktop() {
   }, [iconPositions]);
 
   const notify = useCallback(
-    (message: string, options?: { icon?: string; titleIcon?: string; persistent?: boolean }) => {
-      setNotification({ message, icon: options?.icon, titleIcon: options?.titleIcon, persistent: options?.persistent });
+    (message: string, options?: { icon?: string; titleIcon?: string; persistent?: boolean; balloon?: boolean }) => {
+      setNotification({ message, icon: options?.icon, titleIcon: options?.titleIcon, persistent: options?.persistent, balloon: options?.balloon });
       playSound("notification");
       if (!options?.persistent) {
         window.setTimeout(() => setNotification((current) => (current?.message === message ? null : current)), 2800);
@@ -455,7 +456,7 @@ export default function Desktop() {
   const refreshDesktop = useCallback(() => {
     setContextMenu(null);
     setSelectedIcons(new Set());
-    notify("Desktop refreshed.");
+    notify("Desktop refreshed.", { balloon: true });
   }, [notify]);
 
   const startMarquee = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
@@ -565,6 +566,8 @@ export default function Desktop() {
         return <SolitaireWindow {...props} />;
       case "games":
         return <GamesWindow {...props} />;
+      case "guestbook":
+        return <GuestbookWindow {...props} />;
       case "doom":
         return <DoomWindow {...props} />;
       case "music":
@@ -911,14 +914,17 @@ export default function Desktop() {
         />
       )}
 
-      {notification && (
-        <NotificationDialog
-          message={notification.message}
-          icon={notification.icon}
-          titleIcon={notification.titleIcon}
-          onClose={() => setNotification(null)}
-        />
-      )}
+      {notification &&
+        (notification.balloon ? (
+          <NotificationBalloon message={notification.message} bottomOffset={34} />
+        ) : (
+          <NotificationDialog
+            message={notification.message}
+            icon={notification.icon}
+            titleIcon={notification.titleIcon}
+            onClose={() => setNotification(null)}
+          />
+        ))}
 
       {showDialupHint && (
         <NotificationBalloon

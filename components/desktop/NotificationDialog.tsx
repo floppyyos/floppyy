@@ -3,10 +3,6 @@
 const RAISED =
   "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf";
 
-/**
- * Windows 98 style message box used for the app's transient notifications.
- * Branded with the Floppyy icon and shown as a small centered window.
- */
 export function NotificationDialog({
   message,
   title = "Floppyy",
@@ -27,7 +23,6 @@ export function NotificationDialog({
       role="alertdialog"
       aria-label={title}
     >
-      {/* Title bar */}
       <div className="flex h-[18px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] pl-[3px] pr-[2px]">
         <span className="flex items-center gap-[4px] truncate text-[11px] font-bold text-white">
           <img
@@ -50,7 +45,6 @@ export function NotificationDialog({
         </button>
       </div>
 
-      {/* Body */}
       <div className="flex items-center gap-[14px] px-[16px] py-[18px]">
         <img
           src={icon}
@@ -64,7 +58,6 @@ export function NotificationDialog({
         <span className="text-[11px] leading-[15px] text-black">{message}</span>
       </div>
 
-      {/* Button */}
       <div className="flex justify-center pb-[14px]">
         <button className="win-button min-w-[80px] text-[11px]" onClick={onClose} autoFocus>
           OK

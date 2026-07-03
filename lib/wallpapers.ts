@@ -18,11 +18,8 @@ export type WallpaperId =
 export type Wallpaper = {
   id: WallpaperId;
   label: string;
-  /** CSS class applied to the desktop (used for the dithered photo wallpaper). */
   className?: string;
-  /** Solid background color. */
   color?: string;
-  /** Image wallpaper (served from /public). */
   image?: string;
 };
 
@@ -50,7 +47,6 @@ export function isWallpaperId(value: unknown): value is WallpaperId {
   return typeof value === "string" && value in WALLPAPERS;
 }
 
-/** Background style for an image/solid wallpaper (clouds uses its own class). */
 export function wallpaperStyle(wp: Wallpaper): CSSProperties | undefined {
   if (wp.color) return { backgroundColor: wp.color };
   if (wp.image) {
@@ -64,7 +60,6 @@ export function wallpaperStyle(wp: Wallpaper): CSSProperties | undefined {
   return undefined;
 }
 
-/** Small swatch style for the wallpaper picker list. */
 export function wallpaperSwatchStyle(wp: Wallpaper): CSSProperties {
   if (wp.className === "floppyy-wallpaper") {
     return { backgroundImage: "url('/wallpapers/clouds.jpg')", backgroundSize: "cover", backgroundPosition: "center" };

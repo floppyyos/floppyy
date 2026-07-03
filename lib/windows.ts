@@ -11,6 +11,7 @@ export type WindowId =
   | "documents"
   | "doom"
   | "drive"
+  | "guestbook"
   | "internet"
   | "ie-browser"
   | "netscape"
@@ -62,7 +63,7 @@ export type WindowComponentProps = {
   openWindow: (id: WindowId, payload?: string) => void;
   closeWindow: (instanceId: string) => void;
   minimizeWindow?: (instanceId: string) => void;
-  notify: (message: string) => void;
+  notify: (message: string, options?: { icon?: string; titleIcon?: string; persistent?: boolean; balloon?: boolean }) => void;
   playSound: (sound: string) => void;
   fadeOutSound?: (sound: string, duration?: number) => void;
   startScreensaver: (mode?: "pipes" | "stars" | "maze" | "mystify" | "flying-windows") => void;
@@ -95,6 +96,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   outlook: { id: "outlook", title: "Outlook Express", icon: "msoutlook", width: 720, height: 500 },
   projects: { id: "projects", title: "Projects", icon: "folder", width: 720, height: 500 },
   games: { id: "games", title: "Games", icon: "joystick", width: 760, height: 560 },
+  guestbook: { id: "guestbook", title: "#floppyy", icon: "guestbook", width: 620, height: 470, minWidth: 460, minHeight: 340 },
   music: { id: "music", title: "Winamp", icon: "winamp", width: 290, height: 560 },
   norton: { id: "norton", title: "Norton Commander", icon: "console", width: 760, height: 500 },
   paint: { id: "paint", title: "untitled - Paint", icon: "paint", width: 800, height: 620 },
@@ -142,5 +144,6 @@ export const desktopIcons: DesktopIconDefinition[] = [
   { id: "notepad", label: "Notepad", icon: "notepad", windowId: "notepad" },
   { id: "netscape", label: "Netscape Navigator", icon: "netscape", windowId: "netscape" },
   { id: "legend", label: "legend", icon: "video", windowId: "mediaplayer", payload: "Rick Astley - Never Gonna Give You Up" },
+  { id: "guestbook", label: "Guest Book", icon: "guestbook", windowId: "guestbook" },
   { id: "share", label: "Share", icon: "garfield", windowId: "share" },
 ];

@@ -26,7 +26,6 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
       }`}
       onPointerDown={onPointerDown}
     >
-      {/* Icon + Title */}
       <div
         className="flex flex-1 items-center gap-[3px] min-w-0"
         onDoubleClick={onMaximize}
@@ -35,9 +34,7 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
         <span className="truncate text-[11px] font-bold text-white">{window.title}</span>
       </div>
 
-      {/* Window controls */}
       <div className="flex gap-[0px]">
-        {/* Minimize */}
         <button
           onPointerDown={stopControlDrag}
           onClick={onMinimize}
@@ -50,7 +47,6 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
         >
           <span className="block h-[2px] w-[6px] bg-black mt-[6px]" />
         </button>
-        {/* Maximize */}
         <button
           onPointerDown={stopControlDrag}
           onClick={onMaximize}
@@ -70,9 +66,7 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
             <span className="block h-[8px] w-[9px] border-[1px] border-black border-t-[2px]" />
           )}
         </button>
-        {/* Spacer before close */}
         <span className="w-[2px]" />
-        {/* Close */}
         <button
           onPointerDown={stopControlDrag}
           onClick={onClose}

@@ -24,13 +24,11 @@ export function WinampPlaylist({ tracks, currentTrack, onSelect, elapsed, totalT
 
   return (
     <div className="winamp-pl w-[275px] mt-0">
-      {/* Playlist Title bar */}
       <div className="winamp-pl-titlebar flex items-center justify-between h-[14px] px-[3px]">
         <span className="text-[8px] font-bold tracking-wider winamp-text-green">WINAMP PLAYLIST</span>
         <button className="winamp-tiny-btn" aria-label="Close Playlist">×</button>
       </div>
 
-      {/* Track list */}
       <div className="winamp-pl-body">
         <div className="winamp-pl-list">
           {tracks.map((track, index) => (
@@ -54,7 +52,6 @@ export function WinampPlaylist({ tracks, currentTrack, onSelect, elapsed, totalT
           ))}
         </div>
 
-        {/* Bottom controls */}
         <div className="winamp-pl-controls">
           <div className="flex gap-[2px]">
             <button className="winamp-pl-btn">ADD</button>

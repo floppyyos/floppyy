@@ -69,7 +69,6 @@ function ErrorDialog({
         padding: 3,
       }}
     >
-      {/* Title bar */}
       <div className="flex h-[18px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] pl-[4px] pr-[2px]">
         <span className="truncate text-[11px] font-bold text-white">{title}</span>
         <span
@@ -83,13 +82,11 @@ function ErrorDialog({
         </span>
       </div>
 
-      {/* Body */}
       <div className="flex items-center gap-[12px] px-[14px] py-[16px]">
         <ErrorIcon />
         <span className="text-[11px] leading-[15px] text-black">{message}</span>
       </div>
 
-      {/* Button */}
       <div className="flex justify-center pb-[12px]">
         <span
           className="win-button min-w-[72px] text-center text-[11px]"
@@ -145,7 +142,6 @@ export function CrashSequence({
   const total = variant === "fatal" ? 1 : TOTAL_DIALOGS;
   const freezeDelay = variant === "fatal" ? 1300 : FREEZE_BEFORE_BSOD;
 
-  // Spawn error dialogs one-by-one, each with the classic error sound.
   useEffect(() => {
     if (phase !== "errors") return;
 
@@ -164,7 +160,6 @@ export function CrashSequence({
     return () => window.clearTimeout(timer);
   }, [shown, phase, playSound, total, freezeDelay]);
 
-  // Blue screen, then reboot the whole OS.
   useEffect(() => {
     if (phase !== "bsod") return;
     const timer = window.setTimeout(onReboot, BSOD_DURATION);

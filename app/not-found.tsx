@@ -4,14 +4,12 @@ export default function NotFound() {
   return (
     <div className="flex h-screen w-screen items-center justify-center bg-[#0000aa] p-8 font-mono text-white">
       <div className="max-w-[720px] w-full text-[14px] leading-[22px]">
-        {/* Title bar */}
         <div className="mb-6 text-center">
           <span className="bg-[#a8a8a8] px-4 py-[2px] text-[#0000aa] font-bold">
             Floppyy
           </span>
         </div>
 
-        {/* Error message */}
         <p className="mb-4">
           An exception 0E has occurred at 0028:C0034B03 in VxD VFAT(01) +
           00001840. This was called from 0028:C001624azz in VxD IOS(04) +
@@ -41,7 +39,6 @@ export default function NotFound() {
           {"\n   "}unsaved information in all applications.
         </p>
 
-        {/* Action prompt */}
         <div className="text-center">
           <Link
             href="/"

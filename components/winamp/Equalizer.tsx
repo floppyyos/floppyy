@@ -45,7 +45,6 @@ export function WinampEqualizer({ on, onToggle, bands, onBandChange, preamp, onP
         </div>
 
         <div className="flex gap-[2px] items-stretch">
-          {/* Preamp */}
           <div className="flex flex-col items-center">
             <EqVerticalSlider value={preamp} onChange={onPreampChange} />
             <span className="text-[6px] winamp-text-dim mt-[2px]">PREAMP</span>

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 
-// ===== GAME CONSTANTS =====
 const TILE = 64;
 const MAP_W = 16;
 const MAP_H = 16;
@@ -17,7 +16,6 @@ const ENEMY_ATTACK_RANGE = 80;
 const ENEMY_DAMAGE = 10;
 const ENEMY_ATTACK_COOLDOWN = 1500;
 
-// ===== MAP DATA =====
 // 1=wall, 2=wall variant, 3=door, 0=empty
 const LEVELS: number[][][] = [
   [
@@ -76,7 +74,6 @@ const LEVELS: number[][][] = [
   ],
 ];
 
-// Enemy spawn positions per level
 const ENEMY_SPAWNS: { x: number; y: number }[][] = [
   [
     { x: 5, y: 5 }, { x: 10, y: 5 }, { x: 7, y: 10 },
@@ -94,7 +91,6 @@ const ENEMY_SPAWNS: { x: number; y: number }[][] = [
   ],
 ];
 
-// ===== TYPES =====
 type Enemy = {
   x: number;
   y: number;
@@ -129,7 +125,6 @@ type GameState = {
   screenFlash: string | null;
 };
 
-// ===== HELPER: Wall color by type =====
 function getWallColor(type: number, side: boolean, dist: number): string {
   const shade = Math.max(0.2, 1 - dist / MAX_DEPTH);
   if (type === 1) {
@@ -150,7 +145,6 @@ function getWallColor(type: number, side: boolean, dist: number): string {
   return `rgb(${r},${g},${b})`;
 }
 
-// ===== MAIN COMPONENT =====
 export function Doom({ playSound }: { playSound: (name: string) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const keysRef = useRef<Set<string>>(new Set());
@@ -207,20 +201,17 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
     playSound("click");
   }, [initLevel, playSound]);
 
-  // ===== RAYCASTING RENDER =====
   const render = useCallback((ctx: CanvasRenderingContext2D, state: GameState) => {
     const W = ctx.canvas.width;
     const H = ctx.canvas.height;
     const map = LEVELS[state.level];
 
-    // Sky - dark red gradient like Doom
     const skyGrad = ctx.createLinearGradient(0, 0, 0, H / 2);
     skyGrad.addColorStop(0, "#1a0000");
     skyGrad.addColorStop(1, "#330000");
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, W, H / 2);
 
-    // Floor - dark gray
     const floorGrad = ctx.createLinearGradient(0, H / 2, 0, H);
     floorGrad.addColorStop(0, "#1a1a1a");
     floorGrad.addColorStop(1, "#333333");
@@ -267,18 +258,15 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
       const correctedDist = dist * Math.cos(rayAngle - state.playerAngle);
       depthBuffer[i] = correctedDist;
 
-      // Calculate wall height
       const wallHeight = Math.min(H * 2, (TILE * H) / (correctedDist || 1));
       const wallTop = (H - wallHeight) / 2;
 
-      // Draw wall strip
       if (hitWall > 0) {
         ctx.fillStyle = getWallColor(hitWall, hitSide, correctedDist);
         ctx.fillRect(i, wallTop, 1, wallHeight);
       }
     }
 
-    // ===== RENDER ENEMIES (sprite-style) =====
     // Sort enemies by distance (far first)
     const enemiesWithDist = state.enemies
       .filter((e) => e.alive)
@@ -293,11 +281,9 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
 
     for (const enemy of enemiesWithDist) {
       let angleDiff = enemy.angle - state.playerAngle;
-      // Normalize angle
       while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
       while (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
 
-      // Check if enemy is in FOV
       if (Math.abs(angleDiff) < HALF_FOV + 0.1) {
         const screenX = (0.5 + angleDiff / FOV) * W;
         const correctedDist = enemy.dist * Math.cos(angleDiff);
@@ -309,14 +295,12 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
         // Check if sprite is behind wall
         const col = Math.floor(screenX);
         if (col >= 0 && col < W && correctedDist < depthBuffer[col]) {
-          // Draw enemy sprite (pixel art style)
           const flash = enemy.hitFlash > Date.now() - 100;
           const baseColor = enemy.type === "imp"
             ? (flash ? "#ff8800" : "#8b2500")
             : (flash ? "#ff4444" : "#4a0000");
           const eyeColor = enemy.type === "imp" ? "#ffff00" : "#ff0000";
 
-          // Body
           ctx.fillStyle = baseColor;
           ctx.fillRect(
             spriteLeft + spriteWidth * 0.2,
@@ -325,7 +309,6 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
             spriteHeight * 0.7
           );
 
-          // Head
           ctx.fillStyle = baseColor;
           ctx.beginPath();
           ctx.arc(
@@ -336,7 +319,6 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
           );
           ctx.fill();
 
-          // Eyes
           ctx.fillStyle = eyeColor;
           ctx.fillRect(
             spriteLeft + spriteWidth * 0.38,
@@ -351,7 +333,6 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
             spriteWidth * 0.08
           );
 
-          // Horns for demons
           if (enemy.type === "demon") {
             ctx.fillStyle = "#660000";
             ctx.fillRect(
@@ -368,7 +349,6 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
             );
           }
 
-          // Arms
           ctx.fillStyle = baseColor;
           ctx.fillRect(
             spriteLeft + spriteWidth * 0.05,
@@ -386,7 +366,6 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
       }
     }
 
-    // ===== RENDER PICKUPS =====
     const pickupsWithDist = state.pickups
       .filter((p) => !p.collected)
       .map((p) => {
@@ -424,23 +403,19 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
       }
     }
 
-    // ===== WEAPON (Shotgun) =====
     const weaponBob = Math.sin(Date.now() / 200) * 2;
     const shooting = state.shooting && Date.now() - state.lastShot < 150;
 
-    // Shotgun barrel
     ctx.fillStyle = "#444";
     ctx.fillRect(W / 2 - 8, H - 120 + weaponBob + (shooting ? -8 : 0), 16, 80);
     ctx.fillStyle = "#333";
     ctx.fillRect(W / 2 - 6, H - 120 + weaponBob + (shooting ? -8 : 0), 12, 75);
 
-    // Shotgun body/grip
     ctx.fillStyle = "#5a3a1a";
     ctx.fillRect(W / 2 - 20, H - 50 + weaponBob, 40, 50);
     ctx.fillStyle = "#4a2a0a";
     ctx.fillRect(W / 2 - 16, H - 45 + weaponBob, 32, 45);
 
-    // Muzzle flash
     if (shooting) {
       ctx.fillStyle = "#ffff00";
       ctx.beginPath();
@@ -452,7 +427,6 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
       ctx.fill();
     }
 
-    // Crosshair
     ctx.strokeStyle = "#00ff00";
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -466,14 +440,12 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
     ctx.lineTo(W / 2, H / 2 + 10);
     ctx.stroke();
 
-    // Screen flash (damage/pickup)
     if (state.screenFlash) {
       ctx.fillStyle = state.screenFlash;
       ctx.fillRect(0, 0, W, H);
     }
   }, []);
 
-  // ===== GAME LOOP =====
   const gameLoop = useCallback(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -484,7 +456,6 @@ export function Doom({ playSound }: { playSound: (name: string) => void }) {
     const map = LEVELS[state.level];
     const now = Date.now();
 
-    // ===== PLAYER MOVEMENT =====
     let moveX = 0;
     let moveY = 0;
     const cos = Math.cos(state.playerAngle);

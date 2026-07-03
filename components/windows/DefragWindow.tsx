@@ -117,7 +117,6 @@ export function DefragWindow({ playSound }: WindowComponentProps) {
       className={`relative flex h-full flex-col bg-[#c0c0c0] ${running && !paused ? "cursor-loading" : ""}`}
       aria-busy={running && !paused}
     >
-      {/* Block map inside a sunken frame */}
       {!detailsHidden && (
         <div
           className="mx-[6px] mt-[6px] flex min-h-0 flex-1 border-2"
@@ -150,11 +149,9 @@ export function DefragWindow({ playSound }: WindowComponentProps) {
 
       {detailsHidden && <div className="flex-1" />}
 
-      {/* Bottom bar: status + progress on the left, 2x2 buttons on the right */}
       <div className="flex items-end justify-between gap-[10px] px-[8px] pb-[8px] pt-[6px]">
         <div className="min-w-0 flex-1">
           <div className="mb-[4px] truncate text-[11px]">{statusText}</div>
-          {/* Segmented progress meter */}
           <div
             className="flex h-[13px] w-[190px] max-w-full items-stretch gap-[1px] border-2 bg-[#c0c0c0] p-[1px]"
             style={{ borderColor: "#808080 #ffffff #ffffff #808080" }}
@@ -199,7 +196,6 @@ export function DefragWindow({ playSound }: WindowComponentProps) {
         </div>
       </div>
 
-      {/* Legend dialog */}
       {showLegend && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/10" onClick={() => setShowLegend(false)}>
           <div className="win-bevel bg-[#c0c0c0] p-[12px] text-[11px]" onClick={(e) => e.stopPropagation()}>

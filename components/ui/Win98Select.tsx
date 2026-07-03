@@ -98,7 +98,6 @@ export function Win98Select({
 
       {open && !disabled && (
         <>
-          {/* outside-click catcher */}
           <div className="fixed inset-0 z-[6000]" onMouseDown={() => setOpen(false)} />
           <ul
             role="listbox"

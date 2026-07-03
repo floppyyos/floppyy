@@ -169,7 +169,6 @@ export function NotepadWindow({ window: win, closeWindow, notify, playSound }: W
 
   return (
     <div className="flex h-full flex-col" onClick={() => setOpenMenu(null)}>
-      {/* Menu bar */}
       <div className="window-menu-bar">
         {Object.keys(MENU_ITEMS).map((menu) => (
           <div key={menu} className="relative" style={{ display: "inline-block" }}>
@@ -212,7 +211,6 @@ export function NotepadWindow({ window: win, closeWindow, notify, playSound }: W
         ))}
       </div>
 
-      {/* Text area */}
       <div className="min-h-0 flex-1 p-0">
         <textarea
           ref={textareaRef}

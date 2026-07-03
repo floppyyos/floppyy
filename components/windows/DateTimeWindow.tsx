@@ -48,7 +48,6 @@ function AnalogClock({ now }: { now: Date }) {
 
   return (
     <svg width="124" height="124" viewBox="0 0 120 120" aria-hidden="true">
-      {/* tick marks */}
       {Array.from({ length: 60 }).map((_, i) => {
         const a = ((i * 6 - 90) * Math.PI) / 180;
         const radius = 52;
@@ -66,7 +65,6 @@ function AnalogClock({ now }: { now: Date }) {
           />
         );
       })}
-      {/* hour hand */}
       <polygon
         points={`${hourTip.x},${hourTip.y} ${hourL.x},${hourL.y} ${cx},${cy} ${hourR.x},${hourR.y}`}
         fill={teal}
@@ -74,7 +72,6 @@ function AnalogClock({ now }: { now: Date }) {
         strokeWidth="0.75"
         strokeLinejoin="round"
       />
-      {/* minute hand */}
       <polygon
         points={`${minuteTip.x},${minuteTip.y} ${minuteL.x},${minuteL.y} ${cx},${cy} ${minuteR.x},${minuteR.y}`}
         fill={teal}
@@ -82,7 +79,6 @@ function AnalogClock({ now }: { now: Date }) {
         strokeWidth="0.75"
         strokeLinejoin="round"
       />
-      {/* second hand */}
       <line x1={secondTail.x} y1={secondTail.y} x2={secondTip.x} y2={secondTip.y} stroke="#b33b3b" strokeWidth="1" />
       <circle cx={cx} cy={cy} r="2.5" fill={teal} stroke={tealDark} strokeWidth="0.75" />
     </svg>
@@ -97,7 +93,6 @@ export function DateTimeWindow({ window: win, closeWindow, notify, playSound }: 
   const [viewMonth, setViewMonth] = useState(() => now.getMonth());
   const [selectedDay, setSelectedDay] = useState(() => now.getDate());
 
-  // Live tick.
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(timer);
@@ -109,7 +104,6 @@ export function DateTimeWindow({ window: win, closeWindow, notify, playSound }: 
       const part = formatted.find((p) => p.type === "timeZoneName");
       if (part) return part.value;
     } catch {
-      /* ignore */
     }
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }, [now]);
@@ -123,7 +117,6 @@ export function DateTimeWindow({ window: win, closeWindow, notify, playSound }: 
   const firstWeekday = new Date(viewYear, viewMonth, 1).getDay();
   const totalDays = daysInMonth(viewYear, viewMonth);
 
-  // Build calendar cells (leading blanks + day numbers).
   const cells: (number | null)[] = [
     ...Array.from({ length: firstWeekday }, () => null),
     ...Array.from({ length: totalDays }, (_, i) => i + 1),
@@ -138,16 +131,13 @@ export function DateTimeWindow({ window: win, closeWindow, notify, playSound }: 
 
   return (
     <div className="flex h-full flex-col text-[11px] text-black">
-      {/* Tab strip (single tab) */}
       <div className="datetime-tabstrip">
         <span className="datetime-tab">Date &amp; Time</span>
       </div>
 
-      {/* Panel */}
       <div className="datetime-panel min-h-0 flex-1">
         <div className="flex h-full flex-col">
           <div className="flex gap-[10px]">
-            {/* Date fieldset */}
             <fieldset className="datetime-fieldset flex-1">
               <legend>Date</legend>
               <div className="flex items-start gap-[6px]">
@@ -175,7 +165,6 @@ export function DateTimeWindow({ window: win, closeWindow, notify, playSound }: 
                 </div>
               </div>
 
-              {/* Calendar */}
               <div className="datetime-calendar mt-[6px]">
                 <div className="grid grid-cols-7">
                   {WEEKDAYS.map((d, i) => (
@@ -213,7 +202,6 @@ export function DateTimeWindow({ window: win, closeWindow, notify, playSound }: 
               </div>
             </fieldset>
 
-            {/* Time fieldset */}
             <fieldset className="datetime-fieldset w-[148px]">
               <legend>Time</legend>
               <div className="flex flex-col items-center">
@@ -240,7 +228,6 @@ export function DateTimeWindow({ window: win, closeWindow, notify, playSound }: 
         </div>
       </div>
 
-      {/* Dialog buttons */}
       <div className="mt-[8px] flex justify-end gap-[6px] px-[2px] pb-[2px]">
         <button className="win-button min-w-[75px]" onClick={close}>OK</button>
         <button className="win-button min-w-[75px]" onClick={close}>Cancel</button>

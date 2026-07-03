@@ -143,9 +143,7 @@ export function ShareWindow({ window: win, closeWindow, notify, playSound }: Win
           url: shareUrl,
         });
         playSound("notification");
-      } catch {
-        // User cancelled
-      }
+      } catch {}
     } else {
       copyLink();
     }
@@ -241,7 +239,6 @@ export function ShareWindow({ window: win, closeWindow, notify, playSound }: Win
 
   return (
     <div className="flex h-full flex-col bg-[#c0c0c0] p-[10px] text-[11px]">
-      {/* Header */}
       <div className="mb-[10px] flex items-center gap-[10px]">
         <img
           src="/icons/garfield.png"
@@ -257,7 +254,6 @@ export function ShareWindow({ window: win, closeWindow, notify, playSound }: Win
         </div>
       </div>
 
-      {/* URL field */}
       <fieldset className="mb-[10px] border border-[#808080] px-[10px] pb-[10px] pt-[4px]">
         <legend className="px-[4px]">Link to share</legend>
         <div className="flex items-center gap-[6px]">
@@ -273,7 +269,6 @@ export function ShareWindow({ window: win, closeWindow, notify, playSound }: Win
         </div>
       </fieldset>
 
-      {/* Share options */}
       <fieldset className="flex min-h-0 flex-1 flex-col border border-[#808080] px-[10px] pb-[10px] pt-[4px]">
         <legend className="px-[4px]">Send using</legend>
         <div
@@ -313,7 +308,6 @@ export function ShareWindow({ window: win, closeWindow, notify, playSound }: Win
         Tip: click to select, double-click to share.
       </div>
 
-      {/* Install PWA */}
       <fieldset className="mt-[10px] border border-[#808080] px-[10px] pb-[8px] pt-[4px]">
         <legend className="px-[4px]">Install</legend>
         <div className="flex items-start gap-[8px]">
@@ -327,7 +321,6 @@ export function ShareWindow({ window: win, closeWindow, notify, playSound }: Win
         </div>
       </fieldset>
 
-      {/* Buttons */}
       <div className="mt-[10px] flex justify-end gap-[6px]">
         <button onClick={() => closeWindow(win.instanceId)} className="win-button min-w-[75px]">
           Close
