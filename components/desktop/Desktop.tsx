@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { BootScreen, BootMode } from "@/components/boot/BootScreen";
+import { WindowLoading } from "@/components/windows/WindowLoading";
 import { ContextMenu } from "./ContextMenu";
 import { DesktopIcon } from "./DesktopIcon";
 import { NotificationBalloon } from "./NotificationBalloon";
@@ -14,21 +16,15 @@ import { CalculatorWindow } from "@/components/windows/CalculatorWindow";
 import { ComputerWindow } from "@/components/windows/ComputerWindow";
 import { ControlPanelWindow } from "@/components/windows/ControlPanelWindow";
 import { DateTimeWindow } from "@/components/windows/DateTimeWindow";
-import { DoomWindow } from "@/components/windows/DoomWindow";
 import { GamesWindow } from "@/components/windows/GamesWindow";
 import { GuestbookWindow } from "@/components/windows/GuestbookWindow";
 import { InternetWindow } from "@/components/windows/InternetWindow";
-import { IEBrowserWindow } from "@/components/windows/IEBrowserWindow";
-import { NetscapeWindow } from "@/components/windows/NetscapeWindow";
 import { MsDosWindow } from "@/components/windows/MsDosWindow";
-import { MediaPlayerWindow } from "@/components/windows/MediaPlayerWindow";
 import { MinesweeperWindow } from "@/components/windows/MinesweeperWindow";
 import { SolitaireWindow } from "@/components/windows/SolitaireWindow";
 import { MusicWindow } from "@/components/windows/MusicWindow";
-import { NortonCommanderWindow } from "@/components/windows/NortonCommanderWindow";
 import { NotepadWindow } from "@/components/windows/NotepadWindow";
 import { OutlookWindow } from "@/components/windows/OutlookWindow";
-import { PaintWindow } from "@/components/windows/PaintWindow";
 import { ProjectDetailsWindow } from "@/components/windows/ProjectDetailsWindow";
 import { ProjectsWindow } from "@/components/windows/ProjectsWindow";
 import { RunWindow } from "@/components/windows/RunWindow";
@@ -52,6 +48,32 @@ import { useWindowManager } from "@/hooks/useWindowManager";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
 import { desktopIcons, WindowComponentProps, WindowId } from "@/lib/windows";
 import { DEFAULT_WALLPAPER, isWallpaperId, WALLPAPERS, WallpaperId, wallpaperStyle } from "@/lib/wallpapers";
+
+// Heavy windows are loaded on demand so they stay out of the initial bundle.
+const DoomWindow = dynamic(() => import("@/components/windows/DoomWindow").then((m) => m.DoomWindow), {
+  ssr: false,
+  loading: () => <WindowLoading />,
+});
+const PaintWindow = dynamic(() => import("@/components/windows/PaintWindow").then((m) => m.PaintWindow), {
+  ssr: false,
+  loading: () => <WindowLoading />,
+});
+const NortonCommanderWindow = dynamic(
+  () => import("@/components/windows/NortonCommanderWindow").then((m) => m.NortonCommanderWindow),
+  { ssr: false, loading: () => <WindowLoading /> },
+);
+const IEBrowserWindow = dynamic(() => import("@/components/windows/IEBrowserWindow").then((m) => m.IEBrowserWindow), {
+  ssr: false,
+  loading: () => <WindowLoading />,
+});
+const NetscapeWindow = dynamic(() => import("@/components/windows/NetscapeWindow").then((m) => m.NetscapeWindow), {
+  ssr: false,
+  loading: () => <WindowLoading />,
+});
+const MediaPlayerWindow = dynamic(() => import("@/components/windows/MediaPlayerWindow").then((m) => m.MediaPlayerWindow), {
+  ssr: false,
+  loading: () => <WindowLoading />,
+});
 
 type MenuState = { x: number; y: number; target?: string } | null;
 type IconPosition = { x: number; y: number };

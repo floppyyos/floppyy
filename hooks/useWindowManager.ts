@@ -1,15 +1,70 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DesktopWindow, WindowId, windowDefinitions } from "@/lib/windows";
+
+const STORAGE_KEY = "floppyy-windows";
+const SAVE_DEBOUNCE_MS = 400;
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
+// Restore open windows from a previous session, dropping anything invalid or
+// ephemeral and clamping geometry so nothing lands off-screen.
+function loadPersistedWindows(): DesktopWindow[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    return parsed.flatMap((entry): DesktopWindow[] => {
+      if (!entry || typeof entry !== "object") return [];
+      const item = entry as Partial<DesktopWindow>;
+      const definition = item.id ? windowDefinitions[item.id] : undefined;
+      if (!definition || definition.ephemeral) return [];
+      if (typeof item.instanceId !== "string") return [];
+      if (
+        typeof item.x !== "number" ||
+        typeof item.y !== "number" ||
+        typeof item.width !== "number" ||
+        typeof item.height !== "number"
+      ) {
+        return [];
+      }
+
+      const width = clamp(item.width, definition.minWidth ?? 200, Math.max(200, viewportWidth - 16));
+      const height = clamp(item.height, definition.minHeight ?? 120, Math.max(120, viewportHeight - 42));
+      return [
+        {
+          instanceId: item.instanceId,
+          id: item.id as WindowId,
+          title: typeof item.title === "string" ? item.title : definition.title,
+          icon: typeof item.icon === "string" ? item.icon : definition.icon,
+          x: clamp(item.x, 0, Math.max(0, viewportWidth - 80)),
+          y: clamp(item.y, 0, Math.max(0, viewportHeight - 60)),
+          width,
+          height,
+          minimized: Boolean(item.minimized),
+          maximized: Boolean(item.maximized),
+          zIndex: typeof item.zIndex === "number" ? item.zIndex : 10,
+          payload: typeof item.payload === "string" ? item.payload : undefined,
+        },
+      ];
+    });
+  } catch {
+    return [];
+  }
+}
+
 export function useWindowManager() {
-  const [windows, setWindows] = useState<DesktopWindow[]>([]);
-  const [zCounter, setZCounter] = useState(10);
+  const [windows, setWindows] = useState<DesktopWindow[]>(loadPersistedWindows);
+  const [zCounter, setZCounter] = useState(() => windows.reduce((max, item) => Math.max(max, item.zIndex), 10));
 
   const nextZ = useCallback(() => {
     const z = zCounter + 1;
@@ -136,6 +191,20 @@ export function useWindowManager() {
   const minimizeAll = useCallback(() => {
     setWindows((items) => items.map((item) => ({ ...item, minimized: true })));
   }, []);
+
+  // Debounced persistence of the open windows (skipping ephemeral dialogs).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const timer = window.setTimeout(() => {
+      try {
+        const toSave = windows.filter((item) => !windowDefinitions[item.id]?.ephemeral);
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+      } catch {
+        /* ignore quota/serialization errors */
+      }
+    }, SAVE_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [windows]);
 
   const activeWindow = useMemo(
     () =>

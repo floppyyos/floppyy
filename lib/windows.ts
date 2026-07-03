@@ -56,6 +56,8 @@ export type WindowDefinition = {
   height: number;
   minWidth?: number;
   minHeight?: number;
+  // One-shot windows that should not be restored on reload (dialogs/animations).
+  ephemeral?: boolean;
 };
 
 export type WindowComponentProps = {
@@ -81,12 +83,12 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   computer: { id: "computer", title: "My Computer", icon: "computer", width: 720, height: 520 },
   "control-panel": { id: "control-panel", title: "Control Panel", icon: "control-panel", width: 600, height: 420 },
   datetime: { id: "datetime", title: "Date/Time Properties", icon: "datetime", width: 418, height: 430, minWidth: 418, minHeight: 430 },
-  defrag: { id: "defrag", title: "Defragmenting Drive C", icon: "computer", width: 500, height: 340 },
+  defrag: { id: "defrag", title: "Defragmenting Drive C", icon: "computer", width: 500, height: 340, ephemeral: true },
   help: { id: "help", title: "Floppyy Help", icon: "help", width: 560, height: 440, minWidth: 460, minHeight: 360 },
   documents: { id: "documents", title: "My Documents", icon: "documents", width: 720, height: 500 },
   doom: { id: "doom", title: "DOOM", icon: "doom", width: 680, height: 510, minWidth: 480, minHeight: 360 },
   drive: { id: "drive", title: "Local Disk", icon: "drive-c", width: 780, height: 550 },
-  internet: { id: "internet", title: "Internet", icon: "dialup", width: 360, height: 508 },
+  internet: { id: "internet", title: "Internet", icon: "dialup", width: 360, height: 508, ephemeral: true },
   "ie-browser": { id: "ie-browser", title: "Microsoft Internet Explorer", icon: "ie", width: 840, height: 580 },
   netscape: { id: "netscape", title: "Netscape Navigator", icon: "netscape", width: 760, height: 520 },
   msdos: { id: "msdos", title: "MS-DOS Prompt", icon: "prompt", width: 640, height: 400 },
