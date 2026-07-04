@@ -17,7 +17,7 @@ export const projects: Project[] = [
     status: "Online",
     stack: ["macOS", "Homebrew", "Desktop"],
     site: "https://www.brewwery.com",
-    github: "https://github.com/brewwery",
+    github: "https://github.com/brewwery/brewwery",
     details: "GUI for Homebrew",
   },
   {
@@ -27,7 +27,7 @@ export const projects: Project[] = [
     status: "Online",
     stack: ["Schema Design", "Developer Tools", "Product Teams"],
     site: "https://www.titanbase.run",
-    github: "https://github.com/titanbaserun",
+    github: "https://github.com/titanbaserun/titanbase",
     details: "Visual Schema Designer For Developers and Product Teams.",
   },
   {
@@ -37,7 +37,7 @@ export const projects: Project[] = [
     status: "Online",
     stack: ["AI Infrastructure", "Registry", "Telemetry"],
     site: "https://www.openmodels.run",
-    github: "https://github.com/openmodelsrun",
+    github: "https://github.com/openmodelsrun/openmodels",
     details: "Open Registry & Telemetry for AI Infrastructure.",
   },
   {
@@ -57,7 +57,7 @@ export const projects: Project[] = [
     status: "Online",
     stack: ["Retro Web", "Browser Desktop", "Nostalgia"],
     site: "https://www.floppyy.com",
-    github: "https://github.com/floppyyos",
+    github: "https://github.com/floppyyos/floppyy",
     details: "Floppyy is a browser desktop built on pure nostalgia.",
   },
 ];

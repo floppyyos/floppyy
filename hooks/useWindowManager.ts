@@ -10,8 +10,6 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-// Restore open windows from a previous session, dropping anything invalid or
-// ephemeral and clamping geometry so nothing lands off-screen.
 function loadPersistedWindows(): DesktopWindow[] {
   if (typeof window === "undefined") return [];
   try {
@@ -192,7 +190,6 @@ export function useWindowManager() {
     setWindows((items) => items.map((item) => ({ ...item, minimized: true })));
   }, []);
 
-  // Debounced persistence of the open windows (skipping ephemeral dialogs).
   useEffect(() => {
     if (typeof window === "undefined") return;
     const timer = window.setTimeout(() => {

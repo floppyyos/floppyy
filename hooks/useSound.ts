@@ -69,7 +69,6 @@ export function useSound() {
 
     applyTo(document.body);
 
-    // Also cover the in-memory audio elements used for UI sound effects.
     Object.values(audioCache.current).forEach((audio) => {
       audio.muted = muted;
       audio.volume = volume;

@@ -25,4 +25,5 @@ export const toneMap: Record<string, [number, number, OscillatorType]> = {
   "dialup-02": [1000, 2000, "sawtooth"],
   "dialup-03": [1000, 2000, "sawtooth"],
   icq: [660, 440, "sine"],
+  mail: [523, 784, "sine"],
 };

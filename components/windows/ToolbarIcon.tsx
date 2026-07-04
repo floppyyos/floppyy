@@ -27,6 +27,13 @@ const BITMAP_ICONS = new Set([
   "properties",
   "refresh",
   "views",
+  "stop",
+  "home",
+  "search",
+  "favorites",
+  "history",
+  "print",
+  "security",
 ]);
 
 export function ToolbarIcon({ name, size = 20 }: Props) {

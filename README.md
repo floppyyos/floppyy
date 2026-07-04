@@ -44,7 +44,8 @@ Just a small machine for good old internet memories.
 - **Internet Explorer** — loads real 1998 websites via Wayback Machine
 - **Netscape Navigator** — retro alternative browser
 - **MS-DOS Prompt** — command-line interface with working commands
-- **Outlook Express** — email client UI
+- **Outlook Express** — three-pane email client (Inbox / Outbox / Sent / Deleted), Compose that sends to the Outbox and "delivers" a copy to the Inbox with a *You've got mail* chime, plus Reply and Delete
+- **Guest Book (#floppyy)** — ICQ/mIRC-style chat guestbook where visitors sign in real time (per-IP rate limiting, honeypot and stop-word spam filtering); new signings also arrive as mail in Outlook Express
 - **Norton Commander** — dual-pane file manager
 - **Windows Media Player** — video playback
 - **Winamp** — music player (frameless, authentic skin)
@@ -54,7 +55,8 @@ Just a small machine for good old internet memories.
 - **Date/Time Properties** — live clock with analog face, calendar, and time zone (double-click the taskbar clock)
 - **Disk Defragmenter** — animated defrag utility
 - **Recycle Bin** — holds deleted desktop icons, restore or empty
-- **Run** dialog, **Share** dialog, and **About / Credits**
+- **Run** dialog — authentic fixed-size dialog with a dropdown listing recent history and every available command
+- **Share** dialog, and **About / Credits** — with a classic GeoCities-style seven-segment "You are visitor #…" counter
 - **Help** — Floppyy Help (getting started, platform-aware keyboard shortcuts, and the full list of secrets)
 - **Screensavers** — Pipes, Starfield, Maze, Mystify, Flying Windows
 
@@ -70,6 +72,8 @@ Just a small machine for good old internet memories.
 - Safe Mode boot option
 - Shut Down with "It's now safe to turn off your computer" screen
 - Share dialog for social sharing
+- **Window session persistence** — open windows and their positions/sizes are restored on reload (one-shot dialogs excluded)
+- **Code-split windows** — heavy apps (Doom, Paint, Internet Explorer, Netscape, Media Player, Norton Commander) are lazy-loaded on demand to keep the first paint fast
 
 ## Easter Eggs
 
@@ -94,6 +98,7 @@ Floppyy occasionally fights back. A few things to try — the full list lives in
 - **Canvas API** — Paint app, Doom renderer
 - **HTML5 Video** — Media Player
 - **Service Worker** — offline caching
+- **Route Handlers + Postgres + Redis** — Guest Book & visitor counter (graceful in-memory fallback when unconfigured)
 
 ## Getting Started
 
@@ -112,10 +117,6 @@ npm start
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Browser Support
-
-Works in all modern browsers. Best experienced on desktop at 1024×768 or higher.
 
 ## License
 

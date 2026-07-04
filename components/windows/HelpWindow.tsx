@@ -83,6 +83,8 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
           <li><b>Right-click the desktop</b> for arrange, refresh and properties.</li>
           <li><b>Change the wallpaper</b> — right-click the desktop (or My Computer) → Properties → Background, and pick from the classic Windows 98 wallpapers.</li>
           <li><b>Go online</b> — open Dial-Up Networking, connect, then browse with Internet Explorer or Netscape.</li>
+          <li><b>Sign the Guest Book</b> — open <b>Guest Book (#floppyy)</b> to leave a message in the ICQ/mIRC-style chat. New signings also land in Outlook Express as mail.</li>
+          <li><b>Run anything</b> — open <b>Run...</b> and click the arrow to browse recent commands and the full list of programs you can launch.</li>
         </ul>
       ),
     },

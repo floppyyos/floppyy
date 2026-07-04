@@ -1,7 +1,12 @@
 "use client";
 
-import { DesktopWindow } from "@/lib/windows";
+import { DesktopWindow, windowDefinitions } from "@/lib/windows";
 import { FloppyyIcon } from "@/components/desktop/FloppyyIcon";
+
+const CONTROL_STYLE = {
+  background: "#c0c0c0",
+  boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+} as const;
 
 type Props = {
   window: DesktopWindow;
@@ -17,6 +22,8 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
     event.stopPropagation();
   };
 
+  const isDialog = windowDefinitions[window.id]?.dialog ?? false;
+
   return (
     <div
       className={`flex h-[20px] items-center px-[2px] cursor-move select-none touch-none ${
@@ -28,12 +35,36 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
     >
       <div
         className="flex flex-1 items-center gap-[3px] min-w-0"
-        onDoubleClick={onMaximize}
+        onDoubleClick={isDialog ? undefined : onMaximize}
       >
         <FloppyyIcon type={window.icon} size={14} />
         <span className="truncate text-[11px] font-bold text-white">{window.title}</span>
       </div>
 
+      {isDialog ? (
+        <div className="flex gap-[0px]">
+          <button
+            onPointerDown={stopControlDrag}
+            className="flex h-[16px] w-[16px] items-center justify-center text-[11px] font-bold leading-none text-black"
+            style={CONTROL_STYLE}
+            aria-label="Help"
+          >
+            ?
+          </button>
+          <span className="w-[2px]" />
+          <button
+            onPointerDown={stopControlDrag}
+            onClick={onClose}
+            className="flex h-[16px] w-[16px] items-center justify-center"
+            style={CONTROL_STYLE}
+            aria-label="Close"
+          >
+            <svg width="8" height="7" viewBox="0 0 8 7" fill="none">
+              <path d="M0 0L3 3.5L0 7H1L4 3.5L7 7H8L5 3.5L8 0H7L4 3.5L1 0H0Z" fill="#000" />
+            </svg>
+          </button>
+        </div>
+      ) : (
       <div className="flex gap-[0px]">
         <button
           onPointerDown={stopControlDrag}
@@ -82,6 +113,7 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
           </svg>
         </button>
       </div>
+      )}
     </div>
   );
 }

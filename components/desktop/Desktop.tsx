@@ -1007,7 +1007,7 @@ export default function Desktop() {
             setDialupDone(false);
             setConnectedAt(null);
             setConnectionStatusOpen(false);
-            notify("Disconnected from the Internet.");
+            notify("Disconnected from the Internet.", { balloon: true });
           }}
         />
       )}

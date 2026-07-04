@@ -26,6 +26,10 @@ export const commands: Record<string, WindowId> = {
   mine: "minesweeper",
   solitaire: "solitaire",
   contact: "outlook",
+  outlook: "outlook",
+  mail: "outlook",
+  guestbook: "guestbook",
+  irc: "guestbook",
   help: "help",
 };
 

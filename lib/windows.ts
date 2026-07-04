@@ -56,8 +56,8 @@ export type WindowDefinition = {
   height: number;
   minWidth?: number;
   minHeight?: number;
-  // One-shot windows that should not be restored on reload (dialogs/animations).
   ephemeral?: boolean;
+  dialog?: boolean;
 };
 
 export type WindowComponentProps = {
@@ -80,7 +80,7 @@ export type WindowComponentProps = {
 export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   about: { id: "about", title: "Welcome to Floppyy", icon: "computer", width: 560, height: 500 },
   calculator: { id: "calculator", title: "Calculator", icon: "calculator", width: 260, height: 270 },
-  computer: { id: "computer", title: "My Computer", icon: "computer", width: 720, height: 520 },
+  computer: { id: "computer", title: "My Computer", icon: "computer", width: 740, height: 520 },
   "control-panel": { id: "control-panel", title: "Control Panel", icon: "control-panel", width: 600, height: 420 },
   datetime: { id: "datetime", title: "Date/Time Properties", icon: "datetime", width: 418, height: 430, minWidth: 418, minHeight: 430 },
   defrag: { id: "defrag", title: "Defragmenting Drive C", icon: "computer", width: 500, height: 340, ephemeral: true },
@@ -105,7 +105,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   "recycle-bin": { id: "recycle-bin", title: "Recycle Bin", icon: "trash", width: 720, height: 500 },
   screensaver: { id: "screensaver", title: "Display Properties", icon: "monitor", width: 440, height: 580 },
   solitaire: { id: "solitaire", title: "Solitaire", icon: "cards", width: 720, height: 500, minWidth: 560, minHeight: 400 },
-  run: { id: "run", title: "Run", icon: "run", width: 400, height: 192 },
+  run: { id: "run", title: "Run", icon: "run", width: 380, height: 168, dialog: true },
   settings: { id: "settings", title: "Settings", icon: "gears", width: 520, height: 380 },
   share: { id: "share", title: "Send to a Friend", icon: "garfield", width: 400, height: 555 },
   "project-details": {

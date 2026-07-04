@@ -214,10 +214,21 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected, cra
         </div>
         <button
           onClick={handleGo}
-          className="h-[18px] px-2 border border-[#808080] bg-[#c0c0c0] text-[10px] hover:bg-[#dfdfdf]"
+          className="group flex h-[18px] items-center gap-[3px] border border-[#808080] bg-[#c0c0c0] px-2 text-[10px] hover:bg-[#dfdfdf]"
           style={{ background: "#c0c0c0" }}
         >
-          ↗ Go
+          <img
+            src="/icons/toolbar/go.png"
+            alt=""
+            width={12}
+            height={14}
+            className="grayscale transition-[filter] duration-150 group-hover:grayscale-0"
+            style={{ imageRendering: "pixelated" }}
+            draggable={false}
+          />
+          <span className="text-[11px] leading-none">
+            Go
+          </span>
         </button>
       </div>
 

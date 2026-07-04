@@ -1,4 +1,5 @@
-import postgres from "postgres";
+import type postgres from "postgres";
+import { getSql, isPersistent as dbIsPersistent } from "@/lib/server/postgres";
 import {
   DEFAULT_PAGE_SIZE,
   GuestbookMessage,
@@ -26,18 +27,7 @@ function clampLimit(limit?: number): number {
 }
 
 // ── Postgres store ────────────────────────────────────────────────────────
-let sql: postgres.Sql | null = null;
 let schemaReady: Promise<void> | null = null;
-
-function getSql(): postgres.Sql | null {
-  if (!process.env.DATABASE_URL) return null;
-  sql ??= postgres(process.env.DATABASE_URL, {
-    max: 5,
-    idle_timeout: 20,
-    connect_timeout: 10,
-  });
-  return sql;
-}
 
 function ensureSchema(client: postgres.Sql): Promise<void> {
   if (!schemaReady) {
@@ -176,5 +166,5 @@ export function guestbookStore(): Store {
 }
 
 export function isPersistent(): boolean {
-  return Boolean(process.env.DATABASE_URL);
+  return dbIsPersistent();
 }

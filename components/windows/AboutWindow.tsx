@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
+import { VisitorCounter } from "@/components/ui/VisitorCounter";
 
 type AboutPanel = "welcome" | "nostalgia" | "credits" | "connect";
 
@@ -76,7 +77,7 @@ export function AboutWindow({ window, closeWindow, notify, playSound }: WindowCo
           </div>
         </aside>
 
-        <main className="relative min-w-0 flex-1 px-[16px] py-[18px]">
+        <main className="relative min-h-0 min-w-0 flex-1 overflow-auto px-[16px] py-[18px]">
           <div
             className="pointer-events-none absolute bottom-[14px] right-[18px] h-[150px] w-[190px] opacity-20"
             style={{
@@ -171,6 +172,9 @@ function PanelContent({
       <button className="win-button mt-[2px] min-w-[92px]" onClick={() => setPanel("credits")}>
         Credits
       </button>
+      <div className="mt-[6px] border-t border-[#d0d0d0] pt-[12px]">
+        <VisitorCounter />
+      </div>
     </section>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { DesktopWindow } from "@/lib/windows";
+import { DesktopWindow, windowDefinitions } from "@/lib/windows";
 import { WindowTitleBar } from "./WindowTitleBar";
 
 type Props = {
@@ -71,7 +71,7 @@ export function WindowFrame({ window, active, children, onFocus, onClose, onMini
         {children}
       </div>
 
-      {!window.maximized && (
+      {!window.maximized && !windowDefinitions[window.id]?.dialog && (
         <div
           className="absolute bottom-0 right-0 h-[16px] w-[16px] cursor-se-resize touch-none"
           onPointerDown={(event) => {
