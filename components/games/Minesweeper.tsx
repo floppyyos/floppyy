@@ -3,23 +3,19 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { GameMenuBar } from "./GameChrome";
+import { FloppyyIcon } from "@/components/desktop/FloppyyIcon";
 import { Win98ErrorDialog } from "@/components/windows/Win98ErrorDialog";
 
 const cellSize = 16;
 
 type Difficulty = "beginner" | "intermediate" | "expert";
+type Level = Difficulty | "custom";
 type Config = { cols: number; rows: number; mines: number };
 
-const DIFFICULTIES: Record<Difficulty, Config> = {
+const PRESETS: Record<Difficulty, Config> = {
   beginner: { cols: 9, rows: 9, mines: 10 },
   intermediate: { cols: 16, rows: 16, mines: 40 },
   expert: { cols: 30, rows: 16, mines: 99 },
-};
-
-const DIFFICULTY_LABEL: Record<Difficulty, string> = {
-  beginner: "Beginner",
-  intermediate: "Intermediate",
-  expert: "Expert",
 };
 
 const emptyBest = (): Record<Difficulty, number | null> => ({
@@ -123,8 +119,14 @@ function FaceButton({ face, onClick }: { face: Face; onClick: () => void }) {
   );
 }
 
-export function Minesweeper({ playSound }: { playSound: (name: string) => void }) {
-  const [difficulty, setDifficulty] = useState<Difficulty>("intermediate");
+export function Minesweeper({ playSound, onExit }: { playSound: (name: string) => void; onExit?: () => void }) {
+  const [level, setLevel] = useState<Level>("intermediate");
+  const [customConfig, setCustomConfig] = useState<Config>({ cols: 16, rows: 16, mines: 40 });
+  const [marks, setMarks] = useState(true);
+  const [color, setColor] = useState(true);
+  const [showAbout, setShowAbout] = useState(false);
+  const [showBestTimes, setShowBestTimes] = useState(false);
+  const [showCustom, setShowCustom] = useState(false);
   const [bestTimes, setBestTimes] = useState<Record<Difficulty, number | null>>(emptyBest);
   const [mines, setMines] = useState<Set<number>>(new Set());
   const [open, setOpen] = useState<Set<number>>(new Set());
@@ -138,7 +140,7 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
   const [face, setFace] = useState<Face>("happy");
   const [prankError, setPrankError] = useState(false);
 
-  const { cols, rows, mines: totalMines } = DIFFICULTIES[difficulty];
+  const { cols, rows, mines: totalMines } = level === "custom" ? customConfig : PRESETS[level];
   const totalCells = cols * rows;
 
   const counts = useMemo(() => computeCounts(mines, cols, rows), [mines, cols, rows]);
@@ -168,11 +170,12 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
     if (!won) return;
     setFace("won");
     playSound("notification");
+    if (level === "custom") return; // custom games don't record best times
     const finalTime = Math.max(1, Math.floor((Date.now() - startedAt) / 1000));
     setBestTimes((prev) => {
-      const current = prev[difficulty];
+      const current = prev[level];
       if (current !== null && current <= finalTime) return prev;
-      const next = { ...prev, [difficulty]: finalTime };
+      const next = { ...prev, [level]: finalTime };
       try {
         globalThis.localStorage.setItem("floppyy-mines-best", JSON.stringify(next));
       } catch {
@@ -180,7 +183,7 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
       }
       return next;
     });
-  }, [won, playSound, difficulty, startedAt]);
+  }, [won, playSound, level, startedAt]);
 
   const reset = () => {
     const nextNow = Date.now();
@@ -198,8 +201,8 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
     playSound("click");
   };
 
-  const changeDifficulty = (level: Difficulty) => {
-    setDifficulty(level);
+  const changeLevel = (next: Level) => {
+    setLevel(next);
     const nextNow = Date.now();
     setMines(new Set());
     setOpen(new Set());
@@ -213,6 +216,19 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
     setFace("happy");
     setPrankError(false);
     playSound("click");
+  };
+
+  const applyCustom = (cfg: Config) => {
+    const clamped: Config = {
+      rows: Math.max(8, Math.min(24, Math.round(cfg.rows) || 8)),
+      cols: Math.max(8, Math.min(30, Math.round(cfg.cols) || 8)),
+      mines: 0,
+    };
+    const maxMines = clamped.rows * clamped.cols - 1;
+    clamped.mines = Math.max(1, Math.min(maxMines, Math.round(cfg.mines) || 1));
+    setCustomConfig(clamped);
+    setShowCustom(false);
+    changeLevel("custom");
   };
 
   const loseWith = (death: number, mineSet: Set<number>) => {
@@ -288,7 +304,7 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
         n.delete(index);
         return n;
       });
-      setQuestions((s) => new Set(s).add(index));
+      if (marks) setQuestions((s) => new Set(s).add(index));
     } else if (questions.has(index)) {
       setQuestions((s) => {
         const n = new Set(s);
@@ -320,23 +336,32 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
   };
 
   return (
-    <div className="inline-flex flex-col bg-[#c0c0c0] text-[11px]">
-      <GameMenuBar items={[{ label: "Game", onClick: reset }, { label: "Help", onClick: () => playSound("click") }]} />
-
-      <div className="flex items-center gap-[3px] px-[6px] py-[3px] text-[10px]">
-        {(["beginner", "intermediate", "expert"] as Difficulty[]).map((level) => (
-          <button
-            key={level}
-            className={`win-button px-[6px] py-0 ${difficulty === level ? "active" : ""}`}
-            onClick={() => changeDifficulty(level)}
-          >
-            {DIFFICULTY_LABEL[level]}
-          </button>
-        ))}
-        <span className="ml-auto tabular-nums">
-          Best: {bestTimes[difficulty] !== null ? `${bestTimes[difficulty]}s` : "—"}
-        </span>
-      </div>
+    <div className="relative inline-flex flex-col bg-[#c0c0c0] text-[11px]">
+      <GameMenuBar
+        items={[
+          {
+            label: "Game",
+            menu: [
+              { label: "New", shortcut: "F2", onClick: reset },
+              { label: "Beginner", separatorBefore: true, checked: level === "beginner", onClick: () => changeLevel("beginner") },
+              { label: "Intermediate", checked: level === "intermediate", onClick: () => changeLevel("intermediate") },
+              { label: "Expert", checked: level === "expert", onClick: () => changeLevel("expert") },
+              { label: "Custom...", checked: level === "custom", onClick: () => setShowCustom(true) },
+              { label: "Marks (?)", separatorBefore: true, checked: marks, onClick: () => { setMarks((m) => !m); playSound("click"); } },
+              { label: "Color", checked: color, onClick: () => { setColor((c) => !c); playSound("click"); } },
+              { label: "Best Times...", separatorBefore: true, onClick: () => { setShowBestTimes(true); playSound("click"); } },
+              { label: "Exit", separatorBefore: true, onClick: () => (onExit ? onExit() : undefined) },
+            ],
+          },
+          {
+            label: "Help",
+            menu: [
+              { label: "Help Topics", onClick: () => playSound("click") },
+              { label: "About Minesweeper", separatorBefore: true, onClick: () => { setShowAbout(true); playSound("click"); } },
+            ],
+          },
+        ]}
+      />
 
       <div
         className="bg-[#c0c0c0] p-[6px]"
@@ -406,6 +431,195 @@ export function Minesweeper({ playSound }: { playSound: (name: string) => void }
           onClose={() => setPrankError(false)}
         />
       )}
+
+      {showAbout && <AboutMinesweeperDialog onClose={() => setShowAbout(false)} />}
+      {showBestTimes && (
+        <BestTimesDialog
+          bestTimes={bestTimes}
+          onReset={() => {
+            const cleared = emptyBest();
+            setBestTimes(cleared);
+            try {
+              globalThis.localStorage.setItem("floppyy-mines-best", JSON.stringify(cleared));
+            } catch {
+              /* ignore */
+            }
+            playSound("click");
+          }}
+          onClose={() => setShowBestTimes(false)}
+        />
+      )}
+      {showCustom && (
+        <CustomFieldDialog
+          initial={level === "custom" ? customConfig : PRESETS.intermediate}
+          onCancel={() => setShowCustom(false)}
+          onApply={applyCustom}
+        />
+      )}
     </div>
+  );
+}
+
+/** Shared Windows 98 dialog frame used by the Minesweeper pop-ups. */
+function MsDialog({
+  title,
+  width = 340,
+  onClose,
+  children,
+}: {
+  title: string;
+  width?: number;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="absolute inset-0 z-[9000] flex items-center justify-center bg-black/20"
+      onPointerDown={onClose}
+    >
+      <div
+        className="select-none bg-[#c0c0c0] text-black"
+        style={{
+          width,
+          boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+          padding: 3,
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label={title}
+      >
+        <div className="flex h-[18px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] pl-[4px] pr-[2px]">
+          <span className="truncate text-[11px] font-bold text-white">{title}</span>
+          <button
+            className="flex h-[14px] w-[16px] items-center justify-center text-[10px] leading-none text-black"
+            style={{ background: "#c0c0c0", boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf" }}
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function AboutMinesweeperDialog({ onClose }: { onClose: () => void }) {
+  return (
+    <MsDialog title="About Minesweeper" width={360} onClose={onClose}>
+      <div className="flex gap-[14px] px-[14px] pb-[10px] pt-[16px]">
+        <FloppyyIcon type="gears" size={40} />
+        <div className="text-[11px] leading-[16px]">
+          <div>(R) Minesweeper</div>
+          <div>Windows 98</div>
+          <div>Copyright (C) 1981-1998 Microsoft Corp.</div>
+          <div>by Robert Donner and Curt Johnson</div>
+        </div>
+      </div>
+      <div className="mx-[14px] my-[6px] h-px bg-[#808080] shadow-[0_1px_#fff]" />
+      <div className="px-[14px] pb-[14px] text-[11px] leading-[18px]">
+        <div className="flex justify-between gap-[20px]">
+          <span>Physical memory available to Windows:</span>
+          <span>130,588 KB</span>
+        </div>
+        <div className="flex justify-between gap-[20px]">
+          <span>System resources:</span>
+          <span>97% Free</span>
+        </div>
+      </div>
+      <div className="flex justify-end px-[14px] pb-[14px]">
+        <button className="win-button min-w-[80px] text-[11px]" onClick={onClose} autoFocus>
+          OK
+        </button>
+      </div>
+    </MsDialog>
+  );
+}
+
+function BestTimesDialog({
+  bestTimes,
+  onReset,
+  onClose,
+}: {
+  bestTimes: Record<Difficulty, number | null>;
+  onReset: () => void;
+  onClose: () => void;
+}) {
+  const rows: Array<[Difficulty, string]> = [
+    ["beginner", "Beginner"],
+    ["intermediate", "Intermediate"],
+    ["expert", "Expert"],
+  ];
+  return (
+    <MsDialog title="Fastest Mine Sweepers" width={280} onClose={onClose}>
+      <div className="px-[16px] py-[14px] text-[11px]">
+        {rows.map(([key, label]) => (
+          <div key={key} className="flex justify-between gap-[16px] leading-[20px]">
+            <span>{label}:</span>
+            <span className="tabular-nums">
+              {bestTimes[key] !== null ? `${bestTimes[key]} seconds` : "999 seconds"}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-end gap-[8px] px-[16px] pb-[14px]">
+        <button className="win-button min-w-[92px] text-[11px]" onClick={onReset}>
+          Reset Scores
+        </button>
+        <button className="win-button min-w-[72px] text-[11px]" onClick={onClose} autoFocus>
+          OK
+        </button>
+      </div>
+    </MsDialog>
+  );
+}
+
+function CustomFieldDialog({
+  initial,
+  onCancel,
+  onApply,
+}: {
+  initial: Config;
+  onCancel: () => void;
+  onApply: (cfg: Config) => void;
+}) {
+  const [height, setHeight] = useState(String(initial.rows));
+  const [width, setWidth] = useState(String(initial.cols));
+  const [mines, setMines] = useState(String(initial.mines));
+
+  const field = (label: string, value: string, setValue: (v: string) => void) => (
+    <label className="flex items-center justify-between gap-[10px] leading-[22px]">
+      <span>{label}</span>
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        className="w-[56px] bg-white px-[4px] text-[11px]"
+        style={{ boxShadow: "inset 1px 1px #808080, inset -1px -1px #ffffff" }}
+      />
+    </label>
+  );
+
+  return (
+    <MsDialog title="Custom Field" width={240} onClose={onCancel}>
+      <div className="px-[16px] py-[14px] text-[11px]">
+        {field("Height:", height, setHeight)}
+        {field("Width:", width, setWidth)}
+        {field("Mines:", mines, setMines)}
+      </div>
+      <div className="flex justify-end gap-[8px] px-[16px] pb-[14px]">
+        <button
+          className="win-button min-w-[64px] text-[11px]"
+          onClick={() => onApply({ rows: Number(height), cols: Number(width), mines: Number(mines) })}
+          autoFocus
+        >
+          OK
+        </button>
+        <button className="win-button min-w-[64px] text-[11px]" onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+    </MsDialog>
   );
 }

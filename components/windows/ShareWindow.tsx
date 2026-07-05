@@ -173,15 +173,6 @@ export function ShareWindow({ window: win, closeWindow, notify, playSound }: Win
         ),
     },
     {
-      id: "reddit",
-      label: "Share on Reddit",
-      badge: { bg: "#ff4500" },
-      action: () =>
-        openShare(
-          `https://www.reddit.com/submit?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent("Floppyy — The web you grew up on")}`,
-        ),
-    },
-    {
       id: "telegram",
       label: "Send via Telegram",
       badge: { bg: "#229ed9" },

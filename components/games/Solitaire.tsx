@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GameMenuBar, GameStatusBar } from "./GameChrome";
+import { FloppyyIcon } from "@/components/desktop/FloppyyIcon";
 
 const CARD_W = 71;
 const CARD_H = 96;
@@ -74,13 +75,14 @@ function deal(): GameState {
   return { stock, waste: [], foundations: [[], [], [], []], tableau };
 }
 
-export function Solitaire({ playSound }: { playSound: (name: string) => void }) {
+export function Solitaire({ playSound, onExit }: { playSound: (name: string) => void; onExit?: () => void }) {
   const [game, setGame] = useState<GameState>(() => deal());
   const [score, setScore] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [started, setStarted] = useState(false);
   const [won, setWon] = useState(false);
   const [backIndex, setBackIndex] = useState<number>(() => randomBack());
+  const [showAbout, setShowAbout] = useState(false);
   const dragRef = useRef<DragSource | null>(null);
   // Click-to-move selection (works alongside drag-and-drop, and on touch).
   const [selected, setSelected] = useState<DragSource | null>(null);
@@ -161,7 +163,7 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
     const first = moving[0];
     if (target.length === 0) return first.rank === 13;
     const top = target[target.length - 1];
-    return top.faceUp && oppositeColor(top, first) && top.rank === first.rank - 1;
+    return top.faceUp && oppositeColor(top, first) && top.rank === first.rank + 1;
   };
 
   const canDropFoundation = (target: Card[], moving: Card[]) => {
@@ -301,11 +303,23 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
   const tableauX = (i: number) => 16 + i * (CARD_W + COL_GAP);
 
   return (
-    <div className="flex h-full min-h-[420px] flex-col bg-[#c0c0c0]">
+    <div className="relative flex h-full min-h-[420px] flex-col bg-[#c0c0c0]">
       <GameMenuBar
         items={[
-          { label: "Game", onClick: newGame },
-          { label: "Help", onClick: () => playSound("click") },
+          {
+            label: "Game",
+            menu: [
+              { label: "New Game", shortcut: "F2", onClick: newGame },
+              { label: "Exit", separatorBefore: true, onClick: () => (onExit ? onExit() : undefined) },
+            ],
+          },
+          {
+            label: "Help",
+            menu: [
+              { label: "Help Topics", onClick: () => playSound("click") },
+              { label: "About Solitaire", separatorBefore: true, onClick: () => { playSound("click"); setShowAbout(true); } },
+            ],
+          },
         ]}
       />
       <div
@@ -382,7 +396,7 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
             {pile.map((card, idx) => {
               const y = pile.slice(0, idx).reduce((acc, c) => acc + (c.faceUp ? FACE_UP_OFFSET : FACE_DOWN_OFFSET), 0);
               return (
-                <div key={card.id} className="absolute left-0" style={{ top: y }}>
+                <div key={card.id} className="absolute left-0" style={{ top: y, zIndex: idx + 1 }}>
                   {card.faceUp ? (
                     <CardFace
                       card={card}
@@ -416,6 +430,74 @@ export function Solitaire({ playSound }: { playSound: (name: string) => void }) 
         Score: {score}
         <span className="ml-auto">Time: {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}</span>
       </GameStatusBar>
+
+      {showAbout && <AboutSolitaireDialog onClose={() => setShowAbout(false)} />}
+    </div>
+  );
+}
+
+function AboutSolitaireDialog({ onClose }: { onClose: () => void }) {
+  return (
+    <div
+      className="absolute inset-0 z-[9000] flex items-center justify-center bg-black/20"
+      onPointerDown={onClose}
+    >
+      <div
+        className="w-[360px] select-none bg-[#c0c0c0] text-black"
+        style={{
+          boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+          padding: 3,
+        }}
+        onPointerDown={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-label="About Solitaire"
+      >
+        {/* Title bar */}
+        <div className="flex h-[18px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] pl-[4px] pr-[2px]">
+          <span className="truncate text-[11px] font-bold text-white">About Solitaire</span>
+          <button
+            className="flex h-[14px] w-[16px] items-center justify-center text-[10px] leading-none text-black"
+            style={{ background: "#c0c0c0", boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf" }}
+            onClick={onClose}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex gap-[14px] px-[14px] pb-[10px] pt-[16px]">
+          <FloppyyIcon type="cards" size={40} />
+          <div className="text-[11px] leading-[16px]">
+            <div>(R) Solitaire</div>
+            <div>Windows 98</div>
+            <div>Copyright (C) 1981-1998 Microsoft Corp.</div>
+            <div>Developed for Microsoft by Wes Cherry</div>
+          </div>
+        </div>
+
+        {/* Separator */}
+        <div className="mx-[14px] my-[6px] h-px bg-[#808080] shadow-[0_1px_#fff]" />
+
+        {/* System info */}
+        <div className="px-[14px] pb-[14px] text-[11px] leading-[18px]">
+          <div className="flex justify-between gap-[20px]">
+            <span>Physical memory available to Windows:</span>
+            <span>130,588 KB</span>
+          </div>
+          <div className="flex justify-between gap-[20px]">
+            <span>System resources:</span>
+            <span>94% Free</span>
+          </div>
+        </div>
+
+        {/* OK button */}
+        <div className="flex justify-end px-[14px] pb-[14px]">
+          <button className="win-button min-w-[80px] text-[11px]" onClick={onClose} autoFocus>
+            OK
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

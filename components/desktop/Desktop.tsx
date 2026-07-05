@@ -709,6 +709,7 @@ export default function Desktop() {
         playSound("close");
       },
       minimizeWindow: wm.minimizeWindow,
+      resizeWindow: wm.resizeWindow,
       notify,
       playSound,
       fadeOutSound,

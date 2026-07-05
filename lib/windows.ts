@@ -58,6 +58,7 @@ export type WindowDefinition = {
   minHeight?: number;
   ephemeral?: boolean;
   dialog?: boolean;
+  noMaximize?: boolean;
 };
 
 export type WindowComponentProps = {
@@ -65,6 +66,7 @@ export type WindowComponentProps = {
   openWindow: (id: WindowId, payload?: string) => void;
   closeWindow: (instanceId: string) => void;
   minimizeWindow?: (instanceId: string) => void;
+  resizeWindow?: (instanceId: string, width: number, height: number) => void;
   notify: (message: string, options?: { icon?: string; titleIcon?: string; persistent?: boolean; balloon?: boolean }) => void;
   playSound: (sound: string) => void;
   fadeOutSound?: (sound: string, duration?: number) => void;
@@ -94,7 +96,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   msdos: { id: "msdos", title: "MS-DOS Prompt", icon: "prompt", width: 640, height: 400 },
   notepad: { id: "notepad", title: "Untitled - Notepad", icon: "notepad", width: 600, height: 440 },
   mediaplayer: { id: "mediaplayer", title: "Windows Media Player", icon: "sound", width: 420, height: 380 },
-  minesweeper: { id: "minesweeper", title: "Minesweeper", icon: "mine", width: 300, height: 380, minWidth: 292, minHeight: 365 },
+  minesweeper: { id: "minesweeper", title: "Minesweeper", icon: "mine", width: 300, height: 384, minWidth: 168, minHeight: 200, noMaximize: true },
   outlook: { id: "outlook", title: "Outlook Express", icon: "msoutlook", width: 720, height: 500 },
   projects: { id: "projects", title: "Projects", icon: "folder", width: 720, height: 500 },
   games: { id: "games", title: "Games", icon: "joystick", width: 760, height: 560 },

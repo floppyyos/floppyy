@@ -23,6 +23,7 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
   };
 
   const isDialog = windowDefinitions[window.id]?.dialog ?? false;
+  const noMaximize = windowDefinitions[window.id]?.noMaximize ?? false;
 
   return (
     <div
@@ -35,7 +36,7 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
     >
       <div
         className="flex flex-1 items-center gap-[3px] min-w-0"
-        onDoubleClick={isDialog ? undefined : onMaximize}
+        onDoubleClick={isDialog || noMaximize ? undefined : onMaximize}
       >
         <FloppyyIcon type={window.icon} size={14} />
         <span className="truncate text-[11px] font-bold text-white">{window.title}</span>
@@ -78,25 +79,27 @@ export function WindowTitleBar({ window, active, onMinimize, onMaximize, onClose
         >
           <span className="block h-[2px] w-[6px] bg-black mt-[6px]" />
         </button>
-        <button
-          onPointerDown={stopControlDrag}
-          onClick={onMaximize}
-          className="flex h-[16px] w-[16px] items-center justify-center"
-          style={{
-            background: "#c0c0c0",
-            boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf"
-          }}
-          aria-label={window.maximized ? "Restore" : "Maximize"}
-        >
-          {window.maximized ? (
-            <span className="relative">
-              <span className="absolute -top-[1px] left-[1px] block h-[7px] w-[7px] border-[1px] border-black border-t-[2px]" />
-              <span className="relative block h-[7px] w-[7px] border-[1px] border-black border-t-[2px] bg-[#c0c0c0]" />
-            </span>
-          ) : (
-            <span className="block h-[8px] w-[9px] border-[1px] border-black border-t-[2px]" />
-          )}
-        </button>
+        {!noMaximize && (
+          <button
+            onPointerDown={stopControlDrag}
+            onClick={onMaximize}
+            className="flex h-[16px] w-[16px] items-center justify-center"
+            style={{
+              background: "#c0c0c0",
+              boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf"
+            }}
+            aria-label={window.maximized ? "Restore" : "Maximize"}
+          >
+            {window.maximized ? (
+              <span className="relative">
+                <span className="absolute -top-[1px] left-[1px] block h-[7px] w-[7px] border-[1px] border-black border-t-[2px]" />
+                <span className="relative block h-[7px] w-[7px] border-[1px] border-black border-t-[2px] bg-[#c0c0c0]" />
+              </span>
+            ) : (
+              <span className="block h-[8px] w-[9px] border-[1px] border-black border-t-[2px]" />
+            )}
+          </button>
+        )}
         <span className="w-[2px]" />
         <button
           onPointerDown={stopControlDrag}

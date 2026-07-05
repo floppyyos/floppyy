@@ -41,6 +41,32 @@ const DIR_OUTPUT = [
   "",
 ];
 
+const FLOPPYY_ART = [
+  "",
+  "  Loading FLOPPYY.EXE .......... OK",
+  "",
+  "   .------------------------------.",
+  "   |==============================|",
+  "   |  .------------------------.  |",
+  "   |  |                        |  |",
+  "   |  |     F L O P P Y Y      |  |",
+  "   |  |                        |  |",
+  "   |  '------------------------'  |",
+  "   |                              |",
+  "   |       .--------------.       |",
+  "   |       |   3.5\" HD    |       |",
+  "   |       '--------------'       |",
+  "   '------------------------------'",
+  "",
+  "  FLOPPYY (R) - a Windows 98 tribute that lives in your browser.",
+  "  MIT 1998-2026 Floppyy. All bytes reserved.",
+  "",
+  "  > 640K of memory ought to be enough for anybody.",
+  "  > Insert nostalgia into drive A: and press any key.",
+  "  > Psst... try the other icons on the desktop. There's more hidden.",
+  "",
+];
+
 const FILES: Record<string, string[]> = {
   "autoexec.bat": [
     "@ECHO OFF",
@@ -59,7 +85,7 @@ const FILES: Record<string, string[]> = {
   ],
 };
 
-export function MsDosWindow({ window: win, closeWindow, openWindow, playSound, crashSystem }: WindowComponentProps) {
+export function MsDosWindow({ window: win, closeWindow, openWindow, playSound, crashSystem, notify }: WindowComponentProps) {
   const [lines, setLines] = useState<Line[]>([
     { text: "Microsoft(R) Windows 98", type: "output" },
     { text: "   (C)Copyright Microsoft Corp 1981-1999.", type: "output" },
@@ -70,11 +96,32 @@ export function MsDosWindow({ window: win, closeWindow, openWindow, playSound, c
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const timersRef = useRef<number[]>([]);
+
+  // Clear any pending "slow print" timers when the window closes.
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => timers.forEach((id) => window.clearTimeout(id));
+  }, []);
+
   const addOutput = useCallback((outputLines: string[]) => {
     setLines((prev) => [
       ...prev,
       ...outputLines.map((text) => ({ text, type: "output" as const })),
     ]);
+  }, []);
+
+  // Append lines one at a time with a small delay so output scrolls in like a
+  // real boot sequence instead of appearing all at once. Returns the total
+  // duration so callers can schedule follow-up actions.
+  const printSlowly = useCallback((outputLines: string[], interval = 70) => {
+    outputLines.forEach((text, i) => {
+      const id = window.setTimeout(() => {
+        setLines((prev) => [...prev, { text, type: "output" as const }]);
+      }, i * interval);
+      timersRef.current.push(id);
+    });
+    return outputLines.length * interval;
   }, []);
 
   const executeCommand = useCallback(
@@ -104,6 +151,16 @@ export function MsDosWindow({ window: win, closeWindow, openWindow, playSound, c
         case "ver":
           addOutput(["", "Windows 98 [Version 4.10.1998]", ""]);
           break;
+        case "floppyy":
+        case "floppyy.exe": {
+          playSound("notification");
+          const duration = printSlowly(FLOPPYY_ART, 70);
+          const doneId = window.setTimeout(() => {
+            notify?.("You found a secret: FLOPPYY.EXE is running!", { balloon: true, titleIcon: "prompt" });
+          }, duration + 150);
+          timersRef.current.push(doneId);
+          break;
+        }
         case "dir":
           addOutput(DIR_OUTPUT);
           break;
@@ -169,7 +226,7 @@ export function MsDosWindow({ window: win, closeWindow, openWindow, playSound, c
           break;
       }
     },
-    [addOutput, closeWindow, openWindow, playSound, crashSystem, win.instanceId],
+    [addOutput, printSlowly, closeWindow, openWindow, playSound, crashSystem, notify, win.instanceId],
   );
 
   const handleSubmit = (e: React.FormEvent) => {
