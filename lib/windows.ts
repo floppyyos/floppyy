@@ -10,6 +10,10 @@ export type WindowId =
   | "help"
   | "documents"
   | "doom"
+  | "duke3d"
+  | "wolf3d"
+  | "dune2"
+  | "warcraft"
   | "drive"
   | "guestbook"
   | "internet"
@@ -22,6 +26,7 @@ export type WindowId =
   | "outlook"
   | "projects"
   | "games"
+  | "games-folder"
   | "music"
   | "norton"
   | "paint"
@@ -89,6 +94,10 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   help: { id: "help", title: "Floppyy Help", icon: "help", width: 560, height: 440, minWidth: 460, minHeight: 360 },
   documents: { id: "documents", title: "My Documents", icon: "documents", width: 720, height: 500 },
   doom: { id: "doom", title: "DOOM", icon: "doom", width: 680, height: 510, minWidth: 480, minHeight: 360 },
+  duke3d: { id: "duke3d", title: "Duke Nukem 3D", icon: "duke3d", width: 680, height: 510, minWidth: 480, minHeight: 360 },
+  wolf3d: { id: "wolf3d", title: "Wolfenstein 3D", icon: "wolfenstein", width: 680, height: 510, minWidth: 480, minHeight: 360 },
+  dune2: { id: "dune2", title: "Dune II", icon: "dune2", width: 680, height: 510, minWidth: 480, minHeight: 360 },
+  warcraft: { id: "warcraft", title: "WarCraft: Orcs & Humans", icon: "warcraft", width: 680, height: 510, minWidth: 480, minHeight: 360 },
   drive: { id: "drive", title: "Local Disk", icon: "drive-c", width: 780, height: 550 },
   internet: { id: "internet", title: "Internet", icon: "dialup", width: 360, height: 508, ephemeral: true },
   "ie-browser": { id: "ie-browser", title: "Microsoft Internet Explorer", icon: "ie", width: 840, height: 580 },
@@ -100,6 +109,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   outlook: { id: "outlook", title: "Outlook Express", icon: "msoutlook", width: 720, height: 500 },
   projects: { id: "projects", title: "Projects", icon: "folder", width: 720, height: 500 },
   games: { id: "games", title: "Games", icon: "joystick", width: 760, height: 560 },
+  "games-folder": { id: "games-folder", title: "Games", icon: "directory_check", width: 620, height: 460, minWidth: 420, minHeight: 320 },
   guestbook: { id: "guestbook", title: "#floppyy", icon: "guestbook", width: 620, height: 470, minWidth: 460, minHeight: 340 },
   music: { id: "music", title: "Winamp", icon: "winamp", width: 290, height: 560 },
   norton: { id: "norton", title: "Norton Commander", icon: "console", width: 760, height: 500 },
@@ -139,11 +149,11 @@ export const desktopIcons: DesktopIconDefinition[] = [
   { id: "recycle", label: "Recycle Bin", icon: "trash", windowId: "recycle-bin" },
   { id: "prompt", label: "MS-DOS Prompt", icon: "prompt", windowId: "msdos" },
   { id: "paint", label: "Paint", icon: "painticon", windowId: "paint" },
+  { id: "games-folder", label: "Games", icon: "directory_check", windowId: "games-folder" },
   { id: "doom", label: "Doom", icon: "doom", windowId: "doom" },
+  { id: "solitaire", label: "Solitaire", icon: "cards", windowId: "solitaire" },
   { id: "calculator", label: "Calculator", icon: "calculator", windowId: "calculator" },
   { id: "credits", label: "Credits", icon: "credits", windowId: "about", payload: "welcome" },
-  { id: "minesweeper", label: "Minesweeper", icon: "mine", windowId: "minesweeper" },
-  { id: "solitaire", label: "Solitaire", icon: "cards", windowId: "solitaire" },
   { id: "outlook", label: "Outlook Express", icon: "msoutlook", windowId: "outlook" },
   { id: "notepad", label: "Notepad", icon: "notepad", windowId: "notepad" },
   { id: "netscape", label: "Netscape Navigator", icon: "netscape", windowId: "netscape" },

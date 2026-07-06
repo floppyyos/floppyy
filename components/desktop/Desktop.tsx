@@ -17,6 +17,7 @@ import { ComputerWindow } from "@/components/windows/ComputerWindow";
 import { ControlPanelWindow } from "@/components/windows/ControlPanelWindow";
 import { DateTimeWindow } from "@/components/windows/DateTimeWindow";
 import { GamesWindow } from "@/components/windows/GamesWindow";
+import { GamesFolderWindow } from "@/components/windows/GamesFolderWindow";
 import { GuestbookWindow } from "@/components/windows/GuestbookWindow";
 import { InternetWindow } from "@/components/windows/InternetWindow";
 import { MsDosWindow } from "@/components/windows/MsDosWindow";
@@ -50,7 +51,7 @@ import { desktopIcons, WindowComponentProps, WindowId } from "@/lib/windows";
 import { DEFAULT_WALLPAPER, isWallpaperId, WALLPAPERS, WallpaperId, wallpaperStyle } from "@/lib/wallpapers";
 
 // Heavy windows are loaded on demand so they stay out of the initial bundle.
-const DoomWindow = dynamic(() => import("@/components/windows/DoomWindow").then((m) => m.DoomWindow), {
+const DosGameWindow = dynamic(() => import("@/components/windows/DosGameWindow").then((m) => m.DosGameWindow), {
   ssr: false,
   loading: () => <WindowLoading />,
 });
@@ -588,10 +589,16 @@ export default function Desktop() {
         return <SolitaireWindow {...props} />;
       case "games":
         return <GamesWindow {...props} />;
+      case "games-folder":
+        return <GamesFolderWindow {...props} />;
       case "guestbook":
         return <GuestbookWindow {...props} />;
       case "doom":
-        return <DoomWindow {...props} />;
+      case "duke3d":
+      case "wolf3d":
+      case "dune2":
+      case "warcraft":
+        return <DosGameWindow {...props} />;
       case "music":
         return <MusicWindow {...props} />;
       case "norton":

@@ -22,9 +22,13 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
   ];
 
   const games: Array<[WindowId, string, string, string?]> = [
+    ["minesweeper", "Minesweeper", "mine"],
     ["solitaire", "Solitaire", "cards"],
     ["doom", "Doom", "doom"],
-    ["minesweeper", "Minesweeper", "mine"],
+    ["duke3d", "Duke Nukem 3D", "duke3d"],
+    ["wolf3d", "Wolfenstein 3D", "wolfenstein"],
+    ["dune2", "Dune II", "dune2"],
+    ["warcraft", "WarCraft", "warcraft"],
   ];
 
   const favorites: Array<[string, string]> = [

@@ -61,9 +61,11 @@ Just a small machine for good old internet memories.
 - **Screensavers** — Pipes, Starfield, Maze, Mystify, Flying Windows
 
 ### Games
-- **Doom** — 3D raycasting FPS with enemies, weapons, 3 levels
+- **DOOM**, **Duke Nukem 3D**, **Wolfenstein 3D**, **Dune II**, and **WarCraft: Orcs & Humans** — the real MS-DOS classics running in-browser via js-dos (DOSBox). Grouped in the desktop **Games** folder and under **Start → Games**.
 - **Minesweeper** — classic mine-clearing puzzle
 - **Solitaire** — card game (drag or click-to-move)
+
+> **Desktop only:** the DOS games (DOOM, Duke Nukem 3D, Wolfenstein 3D, Dune II, WarCraft) need a physical keyboard and mouse, so they only run on a desktop or laptop. On phones and tablets they show a "Desktop only" message instead. Click inside a game to capture the mouse/keyboard.
 
 ### System
 - Sound effects via Web Audio API with oscillator fallback
@@ -73,7 +75,7 @@ Just a small machine for good old internet memories.
 - Shut Down with "It's now safe to turn off your computer" screen
 - Share dialog for social sharing
 - **Window session persistence** — open windows and their positions/sizes are restored on reload (one-shot dialogs excluded)
-- **Code-split windows** — heavy apps (Doom, Paint, Internet Explorer, Netscape, Media Player, Norton Commander) are lazy-loaded on demand to keep the first paint fast
+- **Code-split windows** — heavy apps (DOS games, Paint, Internet Explorer, Netscape, Media Player, Norton Commander) are lazy-loaded on demand to keep the first paint fast
 
 ## Easter Eggs
 
@@ -95,7 +97,8 @@ Floppyy occasionally fights back. A few things to try — the full list lives in
 - **TypeScript 5.9** — strict type safety
 - **Tailwind CSS 4** — utility-first styling + custom Win98 CSS
 - **Web Audio API** — sound effects
-- **Canvas API** — Paint app, Doom renderer
+- **Canvas API** — Paint app
+- **js-dos (DOSBox)** — in-browser MS-DOS games (DOOM, Duke Nukem 3D, Wolfenstein 3D, Dune II, WarCraft), run in an isolated iframe
 - **HTML5 Video** — Media Player
 - **Service Worker** — offline caching
 - **Route Handlers + Postgres + Redis** — Guest Book & visitor counter (graceful in-memory fallback when unconfigured)

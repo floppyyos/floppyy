@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { WindowComponentProps, WindowId } from "@/lib/windows";
+import type { WindowComponentProps } from "@/lib/windows";
 import { ToolbarIcon } from "./ToolbarIcon";
 
 type DriveId = "A" | "C" | "D";
@@ -121,6 +121,10 @@ const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
       { id: "mines", label: "Minesweeper.exe", icon: "mine", description: "Application", kind: "file" },
       { id: "solitaire", label: "Solitaire.exe", icon: "cards", description: "Application", kind: "file" },
       { id: "doom", label: "Doom.exe", icon: "doom", description: "Application", kind: "file" },
+      { id: "duke3d", label: "Duke3D.exe", icon: "duke3d", description: "Application", kind: "file" },
+      { id: "wolf3d", label: "Wolf3D.exe", icon: "wolfenstein", description: "Application", kind: "file" },
+      { id: "dune2", label: "Dune2.exe", icon: "dune2", description: "Application", kind: "file" },
+      { id: "warcraft", label: "War.exe", icon: "warcraft", description: "Application", kind: "file" },
     ],
   },
   D: {
@@ -270,6 +274,10 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
     else if (label.includes("minesweeper")) openWindow("minesweeper");
     else if (label.includes("solitaire")) openWindow("solitaire");
     else if (label.includes("doom")) openWindow("doom");
+    else if (label.includes("duke")) openWindow("duke3d");
+    else if (label.includes("wolf")) openWindow("wolf3d");
+    else if (label.includes("dune")) openWindow("dune2");
+    else if (label.includes("war.exe") || label.includes("warcraft")) openWindow("warcraft");
     else if (label.includes("netscape")) openWindow("netscape");
     else if (label.includes("internet explorer") || label.endsWith(".url") || label.endsWith(".htm")) openWindow("ie-browser", "https://www.aol.com/");
     else if (label.includes("norton") || label === "nc.exe") openWindow("norton");

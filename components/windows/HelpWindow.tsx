@@ -85,7 +85,36 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
           <li><b>Go online</b> — open Dial-Up Networking, connect, then browse with Internet Explorer or Netscape.</li>
           <li><b>Sign the Guest Book</b> — open <b>Guest Book (#floppyy)</b> to leave a message in the ICQ/mIRC-style chat. New signings also land in Outlook Express as mail.</li>
           <li><b>Run anything</b> — open <b>Run...</b> and click the arrow to browse recent commands and the full list of programs you can launch.</li>
+          <li><b>Play games</b> — open the <b>Games</b> folder on the desktop (or <b>Start → Games</b>). Note: the DOS games (DOOM, Duke Nukem 3D, Wolfenstein 3D, Dune II, WarCraft) need a desktop with a keyboard &amp; mouse — they don&apos;t run on phones or tablets.</li>
         </ul>
+      ),
+    },
+    {
+      id: "games",
+      title: "Games",
+      body: (
+        <div className="space-y-[10px]">
+          <p>
+            Every game lives in the <b>Games</b> folder on the desktop and under <b>Start → Games</b>.
+            Double-click one to play.
+          </p>
+          <ul className="list-disc space-y-[6px] pl-[18px]">
+            <li><b>Minesweeper</b> and <b>Solitaire</b> — the Windows classics, playable anywhere.</li>
+            <li>
+              <b>DOOM</b>, <b>Duke Nukem 3D</b>, <b>Wolfenstein 3D</b>, <b>Dune II</b> and{" "}
+              <b>WarCraft: Orcs &amp; Humans</b> — the real MS-DOS games, running right in your browser.
+            </li>
+          </ul>
+          <p className="text-[#000080]">
+            <b>Desktop only:</b> the DOS games need a physical keyboard and mouse, so they only run on a
+            desktop or laptop computer. On phones and tablets they&apos;ll show a &quot;Desktop only&quot;
+            message instead.
+          </p>
+          <p>
+            Click inside a DOS game to capture the mouse and keyboard. In the shooters, move with the
+            arrow keys or mouse and fire with <b>{ctrl}</b> or the mouse button.
+          </p>
+        </div>
       ),
     },
     {
