@@ -364,9 +364,7 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
               {items.map((item) => (
                 <button
                   key={item.id}
-                  className={`flex cursor-default flex-col items-center justify-start gap-1 rounded-none p-1 text-center ${
-                    selected === item.id ? "bg-[#000080] text-white" : "hover:bg-[#000080]/10"
-                  }`}
+                  className="flex cursor-default flex-col items-center justify-start gap-1 rounded-none p-1 text-center"
                   onClick={(event) => {
                     event.stopPropagation();
                     setSelected(item.id);
@@ -374,8 +372,16 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
                   }}
                   onDoubleClick={() => openItem(item)}
                 >
-                  <img src={`/icons/${item.icon}.png`} alt="" width={32} height={32} draggable={false} style={{ imageRendering: "pixelated" }} />
-                  <span className={`px-1 text-[11px] leading-[13px] ${selected === item.id ? "bg-[#000080] text-white" : ""}`}>
+                  <span
+                    className="flex items-center justify-center p-[2px]"
+                    style={selected === item.id ? { background: "rgba(0,0,128,0.4)" } : undefined}
+                  >
+                    <img src={`/icons/${item.icon}.png`} alt="" width={32} height={32} draggable={false} style={{ imageRendering: "pixelated" }} />
+                  </span>
+                  <span
+                    className="px-1 text-[11px] leading-[13px]"
+                    style={selected === item.id ? { background: "#000080", color: "#fff", outline: "1px dotted #fff" } : undefined}
+                  >
                     {item.label}
                   </span>
                 </button>
@@ -391,9 +397,8 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
               {items.map((item) => (
                 <button
                   key={item.id}
-                  className={`grid h-[24px] w-full grid-cols-[minmax(160px,1.4fr)_140px_80px_150px] text-left ${
-                    selected === item.id ? "bg-[#000080] text-white" : "hover:bg-[#000080]/10"
-                  }`}
+                  className="grid h-[24px] w-full grid-cols-[minmax(160px,1.4fr)_140px_80px_150px] text-left hover:bg-[#000080]/10"
+                  style={selected === item.id ? { background: "#000080", color: "#fff" } : undefined}
                   onClick={(event) => {
                     event.stopPropagation();
                     setSelected(item.id);

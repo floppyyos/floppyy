@@ -126,9 +126,7 @@ export function GamesFolderWindow({ window: win, openWindow, closeWindow, notify
               {GAMES.map((game) => (
                 <button
                   key={game.id}
-                  className={`flex cursor-default flex-col items-center justify-start gap-1 p-1 text-center ${
-                    selected === game.id ? "bg-[#000080]/10" : "hover:bg-[#000080]/5"
-                  }`}
+                  className="flex cursor-default flex-col items-center justify-start gap-1 p-1 text-center"
                   onClick={(event) => {
                     event.stopPropagation();
                     setSelected(game.id);
@@ -136,7 +134,10 @@ export function GamesFolderWindow({ window: win, openWindow, closeWindow, notify
                   }}
                   onDoubleClick={() => open(game)}
                 >
-                  <span className="relative inline-flex h-[32px] w-[32px] items-center justify-center">
+                  <span
+                    className="relative inline-flex h-[36px] w-[36px] items-center justify-center p-[2px]"
+                    style={selected === game.id ? { background: "rgba(0,0,128,0.4)" } : undefined}
+                  >
                     <img
                       src={`/icons/${game.icon}.png`}
                       alt=""
@@ -155,11 +156,8 @@ export function GamesFolderWindow({ window: win, openWindow, closeWindow, notify
                     </span>
                   </span>
                   <span
-                    className={`px-[3px] leading-[13px] ${
-                      selected === game.id
-                        ? "bg-[#000080] text-white outline outline-1 outline-dotted outline-white"
-                        : ""
-                    }`}
+                    className="px-[3px] leading-[13px]"
+                    style={selected === game.id ? { background: "#000080", color: "#fff", outline: "1px dotted #fff" } : undefined}
                   >
                     {game.label}
                   </span>
@@ -176,9 +174,8 @@ export function GamesFolderWindow({ window: win, openWindow, closeWindow, notify
               {GAMES.map((game) => (
                 <button
                   key={game.id}
-                  className={`grid h-[24px] w-full grid-cols-[minmax(200px,1.6fr)_1fr] text-left ${
-                    selected === game.id ? "bg-[#000080] text-white" : "hover:bg-[#000080]/10"
-                  }`}
+                  className="grid h-[24px] w-full grid-cols-[minmax(200px,1.6fr)_1fr] text-left hover:bg-[#000080]/10"
+                  style={selected === game.id ? { background: "#000080", color: "#fff" } : undefined}
                   onClick={(event) => {
                     event.stopPropagation();
                     setSelected(game.id);

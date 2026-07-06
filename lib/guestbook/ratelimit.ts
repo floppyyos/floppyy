@@ -26,9 +26,19 @@ function getRedis(): Redis | null {
 }
 
 const memoryHits = new Map<string, { count: number; resetAt: number }>();
+let lastPrune = Date.now();
+
+function pruneMemory(now: number): void {
+  if (now - lastPrune < 60_000) return;
+  lastPrune = now;
+  for (const [key, entry] of memoryHits) {
+    if (entry.resetAt <= now) memoryHits.delete(key);
+  }
+}
 
 function memoryLimit(key: string, limit: number, windowSec: number): RateLimitResult {
   const now = Date.now();
+  pruneMemory(now);
   const entry = memoryHits.get(key);
   if (!entry || entry.resetAt <= now) {
     memoryHits.set(key, { count: 1, resetAt: now + windowSec * 1000 });

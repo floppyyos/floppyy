@@ -126,14 +126,12 @@ export function DocumentsWindow({ notify, openWindow, playSound }: WindowCompone
           </p>
         </aside>
 
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-4" onClick={() => setSelected(null)}>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] content-start gap-x-2 gap-y-1">
             {documentItems.map((item) => (
               <button
                 key={item.id}
-                className={`flex flex-col items-center justify-start gap-1 rounded-none p-1 text-center cursor-default ${
-                  selected === item.id ? "bg-[#000080] text-white" : "hover:bg-[#000080]/10"
-                }`}
+                className="flex flex-col items-center justify-start gap-1 rounded-none p-1 text-center cursor-default"
                 onClick={(event) => {
                   event.stopPropagation();
                   setSelected(item.id);
@@ -141,8 +139,16 @@ export function DocumentsWindow({ notify, openWindow, playSound }: WindowCompone
                 }}
                 onDoubleClick={() => openItem(item)}
               >
-                <img src={`/icons/${item.icon}.png`} alt="" width={32} height={32} draggable={false} style={{ imageRendering: "pixelated" }} />
-                <span className={`px-1 text-[11px] leading-[13px] ${selected === item.id ? "bg-[#000080] text-white" : ""}`}>
+                <span
+                  className="flex items-center justify-center p-[2px]"
+                  style={selected === item.id ? { background: "rgba(0,0,128,0.4)" } : undefined}
+                >
+                  <img src={`/icons/${item.icon}.png`} alt="" width={32} height={32} draggable={false} style={{ imageRendering: "pixelated" }} />
+                </span>
+                <span
+                  className="px-1 text-[11px] leading-[13px]"
+                  style={selected === item.id ? { background: "#000080", color: "#fff", outline: "1px dotted #fff" } : undefined}
+                >
                   {item.label}
                 </span>
               </button>
