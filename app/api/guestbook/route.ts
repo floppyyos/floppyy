@@ -1,9 +1,18 @@
+import { timingSafeEqual } from "node:crypto";
 import { guestbookStore } from "@/lib/guestbook/store";
 import { clientIp, hashIp, rateLimit } from "@/lib/guestbook/ratelimit";
 import { validateSubmission } from "@/lib/guestbook/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+function tokenMatches(provided: string | null | undefined, expected: string): boolean {
+  if (!provided) return false;
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
 
 const POST_LIMIT = 5;
 const POST_WINDOW_SEC = 60;
@@ -38,7 +47,6 @@ export async function POST(request: Request) {
 
   const data = (payload ?? {}) as Record<string, unknown>;
 
-  // Honeypot: bots fill hidden fields. Pretend success and drop it silently.
   if (typeof data.website === "string" && data.website.trim() !== "") {
     return Response.json({ ok: true }, { status: 202 });
   }
@@ -72,5 +80,35 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[guestbook] POST failed:", error);
     return Response.json({ error: "Failed to post message." }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  const adminToken = process.env.GUESTBOOK_ADMIN_TOKEN;
+  if (!adminToken) {
+    return Response.json({ error: "Deletion is not enabled." }, { status: 501 });
+  }
+
+  const provided =
+    request.headers.get("x-admin-token") ??
+    request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  if (!tokenMatches(provided, adminToken)) {
+    return Response.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  const id = Number(new URL(request.url).searchParams.get("id"));
+  if (!Number.isInteger(id) || id <= 0) {
+    return Response.json({ error: "A positive integer `id` is required." }, { status: 400 });
+  }
+
+  try {
+    const removed = await guestbookStore().remove(id);
+    return Response.json(
+      { ok: removed },
+      { status: removed ? 200 : 404, headers: { "Cache-Control": "no-store" } },
+    );
+  } catch (error) {
+    console.error("[guestbook] DELETE failed:", error);
+    return Response.json({ error: "Failed to delete message." }, { status: 500 });
   }
 }

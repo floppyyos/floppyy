@@ -19,6 +19,7 @@ type Store = {
   add: (message: NewMessage) => Promise<GuestbookMessage>;
   list: (options?: { limit?: number; before?: number }) => Promise<GuestbookMessage[]>;
   count: () => Promise<number>;
+  remove: (id: number) => Promise<boolean>;
 };
 
 function clampLimit(limit?: number): number {
@@ -127,6 +128,16 @@ const postgresStore: Store = {
     `;
     return Number(row?.count ?? 0);
   },
+
+  async remove(id) {
+    const client = getSql();
+    if (!client) throw new Error("Postgres not configured");
+    await ensureSchema(client);
+    const rows = await client<{ id: string }[]>`
+      DELETE FROM guestbook_messages WHERE id = ${id} RETURNING id
+    `;
+    return rows.length > 0;
+  },
 };
 
 // ── In-memory fallback (local dev without DATABASE_URL) ─────────────────────
@@ -158,6 +169,13 @@ const memoryStore: Store = {
 
   async count() {
     return memory.length;
+  },
+
+  async remove(id) {
+    const index = memory.findIndex((m) => m.id === id);
+    if (index === -1) return false;
+    memory.splice(index, 1);
+    return true;
   },
 };
 

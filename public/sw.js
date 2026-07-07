@@ -1,4 +1,4 @@
-const CACHE_NAME = "floppyy-v1";
+const CACHE_NAME = "floppyy-v2";
 const MAX_CACHE_SIZE = 50;
 const OFFLINE_URLS = [
   "/",
@@ -34,9 +34,17 @@ async function trimCache(cacheName, maxItems) {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  
+
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith("/api/")) return;
+  if (
+    event.request.destination === "audio" ||
+    event.request.destination === "video" ||
+    event.request.headers.has("range")
+  ) {
+    return;
+  }
 
   event.respondWith(
     fetch(event.request)
