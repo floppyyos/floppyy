@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { WindowId } from "@/lib/windows";
 import { FloppyyIcon } from "./FloppyyIcon";
 
@@ -11,6 +12,9 @@ type Props = {
 };
 
 export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props) {
+  const [openSub, setOpenSub] = useState<string | null>(null);
+  const toggleSub = (name: string) => setOpenSub((current) => (current === name ? null : name));
+
   const programs: Array<[WindowId, string, string]> = [
     ["internet", "Dial-Up Networking", "dialup"],
     ["music", "Winamp", "winamp"],
@@ -73,14 +77,14 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
         <div className="group/programs relative">
           <button
             className="menu-command flex items-center gap-[8px] py-[3px]"
-            onClick={(event) => event.preventDefault()}
+            onClick={() => toggleSub("programs")}
           >
             <FloppyyIcon type="directory_open" size={16} />
             <span>Programs</span>
-            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">▶</span>
+            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">{"\u25B6\uFE0E"}</span>
           </button>
           <div
-            className="absolute left-full top-0 hidden w-[210px] bg-[#c0c0c0] py-[3px] group-hover/programs:block"
+            className={`absolute left-full top-0 w-[210px] max-[640px]:w-[160px] bg-[#c0c0c0] py-[3px] group-hover/programs:block ${openSub === "programs" ? "block" : "hidden"}`}
             style={{
               boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
             }}
@@ -99,13 +103,13 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
         </div>
 
         <div className="group/games relative">
-          <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={(event) => event.preventDefault()}>
+          <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => toggleSub("games")}>
             <FloppyyIcon type="directory_check" size={16} />
             <span>Games</span>
-            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">▶</span>
+            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">{"\u25B6\uFE0E"}</span>
           </button>
           <div
-            className="absolute left-full top-0 hidden w-[180px] bg-[#c0c0c0] py-[3px] group-hover/games:block"
+            className={`absolute left-full top-0 w-[180px] max-[640px]:w-[160px] bg-[#c0c0c0] py-[3px] group-hover/games:block ${openSub === "games" ? "block" : "hidden"}`}
             style={{
               boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
             }}
@@ -128,14 +132,14 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
         <div className="group/favorites relative">
           <button
             className="menu-command flex items-center gap-[8px] py-[3px]"
-            onClick={(event) => event.preventDefault()}
+            onClick={() => toggleSub("favorites")}
           >
             <FloppyyIcon type="fav" size={16} />
             <span>Favorites</span>
-            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">▶</span>
+            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">{"\u25B6\uFE0E"}</span>
           </button>
           <div
-            className="absolute left-full top-0 hidden w-[190px] bg-[#c0c0c0] py-[3px] group-hover/favorites:block"
+            className={`absolute left-full top-0 w-[190px] max-[640px]:w-[160px] bg-[#c0c0c0] py-[3px] group-hover/favorites:block ${openSub === "favorites" ? "block" : "hidden"}`}
             style={{
               boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
             }}
@@ -156,13 +160,13 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
         <div className="mx-[3px] my-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
 
         <div className="group/settings relative">
-          <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("control-panel")}>
+          <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => toggleSub("settings")}>
             <FloppyyIcon type="gears" size={16} />
             <span>Settings</span>
-            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">▶</span>
+            <span className="ml-auto w-[10px] text-center text-[7px] leading-none">{"\u25B6\uFE0E"}</span>
           </button>
           <div
-            className="absolute left-full top-0 hidden w-[190px] bg-[#c0c0c0] py-[3px] group-hover/settings:block"
+            className={`absolute left-full top-0 w-[190px] max-[640px]:w-[160px] bg-[#c0c0c0] py-[3px] group-hover/settings:block ${openSub === "settings" ? "block" : "hidden"}`}
             style={{
               boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
             }}

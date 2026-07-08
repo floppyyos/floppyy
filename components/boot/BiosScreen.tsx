@@ -202,11 +202,10 @@ export function BiosScreen({ onComplete }: BiosScreenProps) {
           src="/misc/Energy.png"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute right-[16px] top-[10px] h-auto"
+          className="pointer-events-none absolute right-[16px] top-[10px] h-auto w-[32vw] max-w-[250px] max-[640px]:w-[90px]"
           draggable={false}
           style={{
             imageRendering: "pixelated",
-            width: "min(250px, 32vw)",
           }}
         />
       )}

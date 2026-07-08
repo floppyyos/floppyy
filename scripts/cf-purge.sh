@@ -21,9 +21,9 @@ response=$(curl -s -X POST \
   --data '{"purge_everything":true}')
 
 if echo "$response" | grep -q '"success":true'; then
-  echo "✓ Cache purged."
+  echo "Cache purged."
 else
-  echo "✗ Purge failed:"
+  echo "Purge failed:"
   echo "$response"
   exit 1
 fi

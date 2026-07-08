@@ -95,14 +95,14 @@ export function Taskbar({ windows, activeId, startOpen, internetConnected, muted
         {windows.map((window) => (
           <button
             key={window.instanceId}
-            className={`win-button taskbar-button flex h-[22px] min-w-[100px] max-w-[160px] items-center gap-[4px] truncate px-[4px] text-left text-[11px] ${
+            className={`win-button taskbar-button flex h-[22px] min-w-[100px] max-w-[160px] items-center gap-[4px] truncate px-[4px] text-left text-[11px] max-[640px]:min-w-0 max-[640px]:w-[30px] max-[640px]:max-w-[30px] max-[640px]:flex-shrink-0 max-[640px]:justify-center max-[640px]:px-0 ${
               activeId === window.instanceId && !window.minimized ? "active" : ""
             }`}
             onClick={() => onTask(window.instanceId)}
             aria-label={`Focus ${window.title}`}
           >
             <FloppyyIcon type={window.icon} size={16} />
-            <span className="truncate">{window.title}</span>
+            <span className="truncate max-[640px]:hidden">{window.title}</span>
           </button>
         ))}
       </div>
