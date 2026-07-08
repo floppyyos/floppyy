@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 
 const umamiSrc = process.env.NEXT_PUBLIC_UMAMI_SRC;
+const umamiRecorderSrc = process.env.NEXT_PUBLIC_UMAMI_RECORDER_SRC;
 const umamiWebsiteId = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
 
 const pixelifySans = Pixelify_Sans({
@@ -153,6 +154,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Script
             defer
             src={umamiSrc}
+            data-website-id={umamiWebsiteId}
+            strategy="afterInteractive"
+          />
+        )}
+        {umamiRecorderSrc && umamiWebsiteId && (
+          <Script
+            defer
+            src={umamiRecorderSrc}
             data-website-id={umamiWebsiteId}
             strategy="afterInteractive"
           />
