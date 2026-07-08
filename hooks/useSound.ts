@@ -10,6 +10,9 @@ export function useSound() {
   const audioContext = useRef<AudioContext | null>(null);
   const audioCache = useRef<Record<string, HTMLAudioElement>>({});
   const fadeTimers = useRef<Set<ReturnType<typeof setInterval>>>(new Set());
+  const enabledRef = useRef(false);
+  const mutedRef = useRef(false);
+  const volumeRef = useRef(1);
 
   useEffect(() => {
     try {
@@ -23,6 +26,14 @@ export function useSound() {
     } catch {
     }
   }, []);
+
+  useEffect(() => {
+    mutedRef.current = muted;
+  }, [muted]);
+
+  useEffect(() => {
+    volumeRef.current = volume;
+  }, [volume]);
 
   useEffect(() => {
     try {
@@ -39,7 +50,10 @@ export function useSound() {
   }, [volume]);
 
   useEffect(() => {
-    const enable = () => setEnabled(true);
+    const enable = () => {
+      enabledRef.current = true;
+      setEnabled(true);
+    };
     const timers = fadeTimers.current;
     window.addEventListener("pointerdown", enable, { once: true });
     window.addEventListener("keydown", enable, { once: true });
@@ -112,8 +126,8 @@ export function useSound() {
 
     const audio = new Audio(src);
     audio.preload = "auto";
-    audio.muted = muted;
-    audio.volume = volume;
+    audio.muted = mutedRef.current;
+    audio.volume = volumeRef.current;
     audioCache.current[name] = audio;
     try {
       audio.load();
@@ -121,7 +135,7 @@ export function useSound() {
       /* Some browsers throw if preload is blocked; playSound will fall back. */
     }
     return audio;
-  }, [muted, volume]);
+  }, []);
 
   const warmSound = useCallback(
     (name: string) => {
@@ -132,18 +146,18 @@ export function useSound() {
 
   const playSound = useCallback(
     (name: string) => {
-      if (!enabled || muted) return;
+      if (!enabledRef.current || mutedRef.current) return;
       const audio = ensureAudio(name);
       if (audio) {
         audio.currentTime = 0;
-        audio.muted = muted;
-        audio.volume = volume;
+        audio.muted = mutedRef.current;
+        audio.volume = volumeRef.current;
         audio.play().catch(() => playTone(name));
         return;
       }
       playTone(name);
     },
-    [enabled, ensureAudio, muted, volume, playTone],
+    [ensureAudio, playTone],
   );
 
   const fadeOutSound = useCallback(

@@ -238,7 +238,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
           current.some((m) => m.id === data.message!.id) ? current : [...current, data.message!],
         );
       }
-      playSound("click");
+      playSound("icq");
       await fetchMessages();
     } catch {
       setError("Network error — message not sent.");
