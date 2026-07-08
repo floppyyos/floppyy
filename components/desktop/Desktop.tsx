@@ -51,7 +51,6 @@ import { useServiceWorker } from "@/hooks/useServiceWorker";
 import { desktopIcons, WindowComponentProps, WindowId } from "@/lib/windows";
 import { DEFAULT_WALLPAPER, isWallpaperId, WALLPAPERS, WallpaperId, wallpaperStyle } from "@/lib/wallpapers";
 
-// Heavy windows are loaded on demand so they stay out of the initial bundle.
 const DosGameWindow = dynamic(() => import("@/components/windows/DosGameWindow").then((m) => m.DosGameWindow), {
   ssr: false,
   loading: () => <WindowLoading />,
@@ -76,6 +75,8 @@ const MediaPlayerWindow = dynamic(() => import("@/components/windows/MediaPlayer
   ssr: false,
   loading: () => <WindowLoading />,
 });
+
+const GAME_WINDOW_IDS = new Set<WindowId>(["doom", "duke3d", "wolf3d", "dune2", "warcraft"]);
 
 type MenuState = { x: number; y: number; target?: string } | null;
 type IconPosition = { x: number; y: number };
@@ -109,7 +110,6 @@ function iconGridPositions(ids: string[]) {
   const maxCols = Math.max(1, Math.floor(availableWidth / ICON_STEP_X));
   return Object.fromEntries(
     ids.map((id, index) => {
-      // Place "share" icon at bottom-right
       if (id === "share") {
         return [
           id,
@@ -207,10 +207,13 @@ export default function Desktop() {
   const suppressClickClear = useRef(false);
   const wm = useWindowManager();
   const { playSound, warmSound, fadeOutSound, muted, setMuted, volume, setVolume } = useSound();
-  const screensaver = useScreensaver(60000);
+
+  const gameActive = wm.windows.some(
+    (item) => GAME_WINDOW_IDS.has(item.id) && !item.minimized,
+  );
+  const screensaver = useScreensaver(60000, gameActive);
   useServiceWorker();
 
-  // Load persisted desktop icon layout + wallpaper once on mount.
   useEffect(() => {
     try {
       const savedWallpaper = globalThis.localStorage.getItem("floppyy-wallpaper");
@@ -298,7 +301,6 @@ export default function Desktop() {
     setConnectedAt(Date.now());
   }, []);
 
-  // Let any window bring the whole "OS" down (used by Run, IE/Netscape, ...).
   const crashSystem = useCallback(
     (options?: { variant?: "cascade" | "fatal"; message?: string }) => {
       setCrash((current) => current ?? { variant: options?.variant ?? "cascade", message: options?.message });
@@ -369,7 +371,6 @@ export default function Desktop() {
         return;
       }
 
-      // Check whether the icon was dropped onto the Recycle Bin.
       const recyclePosition = iconPositions["recycle"];
       const overRecycleBin =
         drag.id !== "recycle" &&
@@ -380,7 +381,6 @@ export default function Desktop() {
         event.clientY <= recyclePosition.y + ICON_HEIGHT;
 
       if (overRecycleBin) {
-        // My Computer and Dial-Up Networking can't be thrown away.
         if (drag.id === "computer" || drag.id === "dialup") {
           playSound("error");
           setErrorPopup(
@@ -401,7 +401,6 @@ export default function Desktop() {
           return;
         }
 
-        // Everything else gets removed from the desktop and dropped in the bin.
         setBinItems((previous) => {
           const next = new Set(previous);
           next.add(drag.id);
@@ -484,7 +483,6 @@ export default function Desktop() {
   }, [notify]);
 
   const startMarquee = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    // Only start on a primary-button press over empty desktop (icons stop propagation).
     if (event.button !== 0) return;
     suppressClickClear.current = false;
     const rect = desktopRef.current?.getBoundingClientRect();
@@ -540,7 +538,6 @@ export default function Desktop() {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-    // A drag just happened — keep the marquee selection, don't let the click clear it.
     if (drag.moved) suppressClickClear.current = true;
     marqueeDrag.current = null;
     setMarquee(null);
@@ -548,7 +545,6 @@ export default function Desktop() {
 
   const showProperties = useCallback(() => {
     const target = contextMenu?.target;
-    // Both the desktop and My Computer open Display Properties (Win98 style).
     if (!target || target === "computer") {
       openWindow("screensaver");
     } else {
@@ -642,7 +638,6 @@ export default function Desktop() {
     }
   };
 
-  // Play pending startup sound on first user interaction with desktop
   useEffect(() => {
     if (!pendingStartup) return;
     const play = () => {
@@ -672,8 +667,6 @@ export default function Desktop() {
         wm.closeWindow(wm.activeWindow.instanceId);
         playSound("close");
       }
-      // Easter egg: the "kill" combo (a stand-in for Ctrl+Alt+Del, which the
-      // browser won't let us capture) brings the whole "OS" down.
       if (event.ctrlKey && event.altKey && (event.key === "Backspace" || event.code === "Backspace")) {
         event.preventDefault();
         crashSystem({ variant: "cascade" });
@@ -689,8 +682,6 @@ export default function Desktop() {
     return () => window.removeEventListener("keydown", handler);
   }, [notify, openWindow, playSound, selectedIcons, wm, crashSystem]);
 
-  // Easter egg: a few minutes into the session, McAfee "finds a virus".
-  // Shown at most once ever per browser (persisted), even across reboots.
   useEffect(() => {
     if (!booted) return;
     try {

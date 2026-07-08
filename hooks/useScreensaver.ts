@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export type ScreensaverMode = "pipes" | "stars" | "maze" | "mystify" | "flying-windows";
 
-export function useScreensaver(timeoutMs = 60000) {
+export function useScreensaver(timeoutMs = 60000, suspended = false) {
   const [active, setActive] = useState(false);
   const [mode, setMode] = useState<ScreensaverMode>("flying-windows");
   const timer = useRef<number | null>(null);
@@ -34,6 +34,12 @@ export function useScreensaver(timeoutMs = 60000) {
   }, [schedule]);
 
   useEffect(() => {
+    if (suspended) {
+      clear();
+      setActive(false);
+      return;
+    }
+
     schedule();
     const activity = () => {
       if (active && performance.now() - activatedAt.current > 500) {
@@ -50,7 +56,7 @@ export function useScreensaver(timeoutMs = 60000) {
       window.removeEventListener("pointerdown", activity);
       window.removeEventListener("keydown", activity);
     };
-  }, [active, clear, schedule]);
+  }, [active, clear, schedule, suspended]);
 
   return { active, mode, start, stop, setMode };
 }
