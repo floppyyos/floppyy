@@ -28,6 +28,7 @@ import { NotepadWindow } from "@/components/windows/NotepadWindow";
 import { OutlookWindow } from "@/components/windows/OutlookWindow";
 import { ProjectDetailsWindow } from "@/components/windows/ProjectDetailsWindow";
 import { ProjectsWindow } from "@/components/windows/ProjectsWindow";
+import { UserProfileWindow } from "@/components/windows/UserProfileWindow";
 import { RunWindow } from "@/components/windows/RunWindow";
 import { ScreensaverWindow } from "@/components/windows/ScreensaverWindow";
 import { SettingsWindow } from "@/components/windows/SettingsWindow";
@@ -205,7 +206,7 @@ export default function Desktop() {
   const marqueeDrag = useRef<{ startX: number; startY: number; moved: boolean } | null>(null);
   const suppressClickClear = useRef(false);
   const wm = useWindowManager();
-  const { playSound, fadeOutSound, muted, setMuted, volume, setVolume } = useSound();
+  const { playSound, warmSound, fadeOutSound, muted, setMuted, volume, setVolume } = useSound();
   const screensaver = useScreensaver(60000);
   useServiceWorker();
 
@@ -571,6 +572,8 @@ export default function Desktop() {
         return <DateTimeWindow {...props} />;
       case "projects":
         return <ProjectsWindow {...props} />;
+      case "profile":
+        return <UserProfileWindow {...props} />;
       case "project-details":
         return <ProjectDetailsWindow {...props} />;
       case "internet":
@@ -719,6 +722,7 @@ export default function Desktop() {
       resizeWindow: wm.resizeWindow,
       notify,
       playSound,
+      warmSound,
       fadeOutSound,
       startScreensaver: screensaver.start,
       setDefaultScreensaver: screensaver.setMode,
@@ -730,7 +734,7 @@ export default function Desktop() {
       internetConnected: dialupDone,
       muted,
     }),
-    [notify, openWindow, playSound, fadeOutSound, screensaver.start, screensaver.setMode, crashSystem, wallpaper, wm, dialupDone, muted],
+    [notify, openWindow, playSound, warmSound, fadeOutSound, screensaver.start, screensaver.setMode, crashSystem, wallpaper, wm, dialupDone, muted],
   );
 
   if (!booted) {

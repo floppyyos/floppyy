@@ -1123,3 +1123,41 @@ input[type="radio"]:disabled:checked::after {
 .game-button-danger:hover {
   background: #b91c1c;
 }
+
+.icq-flower {
+  --icq-flower: #00b000;
+  position: relative;
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  image-rendering: pixelated;
+}
+
+.icq-flower::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 5px;
+  height: 5px;
+  background: #ffd800;
+  box-shadow:
+    0 -4px var(--icq-flower),
+    4px 0 var(--icq-flower),
+    0 4px var(--icq-flower),
+    -4px 0 var(--icq-flower),
+    3px -3px #ffffff,
+    -3px 3px #808080;
+}
+
+.icq-flower::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 9px;
+  width: 4px;
+  height: 4px;
+  border-left: 1px solid #008000;
+  border-bottom: 1px solid #008000;
+}

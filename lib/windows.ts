@@ -25,6 +25,7 @@ export type WindowId =
   | "notepad"
   | "outlook"
   | "projects"
+  | "profile"
   | "games"
   | "games-folder"
   | "music"
@@ -74,6 +75,7 @@ export type WindowComponentProps = {
   resizeWindow?: (instanceId: string, width: number, height: number) => void;
   notify: (message: string, options?: { icon?: string; titleIcon?: string; persistent?: boolean; balloon?: boolean }) => void;
   playSound: (sound: string) => void;
+  warmSound?: (sound: string) => void;
   fadeOutSound?: (sound: string, duration?: number) => void;
   startScreensaver: (mode?: "pipes" | "stars" | "maze" | "mystify" | "flying-windows") => void;
   setDefaultScreensaver?: (mode: "pipes" | "stars" | "maze" | "mystify" | "flying-windows") => void;
@@ -108,6 +110,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   minesweeper: { id: "minesweeper", title: "Minesweeper", icon: "mine", width: 300, height: 384, minWidth: 168, minHeight: 200, noMaximize: true },
   outlook: { id: "outlook", title: "Outlook Express", icon: "msoutlook", width: 720, height: 500 },
   projects: { id: "projects", title: "Projects", icon: "folder", width: 720, height: 500 },
+  profile: { id: "profile", title: "User Profile", icon: "users-share", width: 430, height: 310, minWidth: 360, minHeight: 260 },
   games: { id: "games", title: "Games", icon: "joystick", width: 780, height: 580 },
   "games-folder": { id: "games-folder", title: "Games", icon: "directory_check", width: 620, height: 460, minWidth: 420, minHeight: 320 },
   guestbook: { id: "guestbook", title: "#floppyy", icon: "guestbook", width: 620, height: 470, minWidth: 460, minHeight: 340 },

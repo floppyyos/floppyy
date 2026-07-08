@@ -19,6 +19,7 @@ const RANK_LABELS = ["", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J",
 // Column 1 is the classic red robot. A random back is picked for each new deal.
 const BACK_ROW_Y = 384;
 const BACK_COUNT = 12;
+const SOLITAIRE_RECORD_KEY = "floppyy-solitaire-record";
 const randomBack = () => Math.floor(Math.random() * BACK_COUNT) + 1;
 
 type Card = {
@@ -37,6 +38,24 @@ type GameState = {
   foundations: Card[][];
   tableau: Card[][];
 };
+
+type SolitaireRecord = {
+  score: number;
+  seconds: number;
+  wonAt: string;
+};
+
+function readRecord(): SolitaireRecord | null {
+  try {
+    const saved = globalThis.localStorage.getItem(SOLITAIRE_RECORD_KEY);
+    if (!saved) return null;
+    const parsed = JSON.parse(saved) as SolitaireRecord;
+    if (typeof parsed.score !== "number" || typeof parsed.seconds !== "number") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
 
 const isRed = (suit: number) => suit === 1 || suit === 2;
 const oppositeColor = (a: Card, b: Card) => isRed(a.suit) !== isRed(b.suit);
@@ -83,6 +102,8 @@ export function Solitaire({ playSound, onExit }: { playSound: (name: string) => 
   const [won, setWon] = useState(false);
   const [backIndex, setBackIndex] = useState<number>(() => randomBack());
   const [showAbout, setShowAbout] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [record, setRecord] = useState<SolitaireRecord | null>(null);
   const dragRef = useRef<DragSource | null>(null);
   // Click-to-move selection (works alongside drag-and-drop, and on touch).
   const [selected, setSelected] = useState<DragSource | null>(null);
@@ -97,6 +118,10 @@ export function Solitaire({ playSound, onExit }: { playSound: (name: string) => 
     setBackIndex(randomBack());
     playSound("click");
   }, [playSound]);
+
+  useEffect(() => {
+    setRecord(readRecord());
+  }, []);
 
   // Timer
   useEffect(() => {
@@ -115,6 +140,20 @@ export function Solitaire({ playSound, onExit }: { playSound: (name: string) => 
       playSound("click");
     }
   }, [playSound]);
+
+  useEffect(() => {
+    if (!won) return;
+    setRecord((current) => {
+      if (current && (current.score > score || (current.score === score && current.seconds <= seconds))) return current;
+      const next = { score, seconds, wonAt: new Date().toISOString() };
+      try {
+        globalThis.localStorage.setItem(SOLITAIRE_RECORD_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, [won, score, seconds]);
 
   // Draw from stock to waste (draw one), recycle when empty
   const drawStock = useCallback(() => {
@@ -310,6 +349,7 @@ export function Solitaire({ playSound, onExit }: { playSound: (name: string) => 
             label: "Game",
             menu: [
               { label: "New Game", shortcut: "F2", onClick: newGame },
+              { label: "Statistics...", separatorBefore: true, onClick: () => { setShowStats(true); playSound("click"); } },
               { label: "Exit", separatorBefore: true, onClick: () => (onExit ? onExit() : undefined) },
             ],
           },
@@ -428,10 +468,76 @@ export function Solitaire({ playSound, onExit }: { playSound: (name: string) => 
       </div>
       <GameStatusBar>
         Score: {score}
+        {record && <span className="ml-[16px]">Best: {record.score}</span>}
         <span className="ml-auto">Time: {Math.floor(seconds / 60)}:{String(seconds % 60).padStart(2, "0")}</span>
       </GameStatusBar>
 
       {showAbout && <AboutSolitaireDialog onClose={() => setShowAbout(false)} />}
+      {showStats && (
+        <SolitaireStatsDialog
+          record={record}
+          onReset={() => {
+            try {
+              globalThis.localStorage.removeItem(SOLITAIRE_RECORD_KEY);
+            } catch {
+              /* ignore */
+            }
+            setRecord(null);
+            playSound("click");
+          }}
+          onClose={() => setShowStats(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function SolitaireStatsDialog({
+  record,
+  onReset,
+  onClose,
+}: {
+  record: SolitaireRecord | null;
+  onReset: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="absolute inset-0 z-[9000] flex items-center justify-center bg-black/20" onPointerDown={onClose}>
+      <div
+        className="w-[300px] select-none bg-[#c0c0c0] text-black"
+        style={{
+          boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+          padding: 3,
+        }}
+        onPointerDown={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-label="Solitaire Statistics"
+      >
+        <div className="flex h-[18px] items-center justify-between bg-gradient-to-r from-[#000080] to-[#1084d0] pl-[4px] pr-[2px]">
+          <span className="truncate text-[11px] font-bold text-white">Solitaire Statistics</span>
+          <button className="win-button h-[14px] w-[16px] min-w-0 p-0 text-[10px] leading-none" onClick={onClose} aria-label="Close">
+            x
+          </button>
+        </div>
+        <div className="px-[16px] py-[14px] text-[11px] leading-[20px]">
+          <div className="flex justify-between">
+            <span>Best score:</span>
+            <span>{record ? record.score : "0"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Best time:</span>
+            <span>{record ? `${Math.floor(record.seconds / 60)}:${String(record.seconds % 60).padStart(2, "0")}` : "--:--"}</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Player:</span>
+            <span>Floppyy User</span>
+          </div>
+        </div>
+        <div className="flex justify-end gap-[8px] px-[16px] pb-[14px]">
+          <button className="win-button min-w-[88px]" onClick={onReset}>Reset</button>
+          <button className="win-button min-w-[72px]" onClick={onClose} autoFocus>OK</button>
+        </div>
+      </div>
     </div>
   );
 }

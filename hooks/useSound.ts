@@ -104,21 +104,46 @@ export function useSound() {
     });
   }, []);
 
+  const ensureAudio = useCallback((name: string) => {
+    const src = soundFiles[name];
+    if (!src) return null;
+    const cached = audioCache.current[name];
+    if (cached) return cached;
+
+    const audio = new Audio(src);
+    audio.preload = "auto";
+    audio.muted = muted;
+    audio.volume = volume;
+    audioCache.current[name] = audio;
+    try {
+      audio.load();
+    } catch {
+      /* Some browsers throw if preload is blocked; playSound will fall back. */
+    }
+    return audio;
+  }, [muted, volume]);
+
+  const warmSound = useCallback(
+    (name: string) => {
+      ensureAudio(name);
+    },
+    [ensureAudio],
+  );
+
   const playSound = useCallback(
     (name: string) => {
       if (!enabled || muted) return;
-      const src = soundFiles[name];
-      if (src) {
-        audioCache.current[name] ??= new Audio(src);
-        const audio = audioCache.current[name];
+      const audio = ensureAudio(name);
+      if (audio) {
         audio.currentTime = 0;
+        audio.muted = muted;
         audio.volume = volume;
         audio.play().catch(() => playTone(name));
         return;
       }
       playTone(name);
     },
-    [enabled, muted, volume, playTone],
+    [enabled, ensureAudio, muted, volume, playTone],
   );
 
   const fadeOutSound = useCallback(
@@ -143,7 +168,7 @@ export function useSound() {
     [],
   );
 
-  return { playSound, fadeOutSound, muted, setMuted, volume, setVolume, enabled };
+  return { playSound, warmSound, fadeOutSound, muted, setMuted, volume, setVolume, enabled };
 }
 
 declare global {

@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 import { Win98Select } from "@/components/ui/Win98Select";
+import { onProfileChange, readProfile, writeProfile } from "@/lib/profile";
 import {
   BODY_MAX_LENGTH,
   GUESTBOOK_CHANNEL,
@@ -16,35 +18,83 @@ import {
 
 const NICK_STORAGE_KEY = "floppyy-irc-nick";
 const STATUS_STORAGE_KEY = "floppyy-irc-status";
+const ADMIN_STORAGE_KEY = "floppyy-guestbook-admin";
 const POLL_INTERVAL_MS = 10000;
+
+const ICQ_SMILIES = [
+  { tokens: [":)", ":-)"], label: "Smile", face: ":)" },
+  { tokens: [":D", ":-D"], label: "Laugh", face: ":D" },
+  { tokens: [";)", ";-)"], label: "Wink", face: ";)" },
+  { tokens: [":(", ":-("], label: "Sad", face: ":(" },
+  { tokens: [":P", ":-P"], label: "Tongue", face: ":P" },
+  { tokens: [":o", ":O", ":-o", ":-O"], label: "Surprised", face: ":o" },
+  { tokens: ["<3"], label: "Love", face: "<3" },
+] as const;
+
+const SMILIE_LOOKUP = new Map<string, (typeof ICQ_SMILIES)[number]>(
+  ICQ_SMILIES.flatMap((smilie) => smilie.tokens.map((token) => [token, smilie])),
+);
+
+const SMILIE_PATTERN = new RegExp(
+  `(${[...SMILIE_LOOKUP.keys()]
+    .sort((a, b) => b.length - a.length)
+    .map((token) => token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("|")})`,
+  "g",
+);
 
 function timestamp(iso: string): string {
   const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "--:--";
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  if (Number.isNaN(date.getTime())) return "--/--/-- --:--";
+  const day = date.toLocaleDateString([], { month: "2-digit", day: "2-digit", year: "2-digit" });
+  const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  return `${day} ${time}`;
+}
+
+function renderSmilie(token: string, key: string): ReactNode {
+  const smilie = SMILIE_LOOKUP.get(token);
+  if (!smilie) return token;
+  return (
+    <span
+      key={key}
+      className="mx-[1px] inline-flex h-[14px] min-w-[16px] translate-y-[2px] items-center justify-center border border-[#808080] bg-[#ffff66] px-[2px] text-[9px] font-bold leading-none text-black"
+      title={`${smilie.label} ${token}`}
+      style={{
+        boxShadow: "inset 1px 1px #ffffff, inset -1px -1px #808000",
+        fontFamily: "'MS Sans Serif', Arial, sans-serif",
+      }}
+    >
+      {smilie.face}
+    </span>
+  );
+}
+
+function renderMessageBody(body: string): ReactNode[] {
+  return body.split(SMILIE_PATTERN).map((part, index) => {
+    if (!part) return null;
+    return renderSmilie(part, `${index}-${part}`);
+  });
 }
 
 type Peer = { nick: string; status: UserStatus; color: number };
 
 function readStoredNick(): string {
+  return readProfile().nick;
+}
+
+function readStoredStatus(): UserStatus {
+  return readProfile().status;
+}
+
+function readAdminToken(): string {
   try {
-    return globalThis.localStorage.getItem(NICK_STORAGE_KEY)?.slice(0, NICK_MAX_LENGTH) ?? "";
+    return globalThis.localStorage.getItem(ADMIN_STORAGE_KEY) ?? "";
   } catch {
     return "";
   }
 }
 
-function readStoredStatus(): UserStatus {
-  try {
-    const saved = globalThis.localStorage.getItem(STATUS_STORAGE_KEY);
-    if (saved && (STATUS_OPTIONS as readonly string[]).includes(saved)) return saved as UserStatus;
-  } catch {
-    /* localStorage unavailable */
-  }
-  return "online";
-}
-
-export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
+export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponentProps) {
   const [messages, setMessages] = useState<GuestbookMessage[]>([]);
   const [nick, setNick] = useState(readStoredNick);
   const [status, setStatus] = useState<UserStatus>(readStoredStatus);
@@ -53,6 +103,7 @@ export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [adminToken, setAdminToken] = useState(readAdminToken);
 
   const logRef = useRef<HTMLDivElement>(null);
   const lastSeenId = useRef(0);
@@ -62,6 +113,15 @@ export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
   useEffect(() => {
     ownNick.current = nick;
   }, [nick]);
+
+  useEffect(() => onProfileChange((profile) => {
+    setNick(profile.nick);
+    setStatus(profile.status);
+  }), []);
+
+  useEffect(() => {
+    warmSound?.("icq");
+  }, [warmSound]);
 
   const applyMessages = useCallback(
     (incoming: GuestbookMessage[]) => {
@@ -115,6 +175,31 @@ export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
   const send = useCallback(async () => {
     const trimmedNick = nick.trim();
     const trimmedBody = draft.trim();
+    if (/^\/admin\s+off$/i.test(trimmedBody) || /^\/logout$/i.test(trimmedBody)) {
+      setAdminToken("");
+      setDraft("");
+      setError("Operator mode disabled.");
+      try {
+        globalThis.localStorage.removeItem(ADMIN_STORAGE_KEY);
+      } catch {
+        /* ignore */
+      }
+      playSound("click");
+      return;
+    }
+    if (/^\/admin\s+/i.test(trimmedBody)) {
+      const token = trimmedBody.replace(/^\/admin\s+/i, "").trim();
+      setAdminToken(token);
+      setDraft("");
+      setError(token ? "Operator mode enabled." : "Operator token is empty.");
+      try {
+        globalThis.localStorage.setItem(ADMIN_STORAGE_KEY, token);
+      } catch {
+        /* ignore */
+      }
+      playSound(token ? "notification" : "error");
+      return;
+    }
     if (!trimmedNick) {
       setError("Pick a nickname first.");
       playSound("error");
@@ -143,6 +228,7 @@ export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
       try {
         globalThis.localStorage.setItem(NICK_STORAGE_KEY, trimmedNick);
         globalThis.localStorage.setItem(STATUS_STORAGE_KEY, status);
+        writeProfile({ nick: trimmedNick, status });
       } catch {
         /* ignore */
       }
@@ -161,6 +247,37 @@ export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
       setSending(false);
     }
   }, [nick, draft, status, website, sending, playSound, fetchMessages]);
+
+  const deleteMessage = useCallback(
+    async (id: number) => {
+      if (!adminToken) return;
+      try {
+        const response = await fetch(`/api/guestbook?id=${id}`, {
+          method: "DELETE",
+          headers: { "x-admin-token": adminToken },
+        });
+        if (!response.ok) throw new Error("delete failed");
+        setMessages((current) => current.filter((message) => message.id !== id));
+        setError("Message deleted.");
+        playSound("recycle");
+      } catch {
+        setError("Could not delete message. Check operator token.");
+        playSound("error");
+      }
+    },
+    [adminToken, playSound],
+  );
+
+  const insertSmilie = useCallback(
+    (token: string) => {
+      setDraft((current) => {
+        const prefix = current && !/\s$/.test(current) ? `${current} ` : current;
+        return `${prefix}${token} `.slice(0, BODY_MAX_LENGTH);
+      });
+      playSound("click");
+    },
+    [playSound],
+  );
 
   return (
     <div className="flex h-full flex-col bg-[#c0c0c0] text-[11px]">
@@ -202,6 +319,7 @@ export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
           <div className="text-[#008000]">
             *** Channel rules: 1) Mutual respect &nbsp;2) No advertising &nbsp;3) No spam or flooding
           </div>
+          {adminToken && <div className="text-[#000080]">*** Operator mode is active. Click x to remove spam.</div>}
           {loading && messages.length === 0 && (
             <div className="text-[#808080]">*** Connecting to server...</div>
           )}
@@ -209,14 +327,28 @@ export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
             <div className="text-[#808080]">*** No messages yet. Be the first to say hi!</div>
           )}
           {messages.map((message) => (
-            <div key={message.id} className="break-words">
-              <span className="text-[#808080]">[{timestamp(message.createdAt)}] </span>
-              <span style={{ color: nickColor(message.nick, message.color), fontWeight: 700 }}>
-                &lt;{message.nick}&gt;
-              </span>{" "}
-              <span className="text-black">{message.body}</span>
+            <div key={message.id} className="group flex gap-[4px] break-words">
+              <div className="min-w-0 flex-1">
+                <span className="text-[#808080]">[{timestamp(message.createdAt)}] </span>
+                <span style={{ color: nickColor(message.nick, message.color), fontWeight: 700 }}>
+                  &lt;{message.nick}&gt;
+                </span>{" "}
+                <span className="text-black">{renderMessageBody(message.body)}</span>
+              </div>
+              {adminToken && (
+                <button
+                  className="h-[15px] w-[15px] shrink-0 border border-[#808080] bg-[#c0c0c0] text-[9px] leading-none"
+                  title="Delete message"
+                  onClick={() => deleteMessage(message.id)}
+                >
+                  x
+                </button>
+              )}
             </div>
           ))}
+          {draft.trim().length > 0 && (
+            <div className="mt-[2px] text-[#808080]">*** {nick.trim() || "guest"} is typing...</div>
+          )}
         </div>
 
         {/* Nick list with ICQ status flowers */}
@@ -227,8 +359,8 @@ export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
           {peers.map((peer) => (
             <div key={peer.nick} className="flex items-center gap-[5px] py-[1px]" title={STATUS_META[peer.status].label}>
               <span
-                className="inline-block h-[8px] w-[8px] shrink-0 rounded-full"
-                style={{ background: STATUS_META[peer.status].color, boxShadow: "inset -1px -1px rgba(0,0,0,0.35)" }}
+                className="icq-flower"
+                style={{ "--icq-flower": STATUS_META[peer.status].color } as CSSProperties}
               />
               <span className="truncate" style={{ color: nickColor(peer.nick, peer.color) }}>
                 {peer.nick}
@@ -250,8 +382,8 @@ export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
             label: (
               <span className="flex items-center gap-[6px]">
                 <span
-                  className="inline-block h-[8px] w-[8px] shrink-0 rounded-full"
-                  style={{ background: STATUS_META[value].color, boxShadow: "inset -1px -1px rgba(0,0,0,0.35)" }}
+                  className="icq-flower"
+                  style={{ "--icq-flower": STATUS_META[value].color } as CSSProperties}
                 />
                 {STATUS_META[value].label}
               </span>
@@ -281,6 +413,19 @@ export function GuestbookWindow({ notify, playSound }: WindowComponentProps) {
             }
           }}
         />
+        <div className="flex shrink-0 items-center gap-[2px]" aria-label="ICQ smilies">
+          {ICQ_SMILIES.map((smilie) => (
+            <button
+              key={smilie.tokens[0]}
+              type="button"
+              className="win-button h-[24px] min-w-[24px] px-[3px] text-[10px] font-bold leading-none"
+              title={`${smilie.label} ${smilie.tokens[0]}`}
+              onClick={() => insertSmilie(smilie.tokens[0])}
+            >
+              {smilie.face}
+            </button>
+          ))}
+        </div>
         {/* Honeypot — hidden from humans, tempting to bots */}
         <input
           type="text"

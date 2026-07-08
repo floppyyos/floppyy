@@ -39,6 +39,10 @@ export function ControlPanelWindow({ notify, playSound, openWindow }: WindowComp
       openWindow("internet");
       return;
     }
+    if (item.id === "users") {
+      openWindow("profile");
+      return;
+    }
     notify(`${item.label}: ${item.description}`);
   };
 
