@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { CSSProperties } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 import { NICK_MAX_LENGTH, STATUS_META, STATUS_OPTIONS, UserStatus } from "@/lib/guestbook/types";
@@ -8,15 +8,9 @@ import { readProfile, writeProfile } from "@/lib/profile";
 import { Win98Select } from "@/components/ui/Win98Select";
 
 export function UserProfileWindow({ notify, playSound }: WindowComponentProps) {
-  const [nick, setNick] = useState("");
-  const [status, setStatus] = useState<UserStatus>("online");
+  const [nick, setNick] = useState(() => readProfile().nick);
+  const [status, setStatus] = useState<UserStatus>(() => readProfile().status);
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    const profile = readProfile();
-    setNick(profile.nick);
-    setStatus(profile.status);
-  }, []);
 
   const save = () => {
     const nextNick = nick.trim().slice(0, NICK_MAX_LENGTH);

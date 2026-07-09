@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type BootMode = "normal" | "logged" | "safe" | "command";
 
@@ -66,12 +66,14 @@ const BOOTLOG_LINES = [
   "Desktop initialized",
 ];
 
+function createBiosLines() {
+  if (Math.random() > 0.28) return BIOS_LINES;
+  const rare = RARE_BIOS_LINES[Math.floor(Math.random() * RARE_BIOS_LINES.length)];
+  return [...BIOS_LINES.slice(0, -1), { text: rare, highlight: true }, ...BIOS_LINES.slice(-1)];
+}
+
 export function BiosScreen({ onComplete }: BiosScreenProps) {
-  const biosLines = useMemo(() => {
-    if (Math.random() > 0.28) return BIOS_LINES;
-    const rare = RARE_BIOS_LINES[Math.floor(Math.random() * RARE_BIOS_LINES.length)];
-    return [...BIOS_LINES.slice(0, -1), { text: rare, highlight: true }, ...BIOS_LINES.slice(-1)];
-  }, []);
+  const [biosLines] = useState(createBiosLines);
   const [visibleLines, setVisibleLines] = useState(0);
   const [phase, setPhase] = useState<"bios" | "menu" | "bootlog" | "command" | "booting">("bios");
   const [menuChoice, setMenuChoice] = useState("");

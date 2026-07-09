@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 
 type Topic = {
@@ -40,13 +40,11 @@ function Shortcut({ keys, label }: { keys: ReactNode[]; label: string }) {
 }
 
 export function HelpWindow({ openWindow }: WindowComponentProps) {
-  const [isMac, setIsMac] = useState(false);
-  const [active, setActive] = useState("welcome");
-
-  useEffect(() => {
+  const [isMac] = useState(() => {
     const platform = `${navigator.platform} ${navigator.userAgent}`.toLowerCase();
-    setIsMac(platform.includes("mac"));
-  }, []);
+    return platform.includes("mac");
+  });
+  const [active, setActive] = useState("welcome");
 
   const ctrl = isMac ? "⌃ Ctrl" : "Ctrl";
   const alt = isMac ? "⌥ Opt" : "Alt";
@@ -196,7 +194,7 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
       body: (
         <div className="space-y-[10px]">
           <p><b>Floppyy</b> — the web you grew up on.</p>
-          <p>Version 3.2</p>
+          <p>Version 3.3</p>
           <p>
             Built with a lot of nostalgia. For the full story and credits, open{" "}
             <button className="text-[#0000ff] underline" onClick={() => openWindow("about", "welcome")}>

@@ -92,8 +92,9 @@ export function InternetWindow({
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (audioRef.current && fadeOutSound) fadeOutSound(audioRef.current, 250);
     };
-  }, []);
+  }, [fadeOutSound]);
 
   return (
     <div

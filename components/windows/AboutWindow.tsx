@@ -13,7 +13,7 @@ const panels: Array<{ id: AboutPanel; label: string }> = [
   { id: "connect", label: "Connect" },
 ];
 
-export function AboutWindow({ window, closeWindow, notify, playSound }: WindowComponentProps) {
+export function AboutWindow({ window, closeWindow, playSound }: WindowComponentProps) {
   const [activePanel, setActivePanel] = useState<AboutPanel>("welcome");
   const [showOnBoot, setShowOnBoot] = useState(true);
 
@@ -88,7 +88,7 @@ export function AboutWindow({ window, closeWindow, notify, playSound }: WindowCo
               imageRendering: "pixelated",
             }}
           />
-          <PanelContent activePanel={activePanel} notify={notify} setPanel={setPanel} />
+          <PanelContent activePanel={activePanel} setPanel={setPanel} />
         </main>
       </div>
 
@@ -114,11 +114,9 @@ export function AboutWindow({ window, closeWindow, notify, playSound }: WindowCo
 
 function PanelContent({
   activePanel,
-  notify,
   setPanel,
 }: {
   activePanel: AboutPanel;
-  notify: (message: string) => void;
   setPanel: (panel: AboutPanel) => void;
 }) {
   if (activePanel === "nostalgia") {

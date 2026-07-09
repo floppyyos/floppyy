@@ -143,6 +143,10 @@ export const BANNED_WORDS = [
   "onlyfans",
 ];
 
+const BANNED_WORD_PATTERNS = BANNED_WORDS.map(
+  (word) => new RegExp(`(^|[^\\p{L}\\p{N}])${word}([^\\p{L}\\p{N}]|$)`, "iu"),
+);
+
 // spam ("c4sino", "p0rn") still trips the filter.
 const LEET_MAP: Record<string, string> = {
   "0": "o",
@@ -163,10 +167,7 @@ function normalizeForFilter(text: string): string {
 
 export function containsBannedWord(text: string): boolean {
   const normalized = normalizeForFilter(text);
-  return BANNED_WORDS.some((word) => {
-    const pattern = new RegExp(`(^|[^\\p{L}\\p{N}])${word}([^\\p{L}\\p{N}]|$)`, "iu");
-    return pattern.test(normalized);
-  });
+  return BANNED_WORD_PATTERNS.some((pattern) => pattern.test(normalized));
 }
 
 export type ValidationResult =

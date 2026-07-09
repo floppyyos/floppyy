@@ -8,10 +8,11 @@ export type RateLimitResult = {
 };
 
 let redis: Redis | null = null;
-let redisUnavailable = false;
+let redisUnavailableUntil = 0;
+const REDIS_RETRY_COOLDOWN_MS = 30_000;
 
 function getRedis(): Redis | null {
-  if (redisUnavailable || !process.env.REDIS_URL) return null;
+  if (!process.env.REDIS_URL || Date.now() < redisUnavailableUntil) return null;
   if (!redis) {
     redis = new Redis(process.env.REDIS_URL, {
       maxRetriesPerRequest: 1,
@@ -19,7 +20,7 @@ function getRedis(): Redis | null {
       lazyConnect: true,
     });
     redis.on("error", () => {
-      redisUnavailable = true;
+      redisUnavailableUntil = Date.now() + REDIS_RETRY_COOLDOWN_MS;
     });
   }
   return redis;
@@ -69,6 +70,7 @@ export async function rateLimit(
     }
     return { ok: true, remaining: limit - count, retryAfter: 0 };
   } catch {
+    redisUnavailableUntil = Date.now() + REDIS_RETRY_COOLDOWN_MS;
     return memoryLimit(key, limit, windowSec);
   }
 }
@@ -83,6 +85,8 @@ export function clientIp(request: Request): string {
 }
 
 export function hashIp(ip: string): string {
-  const salt = process.env.GUESTBOOK_SALT ?? "floppyy-dev-salt";
+  const salt =
+    process.env.GUESTBOOK_SALT ??
+    (process.env.NODE_ENV === "production" ? process.env.VERCEL_URL ?? "floppyy-prod-missing-salt" : "floppyy-dev-salt");
   return createHash("sha256").update(`${salt}:${ip}`).digest("hex").slice(0, 32);
 }

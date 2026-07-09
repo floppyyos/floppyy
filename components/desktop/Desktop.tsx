@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import dynamic from "next/dynamic";
 import { BootScreen, BootMode } from "@/components/boot/BootScreen";
 import { WindowLoading } from "@/components/windows/WindowLoading";
@@ -48,7 +49,7 @@ import { useScreensaver } from "@/hooks/useScreensaver";
 import { useSound } from "@/hooks/useSound";
 import { useWindowManager } from "@/hooks/useWindowManager";
 import { useServiceWorker } from "@/hooks/useServiceWorker";
-import { desktopIcons, WindowComponentProps, WindowId } from "@/lib/windows";
+import { desktopIcons, DesktopWindow, WindowComponentProps, WindowId } from "@/lib/windows";
 import { DEFAULT_WALLPAPER, isWallpaperId, WALLPAPERS, WallpaperId, wallpaperStyle } from "@/lib/wallpapers";
 
 const DosGameWindow = dynamic(() => import("@/components/windows/DosGameWindow").then((m) => m.DosGameWindow), {
@@ -175,6 +176,27 @@ function nearestFreeGridPosition(id: string, x: number, y: number, positions: Re
   };
 }
 
+function readStoredWallpaper(): WallpaperId {
+  try {
+    const savedWallpaper = globalThis.localStorage.getItem("floppyy-wallpaper");
+    return isWallpaperId(savedWallpaper) ? savedWallpaper : DEFAULT_WALLPAPER;
+  } catch {
+    return DEFAULT_WALLPAPER;
+  }
+}
+
+function readStoredIconPositions(): Record<string, IconPosition> {
+  const positions = initialIconPositions();
+  try {
+    const savedIcons = globalThis.localStorage.getItem("floppyy-icon-positions");
+    if (!savedIcons) return positions;
+    const parsed = JSON.parse(savedIcons) as Record<string, IconPosition>;
+    return parsed && typeof parsed === "object" ? { ...positions, ...parsed } : positions;
+  } catch {
+    return positions;
+  }
+}
+
 export default function Desktop() {
   const [booted, setBooted] = useState(false);
   const [bootMode, setBootMode] = useState<BootMode>("normal");
@@ -193,19 +215,24 @@ export default function Desktop() {
   const [crash, setCrash] = useState<null | { variant: "cascade" | "fatal"; message?: string }>(null);
   const [errorPopup, setErrorPopup] = useState<null | { title: string; message: string }>(null);
   const [virusAlertOpen, setVirusAlertOpen] = useState(false);
-  const [iconPositions, setIconPositions] = useState<Record<string, IconPosition>>(() => initialIconPositions());
-  const [wallpaper, setWallpaper] = useState<WallpaperId>(DEFAULT_WALLPAPER);
+  const [iconPositions, setIconPositions] = useState<Record<string, IconPosition>>(readStoredIconPositions);
+  const [wallpaper, setWallpaper] = useState<WallpaperId>(readStoredWallpaper);
   const [binItems, setBinItems] = useState<Set<string>>(() => new Set());
   const [emptiedIcons, setEmptiedIcons] = useState<Set<string>>(() => new Set());
   const iconDrag = useRef<IconDrag>(null);
-  const winampDrag = useRef<WindowDrag>(null);
+  const [winampDrag, setWinampDrag] = useState<WindowDrag>(null);
   // Tracks rapid, consecutive "My Computer" opens for the crash easter egg.
   const computerSpamRef = useRef({ count: 0, last: 0 });
-  const iconPositionsLoaded = useRef(false);
+  const iconPositionsLoaded = useRef(true);
   const desktopRef = useRef<HTMLDivElement>(null);
   const marqueeDrag = useRef<{ startX: number; startY: number; moved: boolean } | null>(null);
   const suppressClickClear = useRef(false);
   const wm = useWindowManager();
+  const {
+    closeWindow: closeManagedWindow,
+    minimizeWindow,
+    resizeWindow,
+  } = wm;
   const { playSound, warmSound, fadeOutSound, muted, setMuted, volume, setVolume } = useSound();
 
   const gameActive = wm.windows.some(
@@ -213,23 +240,6 @@ export default function Desktop() {
   );
   const screensaver = useScreensaver(60000, gameActive);
   useServiceWorker();
-
-  useEffect(() => {
-    try {
-      const savedWallpaper = globalThis.localStorage.getItem("floppyy-wallpaper");
-      if (isWallpaperId(savedWallpaper)) setWallpaper(savedWallpaper);
-      const savedIcons = globalThis.localStorage.getItem("floppyy-icon-positions");
-      if (savedIcons) {
-        const parsed = JSON.parse(savedIcons) as Record<string, IconPosition>;
-        if (parsed && typeof parsed === "object") {
-          setIconPositions((current) => ({ ...current, ...parsed }));
-        }
-      }
-    } catch {
-      /* ignore corrupt storage */
-    }
-    iconPositionsLoaded.current = true;
-  }, []);
 
   // Persist wallpaper + icon layout when they change (after initial load).
   useEffect(() => {
@@ -706,11 +716,11 @@ export default function Desktop() {
     () => ({
       openWindow,
       closeWindow: (instanceId: string) => {
-        wm.closeWindow(instanceId);
+        closeManagedWindow(instanceId);
         playSound("close");
       },
-      minimizeWindow: wm.minimizeWindow,
-      resizeWindow: wm.resizeWindow,
+      minimizeWindow,
+      resizeWindow,
       notify,
       playSound,
       warmSound,
@@ -725,7 +735,22 @@ export default function Desktop() {
       internetConnected: dialupDone,
       muted,
     }),
-    [notify, openWindow, playSound, warmSound, fadeOutSound, screensaver.start, screensaver.setMode, crashSystem, wallpaper, wm, dialupDone, muted],
+    [
+      notify,
+      openWindow,
+      closeManagedWindow,
+      playSound,
+      warmSound,
+      fadeOutSound,
+      screensaver.start,
+      screensaver.setMode,
+      crashSystem,
+      wallpaper,
+      minimizeWindow,
+      resizeWindow,
+      dialupDone,
+      muted,
+    ],
   );
 
   if (!booted) {
@@ -831,72 +856,21 @@ export default function Desktop() {
         ))}
       </div>
 
-      {wm.windows.map((item) => {
-        // Winamp renders without standard Windows frame
-        if (item.id === "music") {
-          return (
-            <div
-              key={item.instanceId}
-              className={`fixed ${item.minimized ? "hidden" : ""}`}
-              style={{
-                left: item.maximized ? 0 : item.x,
-                top: item.maximized ? 0 : item.y,
-                zIndex: item.zIndex,
-              }}
-              onPointerDown={() => wm.focusWindow(item.instanceId)}
-              onPointerMove={(event) => {
-                if (!winampDrag.current) return;
-                wm.moveWindow(
-                  winampDrag.current.instanceId,
-                  event.clientX - winampDrag.current.dx,
-                  event.clientY - winampDrag.current.dy,
-                );
-              }}
-              onPointerUp={() => {
-                winampDrag.current = null;
-              }}
-            >
-              <div
-                className="relative touch-none"
-                onPointerDown={(event) => {
-                  const target = event.target as HTMLElement;
-                  if (target.closest("button,input")) return;
-                  if (!target.closest(".winamp-titlebar,.winamp-eq-titlebar,.winamp-pl-titlebar")) return;
-                  event.stopPropagation();
-                  wm.focusWindow(item.instanceId);
-                  winampDrag.current = {
-                    instanceId: item.instanceId,
-                    dx: event.clientX - item.x,
-                    dy: event.clientY - item.y,
-                  };
-                  event.currentTarget.setPointerCapture(event.pointerId);
-                }}
-              >
-                {renderWindow({ window: item, ...commonProps })}
-              </div>
-            </div>
-          );
-        }
-
-        return (
-          <WindowFrame
-            key={item.instanceId}
-            window={item}
-            active={wm.activeWindow?.instanceId === item.instanceId}
-            onFocus={() => wm.focusWindow(item.instanceId)}
-            onClose={() => {
-              wm.closeWindow(item.instanceId);
-              playSound("close");
-            }}
-            onMinimize={() => wm.minimizeWindow(item.instanceId)}
-            onMaximize={() => wm.maximizeWindow(item.instanceId)}
-            onMove={(x, y) => wm.moveWindow(item.instanceId, x, y)}
-            onResize={(width, height) => wm.resizeWindow(item.instanceId, width, height)}
-          >
-            {renderWindow({ window: item, ...commonProps })}
-          </WindowFrame>
-        );
-      })}
+      <DesktopWindows
+        windows={wm.windows}
+        activeWindow={wm.activeWindow}
+        commonProps={commonProps}
+        renderWindow={renderWindow}
+        winampDrag={winampDrag}
+        setWinampDrag={setWinampDrag}
+        focusWindow={wm.focusWindow}
+        closeWindow={wm.closeWindow}
+        minimizeWindow={wm.minimizeWindow}
+        maximizeWindow={wm.maximizeWindow}
+        moveWindow={wm.moveWindow}
+        resizeWindow={wm.resizeWindow}
+        playSound={playSound}
+      />
 
       {startOpen && (
         <StartMenu
@@ -1164,6 +1138,100 @@ function McAfeePropertiesDialog({ onClose }: { onClose: () => void }) {
   );
 }
 
+function DesktopWindows({
+  windows,
+  activeWindow,
+  commonProps,
+  renderWindow,
+  winampDrag,
+  setWinampDrag,
+  focusWindow,
+  closeWindow,
+  minimizeWindow,
+  maximizeWindow,
+  moveWindow,
+  resizeWindow,
+  playSound,
+}: {
+  windows: DesktopWindow[];
+  activeWindow?: DesktopWindow;
+  commonProps: Omit<WindowComponentProps, "window">;
+  renderWindow: (props: WindowComponentProps) => ReactNode;
+  winampDrag: WindowDrag;
+  setWinampDrag: Dispatch<SetStateAction<WindowDrag>>;
+  focusWindow: (instanceId: string) => void;
+  closeWindow: (instanceId: string) => void;
+  minimizeWindow: (instanceId: string) => void;
+  maximizeWindow: (instanceId: string) => void;
+  moveWindow: (instanceId: string, x: number, y: number) => void;
+  resizeWindow: (instanceId: string, width: number, height: number) => void;
+  playSound: (sound: string) => void;
+}) {
+  return windows.map((item) => {
+    if (item.id === "music") {
+      return (
+        <div
+          key={item.instanceId}
+          className={`fixed ${item.minimized ? "hidden" : ""}`}
+          style={{
+            left: item.maximized ? 0 : item.x,
+            top: item.maximized ? 0 : item.y,
+            zIndex: item.zIndex,
+          }}
+          onPointerDown={() => focusWindow(item.instanceId)}
+          onPointerMove={(event) => {
+            if (!winampDrag) return;
+            moveWindow(
+              winampDrag.instanceId,
+              event.clientX - winampDrag.dx,
+              event.clientY - winampDrag.dy,
+            );
+          }}
+          onPointerUp={() => setWinampDrag(null)}
+        >
+          <div
+            className="relative touch-none"
+            onPointerDown={(event) => {
+              const target = event.target as HTMLElement;
+              if (target.closest("button,input")) return;
+              if (!target.closest(".winamp-titlebar,.winamp-eq-titlebar,.winamp-pl-titlebar")) return;
+              event.stopPropagation();
+              focusWindow(item.instanceId);
+              setWinampDrag({
+                instanceId: item.instanceId,
+                dx: event.clientX - item.x,
+                dy: event.clientY - item.y,
+              });
+              event.currentTarget.setPointerCapture(event.pointerId);
+            }}
+          >
+            {renderWindow({ window: item, ...commonProps })}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <WindowFrame
+        key={item.instanceId}
+        window={item}
+        active={activeWindow?.instanceId === item.instanceId}
+        onFocus={() => focusWindow(item.instanceId)}
+        onClose={() => {
+          closeWindow(item.instanceId);
+          playSound("close");
+        }}
+        onMinimize={() => minimizeWindow(item.instanceId)}
+        onMaximize={() => maximizeWindow(item.instanceId)}
+        onMove={(x, y) => moveWindow(item.instanceId, x, y)}
+        onResize={(width, height) => resizeWindow(item.instanceId, width, height)}
+      >
+        {renderWindow({ window: item, ...commonProps })}
+      </WindowFrame>
+    );
+  });
+}
+
 function ConnectionStatusDialog({
   connectedAt,
   onClose,
@@ -1173,7 +1241,7 @@ function ConnectionStatusDialog({
   onClose: () => void;
   onDisconnect: () => void;
 }) {
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);

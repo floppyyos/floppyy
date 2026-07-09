@@ -52,11 +52,7 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected, cra
 
   // Animate the classic status-bar progress meter while a page loads.
   useEffect(() => {
-    if (!loading) {
-      setProgress(0);
-      return;
-    }
-    setProgress(8);
+    if (!loading) return;
     const id = setInterval(() => {
       // Creep towards ~90% and stall there until the page finishes.
       setProgress((p) => (p >= 90 ? p : p + Math.max(1, Math.round((90 - p) * 0.12))));
@@ -68,6 +64,7 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected, cra
     if (!internetConnected) {
       setAddress(url);
       setLoading(false);
+      setProgress(0);
       setStatusText("Cannot find server");
       playSound("error");
       return;
@@ -84,6 +81,7 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected, cra
     }
     const waybackUrl = toWaybackUrl(url);
     setLoading(true);
+    setProgress(8);
     setStatusText(`Opening page ${url}...`);
     setCurrentUrl(waybackUrl);
     setAddress(getDisplayUrl(waybackUrl));
@@ -101,6 +99,7 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected, cra
       setCurrentUrl(history[newIndex]);
       setAddress(getDisplayUrl(history[newIndex]));
       setLoading(true);
+      setProgress(8);
       setStatusText("Opening page...");
       playSound("click");
     }
@@ -114,6 +113,7 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected, cra
       setCurrentUrl(history[newIndex]);
       setAddress(getDisplayUrl(history[newIndex]));
       setLoading(true);
+      setProgress(8);
       setStatusText("Opening page...");
       playSound("click");
     }
@@ -159,7 +159,7 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected, cra
         </button>
         <div className="w-px h-[36px] bg-[#808080] mx-1" />
         <button
-          onClick={() => { setLoading(false); setStatusText(internetConnected ? "Done" : "Cannot find server"); }}
+          onClick={() => { setLoading(false); setProgress(0); setStatusText(internetConnected ? "Done" : "Cannot find server"); }}
           className="group flex flex-col items-center justify-center w-[42px] h-[42px] hover:bg-[#dfdfdf] cursor-default text-[10px]"
         >
           <span className="flex h-[20px] items-center justify-center grayscale transition-[filter] duration-150 group-hover:grayscale-0"><ToolbarIcon name="stop" /></span>
@@ -258,6 +258,7 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected, cra
             referrerPolicy="no-referrer"
             onLoad={() => {
               setLoading(false);
+              setProgress(0);
               setStatusText("Done");
             }}
             title="Internet Explorer"

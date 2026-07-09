@@ -24,6 +24,25 @@ const emptyBest = (): Record<Difficulty, number | null> => ({
   expert: null,
 });
 
+function readBestTimes(): Record<Difficulty, number | null> {
+  try {
+    const saved = globalThis.localStorage.getItem("floppyy-mines-best");
+    if (!saved) return emptyBest();
+    const parsed = JSON.parse(saved) as Partial<Record<Difficulty, number | null>>;
+    return { ...emptyBest(), ...parsed };
+  } catch {
+    return emptyBest();
+  }
+}
+
+function nowMs(): number {
+  return Date.now();
+}
+
+function randomChance(chance: number): boolean {
+  return Math.random() < chance;
+}
+
 type Face = "happy" | "pressed" | "lost" | "won";
 
 function neighbors(index: number, cols: number, rows: number): number[] {
@@ -127,7 +146,7 @@ export function Minesweeper({ playSound, onExit }: { playSound: (name: string) =
   const [showAbout, setShowAbout] = useState(false);
   const [showBestTimes, setShowBestTimes] = useState(false);
   const [showCustom, setShowCustom] = useState(false);
-  const [bestTimes, setBestTimes] = useState<Record<Difficulty, number | null>>(emptyBest);
+  const [bestTimes, setBestTimes] = useState<Record<Difficulty, number | null>>(readBestTimes);
   const [mines, setMines] = useState<Set<number>>(new Set());
   const [open, setOpen] = useState<Set<number>>(new Set());
   const [flags, setFlags] = useState<Set<number>>(new Set());
@@ -147,46 +166,35 @@ export function Minesweeper({ playSound, onExit }: { playSound: (name: string) =
   const won = !lost && started && open.size >= totalCells - totalMines;
   const elapsed = Math.min(999, Math.floor((now - startedAt) / 1000));
 
-  // Load best times once.
-  useEffect(() => {
-    try {
-      const saved = globalThis.localStorage.getItem("floppyy-mines-best");
-      if (saved) {
-        const parsed = JSON.parse(saved) as Partial<Record<Difficulty, number | null>>;
-        setBestTimes((prev) => ({ ...prev, ...parsed }));
-      }
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
   useEffect(() => {
     if (!started || lost || won) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    const timer = window.setInterval(() => setNow(nowMs()), 1000);
     return () => window.clearInterval(timer);
   }, [started, lost, won]);
 
   useEffect(() => {
     if (!won) return;
-    setFace("won");
     playSound("notification");
     if (level === "custom") return; // custom games don't record best times
-    const finalTime = Math.max(1, Math.floor((Date.now() - startedAt) / 1000));
-    setBestTimes((prev) => {
-      const current = prev[level];
-      if (current !== null && current <= finalTime) return prev;
-      const next = { ...prev, [level]: finalTime };
-      try {
-        globalThis.localStorage.setItem("floppyy-mines-best", JSON.stringify(next));
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+    const finalTime = Math.max(1, Math.floor((nowMs() - startedAt) / 1000));
+    const timer = window.setTimeout(() => {
+      setBestTimes((prev) => {
+        const current = prev[level];
+        if (current !== null && current <= finalTime) return prev;
+        const next = { ...prev, [level]: finalTime };
+        try {
+          globalThis.localStorage.setItem("floppyy-mines-best", JSON.stringify(next));
+        } catch {
+          /* ignore */
+        }
+        return next;
+      });
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [won, playSound, level, startedAt]);
 
   const reset = () => {
-    const nextNow = Date.now();
+    const nextNow = nowMs();
     setMines(new Set());
     setOpen(new Set());
     setFlags(new Set());
@@ -203,7 +211,7 @@ export function Minesweeper({ playSound, onExit }: { playSound: (name: string) =
 
   const changeLevel = (next: Level) => {
     setLevel(next);
-    const nextNow = Date.now();
+    const nextNow = nowMs();
     setMines(new Set());
     setOpen(new Set());
     setFlags(new Set());
@@ -238,7 +246,7 @@ export function Minesweeper({ playSound, onExit }: { playSound: (name: string) =
     setFace("lost");
     playSound("error");
     // Easter egg: sometimes rub it in with a fake "data lost" error.
-    if (Math.random() < 0.3) {
+    if (randomChance(0.3)) {
       window.setTimeout(() => {
         playSound("error");
         setPrankError(true);
@@ -279,7 +287,7 @@ export function Minesweeper({ playSound, onExit }: { playSound: (name: string) =
       activeMines = placeMines(exclude, cols, rows, totalMines);
       setMines(activeMines);
       setStarted(true);
-      const t = Date.now();
+      const t = nowMs();
       setStartedAt(t);
       setNow(t);
     }
@@ -376,7 +384,7 @@ export function Minesweeper({ playSound, onExit }: { playSound: (name: string) =
           }}
         >
           <LedCounter value={totalMines - flags.size} />
-          <FaceButton face={face} onClick={reset} />
+          <FaceButton face={won ? "won" : face} onClick={reset} />
           <LedCounter value={elapsed} />
         </div>
 

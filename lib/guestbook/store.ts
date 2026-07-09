@@ -31,6 +31,7 @@ function clampLimit(limit?: number): number {
 let schemaReady: Promise<void> | null = null;
 
 function ensureSchema(client: postgres.Sql): Promise<void> {
+  if (process.env.FLOPPYY_DISABLE_RUNTIME_SCHEMA_SYNC === "1") return Promise.resolve();
   if (!schemaReady) {
     schemaReady = (async () => {
       await client`

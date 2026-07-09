@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 import { Win98Select } from "@/components/ui/Win98Select";
+import { fetchGuestbookMessages, forgetGuestbookMessage, rememberGuestbookMessage } from "@/lib/guestbook/client";
 import { onProfileChange, readProfile, writeProfile } from "@/lib/profile";
 import {
   BODY_MAX_LENGTH,
@@ -18,8 +19,9 @@ import {
 
 const NICK_STORAGE_KEY = "floppyy-irc-nick";
 const STATUS_STORAGE_KEY = "floppyy-irc-status";
-const ADMIN_STORAGE_KEY = "floppyy-guestbook-admin";
 const POLL_INTERVAL_MS = 10000;
+
+let sessionAdminToken = "";
 
 const ICQ_SMILIES = [
   { tokens: [":)", ":-)"], label: "Smile", face: ":)" },
@@ -87,11 +89,7 @@ function readStoredStatus(): UserStatus {
 }
 
 function readAdminToken(): string {
-  try {
-    return globalThis.localStorage.getItem(ADMIN_STORAGE_KEY) ?? "";
-  } catch {
-    return "";
-  }
+  return sessionAdminToken;
 }
 
 export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponentProps) {
@@ -141,10 +139,8 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
 
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await fetch("/api/guestbook", { cache: "no-store" });
-      if (!response.ok) throw new Error("bad response");
-      const data = (await response.json()) as { messages: GuestbookMessage[] };
-      applyMessages(data.messages ?? []);
+      const messages = await fetchGuestbookMessages();
+      applyMessages(messages);
       setError(null);
     } catch {
       if (!initialised.current) setError("Could not connect to #floppyy.");
@@ -154,9 +150,12 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
   }, [applyMessages]);
 
   useEffect(() => {
-    fetchMessages();
+    const initialTimer = window.setTimeout(fetchMessages, 0);
     const timer = window.setInterval(fetchMessages, POLL_INTERVAL_MS);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.clearInterval(timer);
+    };
   }, [fetchMessages]);
 
   useEffect(() => {
@@ -177,26 +176,18 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
     const trimmedBody = draft.trim();
     if (/^\/admin\s+off$/i.test(trimmedBody) || /^\/logout$/i.test(trimmedBody)) {
       setAdminToken("");
+      sessionAdminToken = "";
       setDraft("");
       setError("Operator mode disabled.");
-      try {
-        globalThis.localStorage.removeItem(ADMIN_STORAGE_KEY);
-      } catch {
-        /* ignore */
-      }
       playSound("click");
       return;
     }
     if (/^\/admin\s+/i.test(trimmedBody)) {
       const token = trimmedBody.replace(/^\/admin\s+/i, "").trim();
       setAdminToken(token);
+      sessionAdminToken = token;
       setDraft("");
       setError(token ? "Operator mode enabled." : "Operator token is empty.");
-      try {
-        globalThis.localStorage.setItem(ADMIN_STORAGE_KEY, token);
-      } catch {
-        /* ignore */
-      }
       playSound(token ? "notification" : "error");
       return;
     }
@@ -233,20 +224,20 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
         /* ignore */
       }
       if (data.message) {
+        rememberGuestbookMessage(data.message);
         lastSeenId.current = Math.max(lastSeenId.current, data.message.id);
         setMessages((current) =>
           current.some((m) => m.id === data.message!.id) ? current : [...current, data.message!],
         );
       }
       playSound("icq");
-      await fetchMessages();
     } catch {
       setError("Network error — message not sent.");
       playSound("error");
     } finally {
       setSending(false);
     }
-  }, [nick, draft, status, website, sending, playSound, fetchMessages]);
+  }, [nick, draft, status, website, sending, playSound]);
 
   const deleteMessage = useCallback(
     async (id: number) => {
@@ -257,6 +248,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
           headers: { "x-admin-token": adminToken },
         });
         if (!response.ok) throw new Error("delete failed");
+        forgetGuestbookMessage(id);
         setMessages((current) => current.filter((message) => message.id !== id));
         setError("Message deleted.");
         playSound("recycle");

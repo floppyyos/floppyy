@@ -3,29 +3,35 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { soundFiles, toneMap } from "@/lib/sounds";
 
+function readStoredMuted(): boolean {
+  try {
+    return globalThis.localStorage.getItem("floppyy-muted") === "1";
+  } catch {
+    return false;
+  }
+}
+
+function readStoredVolume(): number {
+  try {
+    const value = globalThis.localStorage.getItem("floppyy-volume");
+    if (value === null) return 1;
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? 1 : Math.min(1, Math.max(0, parsed));
+  } catch {
+    return 1;
+  }
+}
+
 export function useSound() {
   const [enabled, setEnabled] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
+  const [muted, setMuted] = useState(readStoredMuted);
+  const [volume, setVolume] = useState(readStoredVolume);
   const audioContext = useRef<AudioContext | null>(null);
   const audioCache = useRef<Record<string, HTMLAudioElement>>({});
   const fadeTimers = useRef<Set<ReturnType<typeof setInterval>>>(new Set());
   const enabledRef = useRef(false);
   const mutedRef = useRef(false);
   const volumeRef = useRef(1);
-
-  useEffect(() => {
-    try {
-      const m = globalThis.localStorage.getItem("floppyy-muted");
-      if (m !== null) setMuted(m === "1");
-      const v = globalThis.localStorage.getItem("floppyy-volume");
-      if (v !== null) {
-        const n = Number(v);
-        if (!Number.isNaN(n)) setVolume(Math.min(1, Math.max(0, n)));
-      }
-    } catch {
-    }
-  }, []);
 
   useEffect(() => {
     mutedRef.current = muted;

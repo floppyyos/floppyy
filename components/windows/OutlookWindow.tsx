@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
+import { fetchGuestbookMessages } from "@/lib/guestbook/client";
 
 type Folder = "inbox" | "outbox" | "sent" | "deleted" | "drafts";
 
@@ -128,10 +129,8 @@ export function OutlookWindow({ notify, playSound }: WindowComponentProps) {
 
     const poll = async () => {
       try {
-        const res = await fetch("/api/guestbook", { cache: "no-store" });
-        if (!res.ok || !active) return;
-        const data = (await res.json()) as { messages?: GbMessage[] };
-        const messages = data.messages ?? [];
+        const messages = await fetchGuestbookMessages();
+        if (!active) return;
         const known = seenGuestbook.current;
         const fresh = messages.filter((m) => !known.has(m.id));
         const firstLoad = !guestbookInit.current;

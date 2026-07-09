@@ -103,7 +103,7 @@ export function Solitaire({ playSound, onExit }: { playSound: (name: string) => 
   const [backIndex, setBackIndex] = useState<number>(() => randomBack());
   const [showAbout, setShowAbout] = useState(false);
   const [showStats, setShowStats] = useState(false);
-  const [record, setRecord] = useState<SolitaireRecord | null>(null);
+  const [record, setRecord] = useState<SolitaireRecord | null>(readRecord);
   const dragRef = useRef<DragSource | null>(null);
   // Click-to-move selection (works alongside drag-and-drop, and on touch).
   const [selected, setSelected] = useState<DragSource | null>(null);
@@ -118,10 +118,6 @@ export function Solitaire({ playSound, onExit }: { playSound: (name: string) => 
     setBackIndex(randomBack());
     playSound("click");
   }, [playSound]);
-
-  useEffect(() => {
-    setRecord(readRecord());
-  }, []);
 
   // Timer
   useEffect(() => {
@@ -143,16 +139,19 @@ export function Solitaire({ playSound, onExit }: { playSound: (name: string) => 
 
   useEffect(() => {
     if (!won) return;
-    setRecord((current) => {
-      if (current && (current.score > score || (current.score === score && current.seconds <= seconds))) return current;
-      const next = { score, seconds, wonAt: new Date().toISOString() };
-      try {
-        globalThis.localStorage.setItem(SOLITAIRE_RECORD_KEY, JSON.stringify(next));
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+    const timer = window.setTimeout(() => {
+      setRecord((current) => {
+        if (current && (current.score > score || (current.score === score && current.seconds <= seconds))) return current;
+        const next = { score, seconds, wonAt: new Date().toISOString() };
+        try {
+          globalThis.localStorage.setItem(SOLITAIRE_RECORD_KEY, JSON.stringify(next));
+        } catch {
+          /* ignore */
+        }
+        return next;
+      });
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [won, score, seconds]);
 
   // Draw from stock to waste (draw one), recycle when empty

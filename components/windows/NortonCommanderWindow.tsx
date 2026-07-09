@@ -176,7 +176,6 @@ function Panel({
   onCursor,
   onEnter,
   onParent,
-  onToggle,
 }: {
   side: PanelSide;
   state: PanelState;
@@ -186,7 +185,6 @@ function Panel({
   onCursor: (side: PanelSide, index: number) => void;
   onEnter: (side: PanelSide) => void;
   onParent: (side: PanelSide) => void;
-  onToggle: (side: PanelSide, name: string) => void;
 }) {
   const rows = state.path.length
     ? [{ name: "..", kind: "dir" as const, size: 0, date: "" }, ...entries]
@@ -646,7 +644,6 @@ export function NortonCommanderWindow({ window: win, closeWindow, openWindow, no
           onCursor={setPanelCursor}
           onEnter={enterPanel}
           onParent={goUp}
-          onToggle={toggleSelected}
         />
         <Panel
           side="right"
@@ -657,7 +654,6 @@ export function NortonCommanderWindow({ window: win, closeWindow, openWindow, no
           onCursor={setPanelCursor}
           onEnter={enterPanel}
           onParent={goUp}
-          onToggle={toggleSelected}
         />
       </div>
       <div className="mt-1 flex h-[22px] items-center bg-black px-2 text-[#c0c0c0]">

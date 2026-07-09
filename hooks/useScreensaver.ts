@@ -36,8 +36,8 @@ export function useScreensaver(timeoutMs = 60000, suspended = false) {
   useEffect(() => {
     if (suspended) {
       clear();
-      setActive(false);
-      return;
+      const idle = window.setTimeout(() => setActive(false), 0);
+      return () => window.clearTimeout(idle);
     }
 
     schedule();

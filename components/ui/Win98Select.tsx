@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode, type KeyboardEvent } from "react";
+import { useId, useRef, useState, type ReactNode, type KeyboardEvent } from "react";
 
 export type Win98SelectOption = { value: string; label: ReactNode };
 
@@ -31,13 +31,10 @@ export function Win98Select({
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
 
   const selectedIndex = Math.max(0, options.findIndex((o) => o.value === value));
   const selectedLabel = options[selectedIndex]?.label ?? "";
-
-  useEffect(() => {
-    if (open) setHighlight(selectedIndex);
-  }, [open, selectedIndex]);
 
   const commit = (i: number) => {
     const opt = options[i];
@@ -78,11 +75,15 @@ export function Win98Select({
       <div
         role="combobox"
         aria-expanded={open}
+        aria-controls={listboxId}
         aria-label={ariaLabel}
         aria-disabled={disabled}
         tabIndex={disabled ? -1 : 0}
         onKeyDown={onKeyDown}
-        onClick={() => !disabled && setOpen((o) => !o)}
+        onClick={() => !disabled && setOpen((o) => {
+          if (!o) setHighlight(selectedIndex);
+          return !o;
+        })}
         className="flex h-[22px] cursor-default select-none items-center py-[1px] pl-[4px] pr-[1px] text-[11px] text-black"
         style={{ background: disabled ? "#c0c0c0" : "#ffffff", boxShadow: FIELD_SHADOW }}
       >
@@ -100,6 +101,7 @@ export function Win98Select({
         <>
           <div className="fixed inset-0 z-[6000]" onMouseDown={() => setOpen(false)} />
           <ul
+            id={listboxId}
             role="listbox"
             className="absolute left-0 right-0 top-full z-[6001] mt-[1px] max-h-[220px] overflow-auto bg-white py-[1px] text-[11px] text-black"
             style={{ border: "1px solid #0a0a0a" }}

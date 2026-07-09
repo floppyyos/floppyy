@@ -61,7 +61,10 @@ export function NotepadWindow({ window: win, closeWindow, notify, playSound }: W
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    setText(DOCUMENT_TEXT[win.payload ?? ""] ?? "");
+    const timer = window.setTimeout(() => {
+      setText(DOCUMENT_TEXT[win.payload ?? ""] ?? "");
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [win.payload]);
 
   const runAction = useCallback(
@@ -164,7 +167,7 @@ export function NotepadWindow({ window: win, closeWindow, notify, playSound }: W
         }
       }
     },
-    [text, notify, playSound, closeWindow, win.instanceId],
+    [text, notify, playSound, closeWindow, win.instanceId, win.title],
   );
 
   return (

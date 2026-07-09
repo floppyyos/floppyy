@@ -212,17 +212,32 @@ export function useWindowManager() {
     [windows],
   );
 
-  return {
-    windows,
-    activeWindow,
-    openWindow,
-    closeWindow,
-    minimizeWindow,
-    minimizeAll,
-    maximizeWindow,
-    moveWindow,
-    resizeWindow,
-    focusWindow,
-    nextZ,
-  };
+  return useMemo(
+    () => ({
+      windows,
+      activeWindow,
+      openWindow,
+      closeWindow,
+      minimizeWindow,
+      minimizeAll,
+      maximizeWindow,
+      moveWindow,
+      resizeWindow,
+      focusWindow,
+      nextZ,
+    }),
+    [
+      windows,
+      activeWindow,
+      openWindow,
+      closeWindow,
+      minimizeWindow,
+      minimizeAll,
+      maximizeWindow,
+      moveWindow,
+      resizeWindow,
+      focusWindow,
+      nextZ,
+    ],
+  );
 }

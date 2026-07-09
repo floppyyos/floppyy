@@ -48,11 +48,7 @@ export function NetscapeWindow({ playSound, internetConnected, crashSystem }: Wi
 
   // Animate the classic status-bar progress meter while a page loads.
   useEffect(() => {
-    if (!loading) {
-      setProgress(0);
-      return;
-    }
-    setProgress(8);
+    if (!loading) return;
     const id = setInterval(() => {
       setProgress((p) => (p >= 90 ? p : p + Math.max(1, Math.round((90 - p) * 0.12))));
     }, 180);
@@ -63,6 +59,7 @@ export function NetscapeWindow({ playSound, internetConnected, crashSystem }: Wi
     if (!internetConnected) {
       setAddress(url);
       setLoading(false);
+      setProgress(0);
       setStatusText("Document: Cannot find server");
       playSound("error");
       return;
@@ -79,6 +76,7 @@ export function NetscapeWindow({ playSound, internetConnected, crashSystem }: Wi
     }
     const waybackUrl = toWaybackUrl(url);
     setLoading(true);
+    setProgress(8);
     setStatusText(`Document: Loading ${url}...`);
     setCurrentUrl(waybackUrl);
     setAddress(getDisplayUrl(waybackUrl));
@@ -96,6 +94,7 @@ export function NetscapeWindow({ playSound, internetConnected, crashSystem }: Wi
       setCurrentUrl(history[newIndex]);
       setAddress(getDisplayUrl(history[newIndex]));
       setLoading(true);
+      setProgress(8);
       setStatusText("Document: Loading...");
       playSound("click");
     }
@@ -109,6 +108,7 @@ export function NetscapeWindow({ playSound, internetConnected, crashSystem }: Wi
       setCurrentUrl(history[newIndex]);
       setAddress(getDisplayUrl(history[newIndex]));
       setLoading(true);
+      setProgress(8);
       setStatusText("Document: Loading...");
       playSound("click");
     }
@@ -240,6 +240,7 @@ export function NetscapeWindow({ playSound, internetConnected, crashSystem }: Wi
             referrerPolicy="no-referrer"
             onLoad={() => {
               setLoading(false);
+              setProgress(0);
               setStatusText("Document: Done");
             }}
             title="Netscape Navigator"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { commands, isUrl } from "@/lib/commands";
 import type { WindowComponentProps, WindowId } from "@/lib/windows";
@@ -29,9 +29,18 @@ const RUN_SUGGESTIONS = [
   "winamp",
 ];
 
+function readRunHistory(): string[] {
+  try {
+    const saved = globalThis.localStorage.getItem("floppyy-run-history");
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
 export function RunWindow({ window: win, openWindow, closeWindow, notify, playSound, startScreensaver, crashSystem }: WindowComponentProps) {
   const [value, setValue] = useState("");
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useState<string[]>(readRunHistory);
   const [histOpen, setHistOpen] = useState(false);
   const comboRef = useRef<HTMLDivElement>(null);
   const [menuRect, setMenuRect] = useState<{ left: number; top: number; width: number } | null>(null);
@@ -53,15 +62,6 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
     setValue(item);
     setHistOpen(false);
   };
-
-  useEffect(() => {
-    try {
-      const saved = globalThis.localStorage.getItem("floppyy-run-history");
-      if (saved) setHistory(JSON.parse(saved));
-    } catch {
-      setHistory([]);
-    }
-  }, []);
 
   const remember = (command: string) => {
     const next = [command, ...history.filter((item) => item.toLowerCase() !== command.toLowerCase())].slice(0, 8);
