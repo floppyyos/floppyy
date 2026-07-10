@@ -235,10 +235,16 @@ export default function Desktop() {
   } = wm;
   const { playSound, warmSound, fadeOutSound, muted, setMuted, volume, setVolume } = useSound();
 
-  const gameActive = wm.windows.some(
-    (item) => GAME_WINDOW_IDS.has(item.id) && !item.minimized,
+  // The screensaver's activity listeners never fire while you're playing a
+  // DOS/canvas game (input is captured by the game) or watching a video (you
+  // just sit still). Suspend the idle timer whenever such a window is open and
+  // not minimized so it can't pop up over gameplay or a video.
+  const screensaverSuppressed = wm.windows.some(
+    (item) =>
+      !item.minimized &&
+      (GAME_WINDOW_IDS.has(item.id) || (item.id === "mediaplayer" && !!item.payload)),
   );
-  const screensaver = useScreensaver(60000, gameActive);
+  const screensaver = useScreensaver(60000, screensaverSuppressed);
   useServiceWorker();
 
   // Persist wallpaper + icon layout when they change (after initial load).

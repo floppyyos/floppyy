@@ -32,6 +32,7 @@ const DEFAULT_TRACKS: WinampTrack[] = [
   { title: "It's Tricky", artist: "Run DMC", duration: 0, file: "/winamp/RunDMC.mp3" },
   { title: "Ice Ice Baby", artist: "Vanilla Ice", duration: 0, file: "/winamp/VanillaIce.mp3" },
   { title: "Never Gonna Give You Up", artist: "Rick Astley", duration: 0, file: "/winamp/RickAstley.mp3" },
+  { title: "Mr. Blue Sky", artist: "Electric Light Orchestra", duration: 0, file: "/winamp/ELO.mp3" },
 ];
 
 const IDLE_BARS = Array(19).fill(2);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { WinampTrack } from "./WinampPlayer";
 
 type Props = {
@@ -21,6 +21,12 @@ export function WinampPlaylist({ tracks, currentTrack, onSelect, elapsed, totalT
   // Single click highlights a row; double click actually plays it (like real Winamp).
   const [manualSelected, setManualSelected] = useState<number | null>(null);
   const selected = manualSelected ?? currentTrack;
+  const playingRef = useRef<HTMLButtonElement>(null);
+
+  // Keep the currently playing track visible as playback advances through the list.
+  useEffect(() => {
+    playingRef.current?.scrollIntoView({ block: "nearest" });
+  }, [currentTrack]);
 
   return (
     <div className="winamp-pl w-[275px] mt-0">
@@ -34,6 +40,7 @@ export function WinampPlaylist({ tracks, currentTrack, onSelect, elapsed, totalT
           {tracks.map((track, index) => (
             <button
               key={index}
+              ref={index === currentTrack ? playingRef : undefined}
               className={`winamp-pl-item ${index === selected ? "active" : ""} ${index === currentTrack ? "playing" : ""}`}
               onClick={() => setManualSelected(index)}
               onDoubleClick={() => {
