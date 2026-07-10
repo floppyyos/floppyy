@@ -114,7 +114,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   games: { id: "games", title: "Games", icon: "joystick", width: 780, height: 580 },
   "games-folder": { id: "games-folder", title: "Games", icon: "directory_check", width: 620, height: 460, minWidth: 420, minHeight: 320 },
   guestbook: { id: "guestbook", title: "#floppyy", icon: "guestbook", width: 620, height: 470, minWidth: 460, minHeight: 340 },
-  music: { id: "music", title: "Winamp", icon: "winamp", width: 290, height: 580 },
+  music: { id: "music", title: "Winamp", icon: "winamp", width: 290, height: 650 },
   norton: { id: "norton", title: "Norton Commander", icon: "console", width: 760, height: 500 },
   paint: { id: "paint", title: "untitled - Paint", icon: "paint", width: 800, height: 620 },
   "recycle-bin": { id: "recycle-bin", title: "Recycle Bin", icon: "trash", width: 720, height: 500 },
