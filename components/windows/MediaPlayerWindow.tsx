@@ -3,8 +3,21 @@
 import { useRef, useState, useCallback } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 
+// Maps a media title (window payload) to its video source and optional
+// YouTube fallback used when the local file can't play in the browser.
+const VIDEO_LIBRARY: Record<string, { src: string; embedUrl?: string }> = {
+  "Rick Astley - Never Gonna Give You Up": {
+    src: "/video/never-gonna-give-you-up.mp4",
+    embedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0",
+  },
+  "Smash Mouth - All Star": {
+    src: "/video/SmashMouth.mp4",
+  },
+};
+
 export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
-  const hasVideo = !!win.payload;
+  const videoConfig = win.payload ? VIDEO_LIBRARY[win.payload] : undefined;
+  const hasVideo = !!videoConfig;
   const [progress, setProgress] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -68,7 +81,7 @@ export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
     setUseEmbed(true);
   };
 
-  const youtubeEmbedUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0";
+  const youtubeEmbedUrl = videoConfig?.embedUrl;
 
   return (
     <div className="flex flex-col h-full" style={{ background: "#c0c0c0" }}>
@@ -83,13 +96,13 @@ export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
 
       <div className="flex-1 flex items-center justify-center mx-[3px] mt-[3px] relative overflow-hidden min-h-0" style={{ background: "#000" }}>
         {hasVideo ? (
-          useEmbed || videoError ? (
+          (useEmbed || videoError) && youtubeEmbedUrl ? (
             <iframe
               src={youtubeEmbedUrl}
               className="w-full h-full border-0"
               allow="autoplay; encrypted-media"
               allowFullScreen
-              title="Rick Astley - Never Gonna Give You Up"
+              title={win.payload}
             />
           ) : (
             <>
@@ -125,7 +138,7 @@ export function MediaPlayerWindow({ window: win }: WindowComponentProps) {
                   }, 5000);
                 }}
               >
-                <source src="/video/never-gonna-give-you-up.mp4" type="video/mp4" />
+                <source src={videoConfig.src} type="video/mp4" />
               </video>
               {muted && (
                 <div

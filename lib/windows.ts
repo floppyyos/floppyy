@@ -161,6 +161,7 @@ export const desktopIcons: DesktopIconDefinition[] = [
   { id: "notepad", label: "Notepad", icon: "notepad", windowId: "notepad" },
   { id: "netscape", label: "Netscape Navigator", icon: "netscape", windowId: "netscape" },
   { id: "legend", label: "legend", icon: "video", windowId: "mediaplayer", payload: "Rick Astley - Never Gonna Give You Up" },
+  { id: "all-star", label: "All Star", icon: "video", windowId: "mediaplayer", payload: "Smash Mouth - All Star" },
   { id: "guestbook", label: "Guest Book", icon: "guestbook", windowId: "guestbook" },
   { id: "share", label: "Share", icon: "garfield", windowId: "share" },
 ];
