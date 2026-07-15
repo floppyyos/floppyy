@@ -362,6 +362,60 @@ export function TypingGame({ playSound, onExit }: GameProps) {
 }
 
 type Piece = "r" | "b" | "R" | "B" | null;
+type CheckersSide = "r" | "b";
+type CheckersMove = { from: number; to: number; capture?: number };
+
+function checkersDirections(piece: Piece): [number, number][] {
+  if (!piece) return [];
+  if (piece === "R" || piece === "B") return [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+  return piece === "r" ? [[-1, -1], [-1, 1]] : [[1, -1], [1, 1]];
+}
+
+function checkersMoves(board: Piece[], side: CheckersSide): CheckersMove[] {
+  const moves: CheckersMove[] = [];
+  const captures: CheckersMove[] = [];
+
+  board.forEach((piece, from) => {
+    if (!piece || piece.toLowerCase() !== side) return;
+    const row = Math.floor(from / 8);
+    const col = from % 8;
+
+    for (const [dr, dc] of checkersDirections(piece)) {
+      const nextRow = row + dr;
+      const nextCol = col + dc;
+      if (nextRow < 0 || nextRow > 7 || nextCol < 0 || nextCol > 7) continue;
+      const next = nextRow * 8 + nextCol;
+
+      if (!board[next]) {
+        moves.push({ from, to: next });
+        continue;
+      }
+
+      const jumpRow = row + dr * 2;
+      const jumpCol = col + dc * 2;
+      if (jumpRow < 0 || jumpRow > 7 || jumpCol < 0 || jumpCol > 7) continue;
+      const jump = jumpRow * 8 + jumpCol;
+      if (board[next]?.toLowerCase() !== side && !board[jump]) {
+        captures.push({ from, to: jump, capture: next });
+      }
+    }
+  });
+
+  return captures.length ? captures : moves;
+}
+
+function applyCheckersMove(board: Piece[], move: CheckersMove, side: CheckersSide): Piece[] {
+  const piece = board[move.from];
+  if (!piece) return board;
+  const next = [...board];
+  const targetRow = Math.floor(move.to / 8);
+  next[move.from] = null;
+  if (typeof move.capture === "number") next[move.capture] = null;
+  next[move.to] = (side === "r" && targetRow === 0) || (side === "b" && targetRow === 7)
+    ? side.toUpperCase() as Piece
+    : piece;
+  return next;
+}
 
 export function CheckersGame({ playSound, onExit }: GameProps) {
   const initial = () => Array.from({ length: 64 }, (_, i): Piece => {
@@ -378,41 +432,49 @@ export function CheckersGame({ playSound, onExit }: GameProps) {
   const white = board.filter((p) => p?.toLowerCase() === "r").length;
   const black = board.filter((p) => p?.toLowerCase() === "b").length;
   const reset = () => { setBoard(initial()); setTurn("r"); setSelected(null); playSound("click"); };
+
+  useEffect(() => {
+    if (turn !== "b" || white === 0 || black === 0) return;
+    const timer = window.setTimeout(() => {
+      setBoard((current) => {
+        const moves = checkersMoves(current, "b");
+        if (moves.length === 0) return current;
+        const captures = moves.filter((item) => typeof item.capture === "number");
+        const pool = captures.length ? captures : moves;
+        const move = pool[Math.floor(Math.random() * pool.length)];
+        playSound(typeof move.capture === "number" ? "recycle" : "click");
+        return applyCheckersMove(current, move, "b");
+      });
+      setTurn("r");
+      setSelected(null);
+    }, 550);
+    return () => window.clearTimeout(timer);
+  }, [black, playSound, turn, white]);
+
   const move = (to: number) => {
+    if (turn !== "r") return;
     if (selected === null) {
-      if (board[to]?.toLowerCase() === turn) setSelected(to);
+      if (board[to]?.toLowerCase() === "r") setSelected(to);
       return;
     }
     const piece = board[selected];
     if (!piece || board[to]) { setSelected(null); return; }
-    const sr = Math.floor(selected / 8), sc = selected % 8;
-    const tr = Math.floor(to / 8), tc = to % 8;
-    const dr = tr - sr, dc = tc - sc;
-    const forward = turn === "r" ? -1 : 1;
-    const king = piece === piece.toUpperCase();
-    const simple = Math.abs(dc) === 1 && (dr === forward || (king && Math.abs(dr) === 1));
-    const jump = Math.abs(dc) === 2 && (dr === forward * 2 || (king && Math.abs(dr) === 2));
-    const mid = selected + (dr / 2) * 8 + dc / 2;
-    if (!simple && !(jump && board[mid]?.toLowerCase() !== turn && board[mid])) { setSelected(null); return; }
-    setBoard((current) => {
-      const next = [...current];
-      next[selected] = null;
-      if (jump) next[mid] = null;
-      next[to] = (turn === "r" && tr === 0) || (turn === "b" && tr === 7) ? turn.toUpperCase() as Piece : piece;
-      return next;
-    });
-    setTurn((value) => (value === "r" ? "b" : "r"));
+
+    const valid = checkersMoves(board, "r").find((item) => item.from === selected && item.to === to);
+    if (!valid) { setSelected(null); return; }
+    setBoard((current) => applyCheckersMove(current, valid, "r"));
+    setTurn("b");
     setSelected(null);
-    playSound(jump ? "recycle" : "click");
+    playSound(typeof valid.capture === "number" ? "recycle" : "click");
   };
   return (
-    <Shell title="Checkers" score={white} best={black} onExit={onExit} onReset={reset} status={`${turn === "r" ? "White" : "Black"} to move. White ${white} / Black ${black}`}>
+    <Shell title="Checkers" score={white} best={black} onExit={onExit} onReset={reset} status={`${turn === "r" ? "White" : "Computer"} to move. White ${white} / Black ${black}`}>
       <div className="grid grid-cols-8 border border-[#808080]">
         {board.map((piece, index) => {
           const row = Math.floor(index / 8);
           const dark = (row + index) % 2 === 1;
           return (
-            <button key={index} className="flex h-[38px] w-[38px] items-center justify-center" style={{ background: dark ? "#606060" : "#f0f0f0", outline: selected === index ? "2px solid #ffff00" : "none" }} onClick={() => move(index)}>
+            <button key={index} className="flex h-[38px] w-[38px] items-center justify-center" style={{ background: dark ? "#008080" : "#f0e6c0", outline: selected === index ? "2px solid #ffff00" : "none" }} onClick={() => move(index)}>
               {piece && <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full border border-black text-[12px] font-bold" style={{ background: piece.toLowerCase() === "r" ? "#ffffff" : "#111111", color: piece.toLowerCase() === "r" ? "#000" : "#fff", boxShadow: cellOutset }}>{piece === piece.toUpperCase() ? "K" : ""}</span>}
             </button>
           );
