@@ -232,58 +232,86 @@ function normalizeForFilter(text: string): string {
     .replace(/[013457@$]/g, (char) => LEET_MAP[char] ?? char);
 }
 
-// Strip everything but letters/digits and collapse repeated characters, so
-// "f u c k", "f.u.c.k" and "fuuuck" all reduce to the same "fuck".
-function compactForFilter(text: string): string {
-  return normalizeForFilter(text)
-    .normalize("NFKD")
-    .replace(/[^\p{L}\p{N}]+/gu, "")
-    .replace(/(.)\1+/gu, "$1");
-}
-
+// ── Spam / advertising: hard block ──────────────────────────────────────────
 const BANNED_WORD_PATTERNS = BANNED_WORDS.map(
   (word) => new RegExp(`(^|[^\\p{L}\\p{N}])${escapeForRegExp(word)}([^\\p{L}\\p{N}]|$)`, "iu"),
 );
 
-// Profanity checked against the original text with word boundaries (catches
-// normal usage and leetspeak). Word boundaries avoid false positives like
-// "peacock" (cock), "dickens" (dick) or "shiitake" (shit).
-const PROFANITY_PATTERNS = PROFANITY_WORDS.map(
-  (word) => new RegExp(`(^|[^\\p{L}\\p{N}])${escapeForRegExp(word)}([^\\p{L}\\p{N}]|$)`, "iu"),
+// Ads/spam are rejected outright — they shouldn't be softly masked.
+export function containsSpam(text: string): boolean {
+  const normalized = normalizeForFilter(text);
+  return BANNED_WORD_PATTERNS.some((pattern) => pattern.test(normalized));
+}
+
+// ── Profanity: soft censor (mask with asterisks) ────────────────────────────
+// Per-letter look-alikes so leetspeak ("sh1t", "f4ggot") is still masked.
+const LEET_VARIANTS: Record<string, string> = {
+  a: "a4@",
+  b: "b8",
+  e: "e3",
+  g: "g9",
+  i: "i1!|",
+  l: "l1",
+  o: "o0",
+  s: "s5$",
+  t: "t7",
+  z: "z2",
+};
+
+// Separators tolerated *between* characters, so "f u c k" / "f.u.c.k" is caught.
+const CHAR_SEPARATOR = "[\\s._\\-*+~]*";
+
+function charClass(ch: string): string {
+  const variants = LEET_VARIANTS[ch];
+  return variants ? `[${variants}]` : escapeForRegExp(ch);
+}
+
+// A fuzzy pattern for one token: leet-tolerant, allows separators and repeats
+// ("fuuuck", "f-u-c-k"). Spaces inside multi-word tokens are dropped.
+function fuzzyWordPattern(word: string): string {
+  return word
+    .replace(/\s+/g, "")
+    .split("")
+    .map((ch) => `${charClass(ch)}+`)
+    .join(CHAR_SEPARATOR);
+}
+
+// Cyrillic entries are treated as roots so inflected forms ("пиздец", "хуйня")
+// get masked whole; Latin entries are matched as standalone words.
+function isRoot(word: string): boolean {
+  return /[а-яё]/i.test(word);
+}
+
+function buildCensorRegex(words: string[], allowSuffix: boolean): RegExp | null {
+  if (words.length === 0) return null;
+  const alternation = words.map(fuzzyWordPattern).join("|");
+  const suffix = allowSuffix ? "[\\p{L}\\p{N}]*" : "";
+  return new RegExp(
+    `(?<![\\p{L}\\p{N}])(?:${alternation})${suffix}(?![\\p{L}\\p{N}])`,
+    "giu",
+  );
+}
+
+const PROFANITY_EXACT_RE = buildCensorRegex(
+  PROFANITY_WORDS.filter((word) => !isRoot(word)),
+  false,
+);
+const PROFANITY_ROOT_RE = buildCensorRegex(
+  PROFANITY_WORDS.filter(isRoot),
+  true,
 );
 
-// Distinctive words that are extremely unlikely to appear inside a benign word.
-// Only these get the aggressive "compacted" substring check that defeats
-// obfuscation ("f u c k", "f.u.c.k", "fuuuck"), keeping false positives low.
-const PROFANITY_COMPACT = [
-  "fuck",
-  "motherfucker",
-  "faggot",
-  "nigger",
-  "nigga",
-  "хуй",
-  "пизд",
-  "ебан",
-  "ебат",
-  "бляд",
-  "блять",
-  "пидор",
-  "пидар",
-  "гандон",
-  "долбоеб",
-  "долбоёб",
-  "залуп",
-]
-  .map((word) => compactForFilter(word))
-  .filter(Boolean);
+function maskMatch(match: string): string {
+  const letters = match.replace(/[^\p{L}\p{N}]/gu, "").length;
+  return "*".repeat(Math.max(3, letters));
+}
 
-export function containsBannedWord(text: string): boolean {
-  const normalized = normalizeForFilter(text);
-  if (BANNED_WORD_PATTERNS.some((pattern) => pattern.test(normalized))) return true;
-  if (PROFANITY_PATTERNS.some((pattern) => pattern.test(normalized))) return true;
-
-  const compact = compactForFilter(text);
-  return PROFANITY_COMPACT.some((word) => compact.includes(word));
+// Replaces any profanity with asterisks, leaving the rest of the text intact.
+export function censorProfanity(text: string): string {
+  let out = text;
+  if (PROFANITY_EXACT_RE) out = out.replace(PROFANITY_EXACT_RE, maskMatch);
+  if (PROFANITY_ROOT_RE) out = out.replace(PROFANITY_ROOT_RE, maskMatch);
+  return out;
 }
 
 export type ValidationResult =
@@ -301,10 +329,11 @@ export function validateSubmission(input: {
   if (nick.length < NICK_MIN_LENGTH) return { ok: false, error: "Please enter a nickname." };
   if (body.length < BODY_MIN_LENGTH) return { ok: false, error: "Message cannot be empty." };
 
-  if (containsBannedWord(nick) || containsBannedWord(body)) {
+  // Ads / spam are rejected; profanity is softly masked instead of blocked.
+  if (containsSpam(nick) || containsSpam(body)) {
     return { ok: false, error: "Your message was blocked by the spam filter. Keep it friendly!" };
   }
 
   const status = isUserStatus(input.status) ? input.status : "online";
-  return { ok: true, nick, body, status };
+  return { ok: true, nick: censorProfanity(nick), body: censorProfanity(body), status };
 }

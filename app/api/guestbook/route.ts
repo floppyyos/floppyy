@@ -70,6 +70,20 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Anti-flood: reject a message identical to the one right before it
+    // (same nick + same body), so nobody can spam the same line twice in a row.
+    const [previous] = await guestbookStore().list({ limit: 1 });
+    if (
+      previous &&
+      previous.nick.trim().toLowerCase() === validation.nick.trim().toLowerCase() &&
+      previous.body.trim().toLowerCase() === validation.body.trim().toLowerCase()
+    ) {
+      return Response.json(
+        { error: "You already said that — try something new." },
+        { status: 409 },
+      );
+    }
+
     const message = await guestbookStore().add({
       nick: validation.nick,
       body: validation.body,
