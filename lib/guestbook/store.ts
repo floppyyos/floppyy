@@ -3,6 +3,7 @@ import { getSql, isPersistent as dbIsPersistent } from "@/lib/server/postgres";
 import {
   DEFAULT_PAGE_SIZE,
   GuestbookMessage,
+  GuestbookAvatar,
   MAX_PAGE_SIZE,
   UserStatus,
   nickColorIndex,
@@ -11,6 +12,7 @@ import {
 type NewMessage = {
   nick: string;
   body: string;
+  avatar: GuestbookAvatar;
   status: UserStatus;
   ipHash?: string | null;
 };
@@ -39,11 +41,16 @@ function ensureSchema(client: postgres.Sql): Promise<void> {
           id BIGSERIAL PRIMARY KEY,
           nick TEXT NOT NULL,
           body TEXT NOT NULL,
+          avatar TEXT NOT NULL DEFAULT 'face-smile',
           color SMALLINT NOT NULL DEFAULT 0,
           status TEXT NOT NULL DEFAULT 'online',
           ip_hash TEXT,
           created_at TIMESTAMPTZ NOT NULL DEFAULT now()
         )
+      `;
+      await client`
+        ALTER TABLE guestbook_messages
+        ADD COLUMN IF NOT EXISTS avatar TEXT NOT NULL DEFAULT 'face-smile'
       `;
       await client`
         CREATE INDEX IF NOT EXISTS guestbook_messages_id_desc_idx
@@ -62,6 +69,7 @@ type Row = {
   id: string | number;
   nick: string;
   body: string;
+  avatar?: string | null;
   color: number;
   status: string;
   created_at: Date | string;
@@ -72,6 +80,7 @@ function rowToMessage(row: Row): GuestbookMessage {
     id: Number(row.id),
     nick: row.nick,
     body: row.body,
+    avatar: (row.avatar ?? "face-smile") as GuestbookAvatar,
     color: Number(row.color),
     status: row.status as UserStatus,
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
@@ -88,11 +97,12 @@ const postgresStore: Store = {
       INSERT INTO guestbook_messages ${client({
         nick: message.nick,
         body: message.body,
+        avatar: message.avatar,
         color,
         status: message.status,
         ip_hash: message.ipHash ?? null,
       })}
-      RETURNING id, nick, body, color, status, created_at
+      RETURNING id, nick, body, avatar, color, status, created_at
     `;
     return rowToMessage(row);
   },
@@ -105,14 +115,14 @@ const postgresStore: Store = {
     const before = options?.before;
     const rows = before
       ? await client<Row[]>`
-          SELECT id, nick, body, color, status, created_at
+          SELECT id, nick, body, avatar, color, status, created_at
           FROM guestbook_messages
           WHERE id < ${before}
           ORDER BY id DESC
           LIMIT ${limit}
         `
       : await client<Row[]>`
-          SELECT id, nick, body, color, status, created_at
+          SELECT id, nick, body, avatar, color, status, created_at
           FROM guestbook_messages
           ORDER BY id DESC
           LIMIT ${limit}
@@ -152,6 +162,7 @@ const memoryStore: Store = {
       id: memoryId,
       nick: message.nick,
       body: message.body,
+      avatar: message.avatar,
       color: nickColorIndex(message.nick),
       status: message.status,
       createdAt: new Date().toISOString(),

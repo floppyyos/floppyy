@@ -34,6 +34,12 @@ export type WindowId =
   | "recycle-bin"
   | "screensaver"
   | "solitaire"
+  | "snake"
+  | "tetris"
+  | "breakout"
+  | "pixel-puzzle"
+  | "typing-game"
+  | "checkers"
   | "run"
   | "settings"
   | "share"
@@ -101,7 +107,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   dune2: { id: "dune2", title: "Dune II", icon: "dune2", width: 680, height: 510, minWidth: 480, minHeight: 360 },
   warcraft: { id: "warcraft", title: "WarCraft: Orcs & Humans", icon: "warcraft", width: 680, height: 510, minWidth: 480, minHeight: 360 },
   drive: { id: "drive", title: "Local Disk", icon: "drive-c", width: 780, height: 550 },
-  internet: { id: "internet", title: "Internet", icon: "dialup", width: 360, height: 540, ephemeral: true },
+  internet: { id: "internet", title: "Internet", icon: "dialup", width: 360, height: 520, ephemeral: true },
   "ie-browser": { id: "ie-browser", title: "Microsoft Internet Explorer", icon: "ie", width: 840, height: 580 },
   netscape: { id: "netscape", title: "Netscape Navigator", icon: "netscape", width: 760, height: 580 },
   msdos: { id: "msdos", title: "MS-DOS Prompt", icon: "prompt", width: 640, height: 400 },
@@ -111,15 +117,21 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   outlook: { id: "outlook", title: "Outlook Express", icon: "msoutlook", width: 720, height: 500 },
   projects: { id: "projects", title: "Projects", icon: "folder", width: 720, height: 500 },
   profile: { id: "profile", title: "User Profile", icon: "users-share", width: 430, height: 310, minWidth: 360, minHeight: 260 },
-  games: { id: "games", title: "Games", icon: "joystick", width: 780, height: 580 },
-  "games-folder": { id: "games-folder", title: "Games", icon: "directory_check", width: 620, height: 460, minWidth: 420, minHeight: 320 },
-  guestbook: { id: "guestbook", title: "#floppyy", icon: "guestbook", width: 620, height: 470, minWidth: 460, minHeight: 340 },
+  games: { id: "games", title: "Games", icon: "directory_check", width: 780, height: 580 },
+  "games-folder": { id: "games-folder", title: "Games", icon: "directory_check", width: 760, height: 560, minWidth: 520, minHeight: 400 },
+  guestbook: { id: "guestbook", title: "#floppyy", icon: "guestbook", width: 820, height: 640, minWidth: 560, minHeight: 420 },
   music: { id: "music", title: "Winamp", icon: "winamp", width: 290, height: 650 },
   norton: { id: "norton", title: "Norton Commander", icon: "console", width: 760, height: 500 },
   paint: { id: "paint", title: "untitled - Paint", icon: "paint", width: 800, height: 620 },
   "recycle-bin": { id: "recycle-bin", title: "Recycle Bin", icon: "trash", width: 720, height: 500 },
   screensaver: { id: "screensaver", title: "Display Properties", icon: "monitor", width: 440, height: 580 },
   solitaire: { id: "solitaire", title: "Solitaire", icon: "cards", width: 720, height: 500, minWidth: 560, minHeight: 400 },
+  snake: { id: "snake", title: "Snake", icon: "snake", width: 360, height: 360, minWidth: 320, minHeight: 300 },
+  tetris: { id: "tetris", title: "Tetris", icon: "tetris", width: 300, height: 440, minWidth: 260, minHeight: 380 },
+  breakout: { id: "breakout", title: "Breakout", icon: "breakout", width: 450, height: 410, minWidth: 380, minHeight: 340 },
+  "pixel-puzzle": { id: "pixel-puzzle", title: "Pixel Puzzle", icon: "pixelpuzzle", width: 360, height: 390, minWidth: 320, minHeight: 340 },
+  "typing-game": { id: "typing-game", title: "Typing Tutor", icon: "typingtutor", width: 430, height: 300, minWidth: 360, minHeight: 260 },
+  checkers: { id: "checkers", title: "Checkers", icon: "cards", width: 390, height: 420, minWidth: 340, minHeight: 360 },
   run: { id: "run", title: "Run", icon: "run", width: 380, height: 168, dialog: true },
   settings: { id: "settings", title: "Settings", icon: "gears", width: 520, height: 380 },
   share: { id: "share", title: "Send to a Friend", icon: "garfield", width: 400, height: 555 },

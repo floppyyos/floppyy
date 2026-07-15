@@ -55,6 +55,7 @@ export async function POST(request: Request) {
     nick: data.nick,
     body: data.body,
     status: data.status,
+    avatar: data.avatar,
   });
   if (!validation.ok) {
     return Response.json({ error: validation.error }, { status: 400 });
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
     const message = await guestbookStore().add({
       nick: validation.nick,
       body: validation.body,
+      avatar: validation.avatar,
       status: validation.status,
       ipHash,
     });

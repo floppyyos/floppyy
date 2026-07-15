@@ -118,6 +118,12 @@ const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
       { id: "floppyy", label: "Floppyy", icon: "folder", description: "A retro computer in your browser.", kind: "file" },
     ],
     Games: [
+      { id: "snake", label: "Snake.exe", icon: "snake", description: "Application", kind: "file" },
+      { id: "tetris", label: "Tetris.exe", icon: "tetris", description: "Application", kind: "file" },
+      { id: "breakout", label: "Breakout.exe", icon: "breakout", description: "Application", kind: "file" },
+      { id: "puzzle", label: "PixelPuzzle.exe", icon: "pixelpuzzle", description: "Application", kind: "file" },
+      { id: "typing", label: "TypingTutor.exe", icon: "typingtutor", description: "Application", kind: "file" },
+      { id: "checkers", label: "Checkers.exe", icon: "cards", description: "Application", kind: "file" },
       { id: "mines", label: "Minesweeper.exe", icon: "mine", description: "Application", kind: "file" },
       { id: "solitaire", label: "Solitaire.exe", icon: "cards", description: "Application", kind: "file" },
       { id: "doom", label: "Doom.exe", icon: "doom", description: "Application", kind: "file" },
@@ -271,6 +277,12 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
       return;
     }
     if (label.includes("winamp")) openWindow("music");
+    else if (label.includes("snake")) openWindow("snake");
+    else if (label.includes("tetris")) openWindow("tetris");
+    else if (label.includes("breakout")) openWindow("breakout");
+    else if (label.includes("pixelpuzzle")) openWindow("pixel-puzzle");
+    else if (label.includes("typing")) openWindow("typing-game");
+    else if (label.includes("checkers")) openWindow("checkers");
     else if (label.includes("minesweeper")) openWindow("minesweeper");
     else if (label.includes("solitaire")) openWindow("solitaire");
     else if (label.includes("doom")) openWindow("doom");

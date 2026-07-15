@@ -8,7 +8,9 @@ import { fetchGuestbookMessages, forgetGuestbookMessage, rememberGuestbookMessag
 import { onProfileChange, readProfile, writeProfile } from "@/lib/profile";
 import {
   BODY_MAX_LENGTH,
+  GUESTBOOK_AVATARS,
   GUESTBOOK_CHANNEL,
+  GuestbookAvatar,
   GuestbookMessage,
   NICK_MAX_LENGTH,
   STATUS_META,
@@ -16,6 +18,7 @@ import {
   UserStatus,
   nickColor,
 } from "@/lib/guestbook/types";
+import { AVATAR_LABELS, GuestbookAvatarIcon } from "@/components/ui/GuestbookAvatar";
 
 const NICK_STORAGE_KEY = "floppyy-irc-nick";
 const STATUS_STORAGE_KEY = "floppyy-irc-status";
@@ -72,13 +75,62 @@ function renderSmilie(token: string, key: string): ReactNode {
 }
 
 function renderMessageBody(body: string): ReactNode[] {
-  return body.split(SMILIE_PATTERN).map((part, index) => {
-    if (!part) return null;
-    return renderSmilie(part, `${index}-${part}`);
-  });
+  return renderFormattedText(body);
 }
 
-type Peer = { nick: string; status: UserStatus; color: number };
+function renderPlainText(text: string, keyPrefix: string): ReactNode[] {
+  return text.split(/(\n| )/).map((part, index) => {
+    if (!part) return null;
+    if (part === "\n") return <br key={`${keyPrefix}-br-${index}`} />;
+    return part.split(SMILIE_PATTERN).map((piece, pieceIndex) => {
+      if (!piece) return null;
+      return renderSmilie(piece, `${keyPrefix}-${index}-${pieceIndex}-${piece}`);
+    });
+  }).flat();
+}
+
+function safeUrl(raw: string): string | null {
+  try {
+    const url = new URL(raw.includes("://") ? raw : `https://${raw}`);
+    if (!["http:", "https:"].includes(url.protocol)) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+function renderFormattedText(body: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const pattern = /\[b\]([\s\S]{1,240}?)\[\/b\]|\[i\]([\s\S]{1,240}?)\[\/i\]|\[url(?:=([^\]]{1,160}))?\]([\s\S]{1,160}?)\[\/url\]/gi;
+  let last = 0;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(body))) {
+    if (match.index > last) nodes.push(...renderPlainText(body.slice(last, match.index), `plain-${last}`));
+
+    if (match[1]) {
+      nodes.push(<strong key={`b-${match.index}`}>{renderPlainText(match[1], `b-${match.index}`)}</strong>);
+    } else if (match[2]) {
+      nodes.push(<em key={`i-${match.index}`}>{renderPlainText(match[2], `i-${match.index}`)}</em>);
+    } else {
+      const href = safeUrl(match[3] || match[4] || "");
+      const label = match[4] || match[3] || "";
+      nodes.push(
+        href ? (
+          <a key={`url-${match.index}`} href={href} target="_blank" rel="noreferrer nofollow" className="font-bold text-[#0000ee] underline">
+            {renderPlainText(label, `url-label-${match.index}`)}
+          </a>
+        ) : (
+          <span key={`bad-url-${match.index}`}>{renderPlainText(label, `bad-url-label-${match.index}`)}</span>
+        ),
+      );
+    }
+    last = match.index + match[0].length;
+  }
+  if (last < body.length) nodes.push(...renderPlainText(body.slice(last), `plain-${last}`));
+  return nodes;
+}
+
+type Peer = { nick: string; status: UserStatus; color: number; avatar: GuestbookAvatar };
 
 function readStoredNick(): string {
   return readProfile().nick;
@@ -96,8 +148,10 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
   const [messages, setMessages] = useState<GuestbookMessage[]>([]);
   const [nick, setNick] = useState(readStoredNick);
   const [status, setStatus] = useState<UserStatus>(readStoredStatus);
+  const [avatar, setAvatar] = useState<GuestbookAvatar>(() => readProfile().avatar);
   const [draft, setDraft] = useState("");
   const [website, setWebsite] = useState("");
+  const [shareBadge, setShareBadge] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -115,6 +169,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
   useEffect(() => onProfileChange((profile) => {
     setNick(profile.nick);
     setStatus(profile.status);
+    setAvatar(profile.avatar);
   }), []);
 
   useEffect(() => {
@@ -166,7 +221,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
   const peers = useMemo(() => {
     const map = new Map<string, Peer>();
     for (const message of messages) {
-      map.set(message.nick, { nick: message.nick, status: message.status, color: message.color });
+      map.set(message.nick, { nick: message.nick, status: message.status, color: message.color, avatar: message.avatar ?? "face-smile" });
     }
     return [...map.values()].sort((a, b) => a.nick.localeCompare(b.nick));
   }, [messages]);
@@ -204,7 +259,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
       const response = await fetch("/api/guestbook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nick: trimmedNick, body: trimmedBody, status, website }),
+        body: JSON.stringify({ nick: trimmedNick, body: trimmedBody, status, avatar, website }),
       });
       const data = (await response.json().catch(() => ({}))) as {
         message?: GuestbookMessage;
@@ -219,11 +274,13 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
       try {
         globalThis.localStorage.setItem(NICK_STORAGE_KEY, trimmedNick);
         globalThis.localStorage.setItem(STATUS_STORAGE_KEY, status);
-        writeProfile({ nick: trimmedNick, status });
+        writeProfile({ nick: trimmedNick, status, avatar });
       } catch {
         /* ignore */
       }
       if (data.message) {
+        const number = String(data.message.id).padStart(4, "0");
+        setShareBadge(`[ Floppyy Guestbook #${number} ] ${trimmedNick} was here - www.floppyy.com`);
         rememberGuestbookMessage(data.message);
         lastSeenId.current = Math.max(lastSeenId.current, data.message.id);
         setMessages((current) =>
@@ -237,7 +294,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
     } finally {
       setSending(false);
     }
-  }, [nick, draft, status, website, sending, playSound]);
+  }, [nick, draft, status, avatar, website, sending, playSound]);
 
   const deleteMessage = useCallback(
     async (id: number) => {
@@ -270,6 +327,15 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
     },
     [playSound],
   );
+
+  const insertTag = useCallback((tag: "b" | "i" | "url") => {
+    setDraft((current) => {
+      const snippet = tag === "url" ? "[url]https://[/url]" : `[${tag}][/${tag}]`;
+      const prefix = current && !/\s$/.test(current) ? `${current} ` : current;
+      return `${prefix}${snippet}`.slice(0, BODY_MAX_LENGTH);
+    });
+    playSound("click");
+  }, [playSound]);
 
   return (
     <div className="flex h-full flex-col bg-[#c0c0c0] text-[11px]">
@@ -320,6 +386,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
           )}
           {messages.map((message) => (
             <div key={message.id} className="group flex gap-[4px] break-words">
+              <GuestbookAvatarIcon avatar={message.avatar ?? "face-smile"} size={20} />
               <div className="min-w-0 flex-1">
                 <span className="text-[#808080]">[{timestamp(message.createdAt)}] </span>
                 <span style={{ color: nickColor(message.nick, message.color), fontWeight: 700 }}>
@@ -354,6 +421,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
                 className="icq-flower"
                 style={{ "--icq-flower": STATUS_META[peer.status].color } as CSSProperties}
               />
+              <GuestbookAvatarIcon avatar={peer.avatar} size={17} />
               <span className="truncate" style={{ color: nickColor(peer.nick, peer.color) }}>
                 {peer.nick}
               </span>
@@ -389,34 +457,76 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
           value={nick}
           onChange={(event) => setNick(event.target.value)}
         />
+        <div className="flex min-w-0 items-center gap-[1px]" aria-label="Guestbook avatars">
+          {GUESTBOOK_AVATARS.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className="flex h-[22px] w-[22px] shrink-0 items-center justify-center"
+              title={AVATAR_LABELS[item]}
+              onClick={() => {
+                setAvatar(item);
+                playSound("click");
+              }}
+            >
+              <GuestbookAvatarIcon avatar={item} size={19} selected={avatar === item} />
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="m-[3px] flex items-center gap-[4px]">
-        <input
-          className="win-bevel-inset h-[24px] flex-1 px-[6px] text-[11px]"
+      {shareBadge && (
+        <div className="mx-[3px] mt-[3px] field-border flex items-center gap-[5px] bg-[#ffffcc] px-[6px] py-[4px]">
+          <span className="font-bold text-[#000080]">Badge:</span>
+          <input className="win-bevel-inset h-[20px] min-w-0 flex-1 bg-white px-[4px] text-[10px]" readOnly value={shareBadge} />
+          <button
+            className="win-button min-w-[48px]"
+            onClick={() => {
+              navigator.clipboard?.writeText(shareBadge).catch(() => undefined);
+              notify("Guestbook badge copied.");
+              playSound("click");
+            }}
+          >
+            Copy
+          </button>
+        </div>
+      )}
+
+      <div className="m-[3px] flex items-end gap-[4px]">
+        <textarea
+          className="win-bevel-inset h-[44px] flex-1 resize-none px-[6px] py-[4px] text-[11px]"
           placeholder={`Message ${GUESTBOOK_CHANNEL}`}
           maxLength={BODY_MAX_LENGTH}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter") {
+            if (event.key === "Enter" && !event.shiftKey) {
               event.preventDefault();
               send();
             }
           }}
         />
-        <div className="flex shrink-0 items-center gap-[2px]" aria-label="ICQ smilies">
-          {ICQ_SMILIES.map((smilie) => (
-            <button
-              key={smilie.tokens[0]}
-              type="button"
-              className="win-button h-[24px] min-w-[24px] px-[3px] text-[10px] font-bold leading-none"
-              title={`${smilie.label} ${smilie.tokens[0]}`}
-              onClick={() => insertSmilie(smilie.tokens[0])}
-            >
-              {smilie.face}
-            </button>
-          ))}
+        <div className="flex shrink-0 flex-col gap-[2px]">
+          <div className="flex items-center gap-[2px]" aria-label="ICQ smilies">
+            {ICQ_SMILIES.slice(0, 5).map((smilie) => (
+              <button
+                key={smilie.tokens[0]}
+                type="button"
+                className="win-button h-[20px] min-w-[21px] px-[2px] text-[9px] font-bold leading-none"
+                title={`${smilie.label} ${smilie.tokens[0]}`}
+                onClick={() => insertSmilie(smilie.tokens[0])}
+              >
+                {smilie.face}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-[2px]">
+            {(["b", "i", "url"] as const).map((tag) => (
+              <button key={tag} type="button" className="win-button h-[20px] min-w-[32px] px-[3px] text-[9px]" onClick={() => insertTag(tag)}>
+                [{tag}]
+              </button>
+            ))}
+          </div>
         </div>
         {/* Honeypot — hidden from humans, tempting to bots */}
         <input

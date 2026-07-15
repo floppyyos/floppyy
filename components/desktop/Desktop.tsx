@@ -24,6 +24,7 @@ import { InternetWindow } from "@/components/windows/InternetWindow";
 import { MsDosWindow } from "@/components/windows/MsDosWindow";
 import { MinesweeperWindow } from "@/components/windows/MinesweeperWindow";
 import { SolitaireWindow } from "@/components/windows/SolitaireWindow";
+import { RetroGameWindow } from "@/components/windows/RetroGameWindow";
 import { MusicWindow } from "@/components/windows/MusicWindow";
 import { NotepadWindow } from "@/components/windows/NotepadWindow";
 import { OutlookWindow } from "@/components/windows/OutlookWindow";
@@ -602,6 +603,13 @@ export default function Desktop() {
         return <MinesweeperWindow {...props} />;
       case "solitaire":
         return <SolitaireWindow {...props} />;
+      case "snake":
+      case "tetris":
+      case "breakout":
+      case "pixel-puzzle":
+      case "typing-game":
+      case "checkers":
+        return <RetroGameWindow {...props} />;
       case "games":
         return <GamesWindow {...props} />;
       case "games-folder":

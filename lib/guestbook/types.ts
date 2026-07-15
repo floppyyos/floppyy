@@ -9,6 +9,18 @@ export const MAX_PAGE_SIZE = 100;
 
 export const USER_STATUSES = ["online", "ffc", "away", "na", "occupied", "dnd"] as const;
 export type UserStatus = (typeof USER_STATUSES)[number];
+export const GUESTBOOK_AVATARS = [
+  "face-smile",
+  "face-cool",
+  "computer",
+  "floppy",
+  "cd",
+  "modem",
+  "mouse",
+  "game",
+  "spark",
+] as const;
+export type GuestbookAvatar = (typeof GUESTBOOK_AVATARS)[number];
 
 export const STATUS_META: Record<UserStatus, { label: string; color: string }> = {
   online: { label: "Online", color: "#00b000" },
@@ -25,12 +37,13 @@ export function isUserStatus(value: unknown): value is UserStatus {
 
 // Statuses offered in the composer dropdown. STATUS_META still covers every
 // status so older messages using other values keep rendering correctly.
-export const STATUS_OPTIONS: UserStatus[] = ["online", "dnd"];
+export const STATUS_OPTIONS: UserStatus[] = ["online", "ffc", "away", "dnd"];
 
 export type GuestbookMessage = {
   id: number;
   nick: string;
   body: string;
+  avatar: GuestbookAvatar;
   color: number;
   status: UserStatus;
   createdAt: string;
@@ -62,6 +75,10 @@ export function nickColorIndex(nick: string): number {
 export function nickColor(nick: string, index?: number): string {
   const i = typeof index === "number" ? index % NICK_COLORS.length : nickColorIndex(nick);
   return NICK_COLORS[i] ?? NICK_COLORS[0];
+}
+
+export function isGuestbookAvatar(value: unknown): value is GuestbookAvatar {
+  return typeof value === "string" && (GUESTBOOK_AVATARS as readonly string[]).includes(value);
 }
 
 function stripControlChars(value: string): string {
@@ -315,13 +332,14 @@ export function censorProfanity(text: string): string {
 }
 
 export type ValidationResult =
-  | { ok: true; nick: string; body: string; status: UserStatus }
+  | { ok: true; nick: string; body: string; status: UserStatus; avatar: GuestbookAvatar }
   | { ok: false; error: string };
 
 export function validateSubmission(input: {
   nick: unknown;
   body: unknown;
   status: unknown;
+  avatar: unknown;
 }): ValidationResult {
   const nick = sanitizeNick(input.nick);
   const body = sanitizeBody(input.body);
@@ -335,5 +353,6 @@ export function validateSubmission(input: {
   }
 
   const status = isUserStatus(input.status) ? input.status : "online";
-  return { ok: true, nick: censorProfanity(nick), body: censorProfanity(body), status };
+  const avatar = isGuestbookAvatar(input.avatar) ? input.avatar : "face-smile";
+  return { ok: true, nick: censorProfanity(nick), body: censorProfanity(body), status, avatar };
 }

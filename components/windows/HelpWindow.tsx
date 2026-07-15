@@ -83,7 +83,7 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
           <li><b>Go online</b> — open Dial-Up Networking, connect, then browse with Internet Explorer or Netscape.</li>
           <li><b>Sign the Guest Book</b> — open <b>Guest Book (#floppyy)</b> to leave a message in the ICQ/mIRC-style chat. New signings also land in Outlook Express as mail.</li>
           <li><b>Run anything</b> — open <b>Run...</b> and click the arrow to browse recent commands and the full list of programs you can launch.</li>
-          <li><b>Play games</b> — open the <b>Games</b> folder on the desktop (or <b>Start → Games</b>). Note: the DOS games (DOOM, Duke Nukem 3D, Wolfenstein 3D, Dune II, WarCraft) need a desktop with a keyboard &amp; mouse — they don&apos;t run on phones or tablets.</li>
+          <li><b>Play games</b> — open the <b>Games</b> folder on the desktop (or <b>Start → Games</b>). Snake, Tetris, Breakout, Pixel Puzzle, Typing Tutor, Checkers, Minesweeper and Solitaire run right in the desktop. DOS games need a keyboard &amp; mouse — they don&apos;t run on phones or tablets.</li>
         </ul>
       ),
     },
@@ -97,6 +97,7 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
             Double-click one to play.
           </p>
           <ul className="list-disc space-y-[6px] pl-[18px]">
+            <li><b>Snake</b>, <b>Tetris</b>, <b>Breakout</b>, <b>Pixel Puzzle</b>, <b>Typing Tutor</b> and <b>Checkers</b> — small Win98-style games with local high scores where it makes sense.</li>
             <li><b>Minesweeper</b> and <b>Solitaire</b> — the Windows classics, playable anywhere.</li>
             <li>
               <b>DOOM</b>, <b>Duke Nukem 3D</b>, <b>Wolfenstein 3D</b>, <b>Dune II</b> and{" "}
@@ -194,7 +195,7 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
       body: (
         <div className="space-y-[10px]">
           <p><b>Floppyy</b> — the web you grew up on.</p>
-          <p>Version 3.3</p>
+          <p>Version 3.4</p>
           <p>
             Built with a lot of nostalgia. For the full story and credits, open{" "}
             <button className="text-[#0000ff] underline" onClick={() => openWindow("about", "welcome")}>

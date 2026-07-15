@@ -26,6 +26,12 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
   ];
 
   const games: Array<[WindowId, string, string, string?]> = [
+    ["snake", "Snake", "snake"],
+    ["tetris", "Tetris", "tetris"],
+    ["breakout", "Breakout", "breakout"],
+    ["pixel-puzzle", "Pixel Puzzle", "pixelpuzzle"],
+    ["typing-game", "Typing Tutor", "typingtutor"],
+    ["checkers", "Checkers", "cards"],
     ["minesweeper", "Minesweeper", "mine"],
     ["solitaire", "Solitaire", "cards"],
     ["doom", "Doom", "doom"],

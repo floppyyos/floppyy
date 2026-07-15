@@ -17,11 +17,17 @@ try {
       id BIGSERIAL PRIMARY KEY,
       nick TEXT NOT NULL,
       body TEXT NOT NULL,
+      avatar TEXT NOT NULL DEFAULT 'face-smile',
       color SMALLINT NOT NULL DEFAULT 0,
       status TEXT NOT NULL DEFAULT 'online',
       ip_hash TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     )
+  `;
+
+  await sql`
+    ALTER TABLE guestbook_messages
+    ADD COLUMN IF NOT EXISTS avatar TEXT NOT NULL DEFAULT 'face-smile'
   `;
 
   await sql`

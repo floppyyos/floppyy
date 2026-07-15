@@ -5,10 +5,17 @@ import type { WindowComponentProps } from "@/lib/windows";
 import { Minesweeper } from "@/components/games/Minesweeper";
 import { Solitaire } from "@/components/games/Solitaire";
 import { DOS_GAMES, JsDosGame } from "@/components/games/JsDosGame";
+import { BreakoutGame, CheckersGame, PixelPuzzleGame, SnakeGame, TetrisGame, TypingGame } from "@/components/games/RetroGames";
 
-type GameTab = "mines" | "solitaire" | "doom" | "duke3d" | "wolf3d" | "dune2" | "warcraft";
+type GameTab = "snake" | "tetris" | "breakout" | "pixel-puzzle" | "typing-game" | "checkers" | "mines" | "solitaire" | "doom" | "duke3d" | "wolf3d" | "dune2" | "warcraft";
 
 const TABS: [GameTab, string][] = [
+  ["snake", "Snake"],
+  ["tetris", "Tetris"],
+  ["breakout", "Breakout"],
+  ["pixel-puzzle", "Pixel Puzzle"],
+  ["typing-game", "Typing"],
+  ["checkers", "Checkers"],
   ["mines", "Minesweeper"],
   ["solitaire", "Solitaire"],
   ["doom", "Doom"],
@@ -20,7 +27,7 @@ const TABS: [GameTab, string][] = [
 
 function payloadToTab(payload?: string): GameTab {
   if (payload && TABS.some(([id]) => id === payload)) return payload as GameTab;
-  return "mines";
+  return "snake";
 }
 
 export function GamesWindow({ playSound, window }: WindowComponentProps) {
@@ -45,6 +52,12 @@ export function GamesWindow({ playSound, window }: WindowComponentProps) {
         ))}
       </div>
       <div className="win-bevel-inset min-h-0 flex-1 overflow-auto bg-[#c0c0c0] p-3">
+        {tab === "snake" && <SnakeGame playSound={playSound} />}
+        {tab === "tetris" && <TetrisGame playSound={playSound} />}
+        {tab === "breakout" && <BreakoutGame playSound={playSound} />}
+        {tab === "pixel-puzzle" && <PixelPuzzleGame playSound={playSound} />}
+        {tab === "typing-game" && <TypingGame playSound={playSound} />}
+        {tab === "checkers" && <CheckersGame playSound={playSound} />}
         {tab === "mines" && <Minesweeper playSound={playSound} />}
         {tab === "solitaire" && <Solitaire playSound={playSound} />}
         {dosGame && <JsDosGame key={tab} bundleUrl={dosGame.bundle} playSound={playSound} />}

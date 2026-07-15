@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 import { ToolbarIcon } from "./ToolbarIcon";
 
@@ -40,7 +40,7 @@ function getDisplayUrl(url: string): string {
   return url;
 }
 
-export function IEBrowserWindow({ playSound, window: win, internetConnected, crashSystem }: WindowComponentProps) {
+export function IEBrowserWindow({ playSound, window: win, internetConnected, crashSystem, openWindow }: WindowComponentProps) {
   const initialUrl = win.payload && win.payload.trim() ? win.payload.trim() : HOME_URL;
   const [address, setAddress] = useState(initialUrl);
   const [currentUrl, setCurrentUrl] = useState(toWaybackUrl(initialUrl));
@@ -49,6 +49,8 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected, cra
   const [loading, setLoading] = useState(Boolean(internetConnected));
   const [statusText, setStatusText] = useState(internetConnected ? "Opening page..." : "Cannot find server");
   const [progress, setProgress] = useState(0);
+  const dialupPrompted = useRef(false);
+  const dialupTimer = useRef<number | null>(null);
 
   // Animate the classic status-bar progress meter while a page loads.
   useEffect(() => {
@@ -59,6 +61,30 @@ export function IEBrowserWindow({ playSound, window: win, internetConnected, cra
     }, 180);
     return () => clearInterval(id);
   }, [loading]);
+
+  useEffect(() => {
+    if (internetConnected) {
+      dialupPrompted.current = false;
+      if (dialupTimer.current !== null) {
+        window.clearTimeout(dialupTimer.current);
+        dialupTimer.current = null;
+      }
+      return;
+    }
+    if (dialupPrompted.current || dialupTimer.current !== null) return;
+    dialupTimer.current = window.setTimeout(() => {
+      dialupPrompted.current = true;
+      dialupTimer.current = null;
+      playSound("notification");
+      openWindow("internet");
+    }, 2000);
+    return () => {
+      if (dialupTimer.current !== null) {
+        window.clearTimeout(dialupTimer.current);
+        dialupTimer.current = null;
+      }
+    };
+  }, [internetConnected, openWindow, playSound]);
 
   const navigate = (url: string) => {
     if (!internetConnected) {

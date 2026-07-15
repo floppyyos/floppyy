@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { WindowComponentProps, WindowId } from "@/lib/windows";
 import { ToolbarIcon } from "./ToolbarIcon";
+import { FloppyyIcon } from "@/components/desktop/FloppyyIcon";
 
 type GameEntry = {
   id: WindowId;
@@ -14,6 +15,12 @@ type GameEntry = {
 // Every Floppyy game lives here. Icons resolve from /public/icons/<icon>.png
 // with an SVG fallback, so new PNGs can be dropped in later.
 const GAMES: GameEntry[] = [
+  { id: "snake", label: "Snake", icon: "snake", description: "Retro grid snake with local high score" },
+  { id: "tetris", label: "Tetris", icon: "tetris", description: "Falling blocks, rows, and old keyboard reflexes" },
+  { id: "breakout", label: "Breakout", icon: "breakout", description: "Break every brick before the ball escapes" },
+  { id: "pixel-puzzle", label: "Pixel Puzzle", icon: "pixelpuzzle", description: "Slide the tiles back into order" },
+  { id: "typing-game", label: "Typing Tutor", icon: "typingtutor", description: "Type the retro words before the clock runs out" },
+  { id: "checkers", label: "Checkers", icon: "cards", description: "Two-player checkerboard for the desktop" },
   { id: "minesweeper", label: "Minesweeper", icon: "mine", description: "Classic mine-clearing puzzle" },
   { id: "solitaire", label: "Solitaire", icon: "cards", description: "Klondike solitaire card game" },
   { id: "doom", label: "DOOM", icon: "doom", description: "id Software's legendary FPS" },
@@ -138,14 +145,7 @@ export function GamesFolderWindow({ window: win, openWindow, closeWindow, notify
                     className="relative inline-flex h-[36px] w-[36px] items-center justify-center p-[2px]"
                     style={selected === game.id ? { background: "rgba(0,0,128,0.4)" } : undefined}
                   >
-                    <img
-                      src={`/icons/${game.icon}.png`}
-                      alt=""
-                      width={32}
-                      height={32}
-                      draggable={false}
-                      style={{ imageRendering: "pixelated" }}
-                    />
+                    <FloppyyIcon type={game.icon} size={32} />
                     {/* Windows 98 shortcut arrow overlay */}
                     <span className="absolute bottom-0 left-0 flex h-[11px] w-[11px] items-center justify-center border border-[#808080] bg-white">
                       <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true" style={{ display: "block" }}>
@@ -184,7 +184,7 @@ export function GamesFolderWindow({ window: win, openWindow, closeWindow, notify
                   onDoubleClick={() => open(game)}
                 >
                   <div className="flex min-w-0 items-center gap-1 px-2">
-                    <img src={`/icons/${game.icon}.png`} alt="" width={16} height={16} draggable={false} style={{ imageRendering: "pixelated" }} />
+                    <FloppyyIcon type={game.icon} size={16} />
                     <span className="truncate">{game.label}</span>
                   </div>
                   <div className="truncate px-2 py-[4px]">Shortcut</div>

@@ -3,18 +3,20 @@
 import { useState } from "react";
 import type { CSSProperties } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
-import { NICK_MAX_LENGTH, STATUS_META, STATUS_OPTIONS, UserStatus } from "@/lib/guestbook/types";
+import { GUESTBOOK_AVATARS, GuestbookAvatar, NICK_MAX_LENGTH, STATUS_META, STATUS_OPTIONS, UserStatus } from "@/lib/guestbook/types";
 import { readProfile, writeProfile } from "@/lib/profile";
 import { Win98Select } from "@/components/ui/Win98Select";
+import { AVATAR_LABELS, GuestbookAvatarIcon } from "@/components/ui/GuestbookAvatar";
 
 export function UserProfileWindow({ notify, playSound }: WindowComponentProps) {
   const [nick, setNick] = useState(() => readProfile().nick);
   const [status, setStatus] = useState<UserStatus>(() => readProfile().status);
+  const [avatar, setAvatar] = useState<GuestbookAvatar>(() => readProfile().avatar);
   const [saved, setSaved] = useState(false);
 
   const save = () => {
     const nextNick = nick.trim().slice(0, NICK_MAX_LENGTH);
-    writeProfile({ nick: nextNick, status });
+    writeProfile({ nick: nextNick, status, avatar });
     setNick(nextNick);
     setSaved(true);
     playSound("click");
@@ -35,7 +37,7 @@ export function UserProfileWindow({ notify, playSound }: WindowComponentProps) {
 
       <div className="flex min-h-0 flex-1 gap-[14px] p-[14px]">
         <div className="field-border flex w-[120px] shrink-0 flex-col items-center bg-white px-[8px] py-[12px] text-center">
-          <img src="/icons/users-share.png" alt="" width={48} height={48} draggable={false} style={{ imageRendering: "pixelated" }} />
+          <GuestbookAvatarIcon avatar={avatar} size={48} />
           <div className="mt-[8px] font-bold">Floppyy User</div>
           <div className="mt-[4px] text-[#606060]">{nick.trim() || "guest"}</div>
         </div>
@@ -73,6 +75,25 @@ export function UserProfileWindow({ notify, playSound }: WindowComponentProps) {
                 }))}
               />
             </label>
+            <div className="mt-[10px]">
+              <span className="mb-[3px] block">Guestbook avatar:</span>
+              <div className="grid grid-cols-9 gap-[3px]">
+                {GUESTBOOK_AVATARS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    className="flex h-[28px] w-[28px] items-center justify-center"
+                    title={AVATAR_LABELS[item]}
+                    onClick={() => {
+                      setAvatar(item);
+                      playSound("click");
+                    }}
+                  >
+                    <GuestbookAvatarIcon avatar={item} size={24} selected={avatar === item} />
+                  </button>
+                ))}
+              </div>
+            </div>
           </fieldset>
 
           <div className="mt-[12px] field-border bg-white px-[8px] py-[6px] leading-[15px]">

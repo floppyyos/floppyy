@@ -8,7 +8,7 @@ Mostly.
 
 > The web you grew up on.
 
-![Floppyy](https://img.shields.io/badge/Floppyy-v3.3.0-008080?style=flat-square)
+![Floppyy](https://img.shields.io/badge/Floppyy-v3.4.0-008080?style=flat-square)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square&logo=typescript)
 ![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react)
@@ -45,7 +45,7 @@ Just a small machine for good old internet memories.
 - **Netscape Navigator** — retro alternative browser
 - **MS-DOS Prompt** — command-line interface with working commands
 - **Outlook Express** — three-pane email client (Inbox / Outbox / Sent / Deleted), Compose that sends to the Outbox and "delivers" a copy to the Inbox with a *You've got mail* chime, plus Reply and Delete
-- **Guest Book (#floppyy)** — ICQ/mIRC-style chat guestbook where visitors sign in real time (per-IP rate limiting, honeypot and stop-word spam filtering); new signings also arrive as mail in Outlook Express
+- **Guest Book (#floppyy)** — ICQ/mIRC-style chat guestbook where visitors sign in real time with retro avatars, ICQ-style statuses, emoticons, safe BBCode formatting (`[b]`, `[i]`, `[url]`), share badges, per-IP rate limiting, honeypot and stop-word spam filtering; new signings also arrive as mail in Outlook Express
 - **Norton Commander** — dual-pane file manager
 - **Windows Media Player** — video playback
 - **Winamp** — music player (frameless, authentic skin)
@@ -61,7 +61,8 @@ Just a small machine for good old internet memories.
 - **Screensavers** — Pipes, Starfield, Maze, Mystify, Flying Windows
 
 ### Games
-- **DOOM**, **Duke Nukem 3D**, **Wolfenstein 3D**, **Dune II**, and **WarCraft: Orcs & Humans** — the real MS-DOS classics running in-browser via js-dos (DOSBox). Grouped in the desktop **Games** folder and under **Start → Games**.
+- **Snake**, **Tetris**, **Breakout**, **Pixel Puzzle**, **Typing Tutor**, and **Checkers** — lightweight Win98-style browser games with local high scores where it makes sense
+- **DOOM**, **Duke Nukem 3D**, **Wolfenstein 3D**, **Dune II**, and **WarCraft: Orcs & Humans** — MS-DOS classics running in-browser via js-dos (DOSBox). Grouped in the desktop **Games** folder and under **Start → Games**.
 - **Minesweeper** — classic mine-clearing puzzle
 - **Solitaire** — card game (drag or click-to-move)
 
@@ -69,6 +70,7 @@ Just a small machine for good old internet memories.
 
 ### System
 - Sound effects via Web Audio API with oscillator fallback
+- Offline browsers automatically offer Dial-Up Networking after a short delay
 - Screensaver activation after idle timeout
 - Service worker for offline support
 - Safe Mode boot option
@@ -120,6 +122,7 @@ npm start
 
 # Lint / React Compiler checks
 npm run lint
+```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
