@@ -115,7 +115,7 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
             <span className="ml-auto w-[10px] text-center text-[7px] leading-none">{"\u25B6\uFE0E"}</span>
           </button>
           <div
-            className={`absolute left-full top-0 w-[180px] max-[640px]:w-[160px] bg-[#c0c0c0] py-[3px] group-hover/games:block ${openSub === "games" ? "block" : "hidden"}`}
+            className={`absolute left-full top-0 max-h-[calc(100vh-52px)] w-[180px] max-[640px]:w-[160px] overflow-y-auto bg-[#c0c0c0] pb-[18px] pt-[3px] group-hover/games:block ${openSub === "games" ? "block" : "hidden"}`}
             style={{
               boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
             }}
@@ -130,6 +130,9 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
                 <span>{label}</span>
               </button>
             ))}
+            <div className="sticky bottom-0 flex h-[16px] items-center justify-center bg-[#c0c0c0] text-[9px] leading-none shadow-[inset_0_1px_#808080]">
+              ▼
+            </div>
           </div>
         </div>
 

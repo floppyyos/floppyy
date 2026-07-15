@@ -372,36 +372,51 @@ function checkersDirections(piece: Piece): [number, number][] {
 }
 
 function checkersMoves(board: Piece[], side: CheckersSide): CheckersMove[] {
-  const moves: CheckersMove[] = [];
-  const captures: CheckersMove[] = [];
+  const moves = checkersMovesForSide(board, side, false);
+  const captures = checkersMovesForSide(board, side, true);
+  return captures.length ? captures : moves;
+}
+
+function checkersMovesForSide(board: Piece[], side: CheckersSide, capturesOnly: boolean): CheckersMove[] {
+  const out: CheckersMove[] = [];
 
   board.forEach((piece, from) => {
     if (!piece || piece.toLowerCase() !== side) return;
-    const row = Math.floor(from / 8);
-    const col = from % 8;
-
-    for (const [dr, dc] of checkersDirections(piece)) {
-      const nextRow = row + dr;
-      const nextCol = col + dc;
-      if (nextRow < 0 || nextRow > 7 || nextCol < 0 || nextCol > 7) continue;
-      const next = nextRow * 8 + nextCol;
-
-      if (!board[next]) {
-        moves.push({ from, to: next });
-        continue;
-      }
-
-      const jumpRow = row + dr * 2;
-      const jumpCol = col + dc * 2;
-      if (jumpRow < 0 || jumpRow > 7 || jumpCol < 0 || jumpCol > 7) continue;
-      const jump = jumpRow * 8 + jumpCol;
-      if (board[next]?.toLowerCase() !== side && !board[jump]) {
-        captures.push({ from, to: jump, capture: next });
-      }
-    }
+    out.push(...checkersMovesForPiece(board, from, capturesOnly));
   });
 
-  return captures.length ? captures : moves;
+  return out;
+}
+
+function checkersMovesForPiece(board: Piece[], from: number, capturesOnly: boolean): CheckersMove[] {
+  const piece = board[from];
+  if (!piece) return [];
+  const side = piece.toLowerCase() as CheckersSide;
+  const row = Math.floor(from / 8);
+  const col = from % 8;
+  const moves: CheckersMove[] = [];
+
+  for (const [dr, dc] of checkersDirections(piece)) {
+    const nextRow = row + dr;
+    const nextCol = col + dc;
+    if (nextRow < 0 || nextRow > 7 || nextCol < 0 || nextCol > 7) continue;
+    const next = nextRow * 8 + nextCol;
+
+    if (!capturesOnly && !board[next]) {
+      moves.push({ from, to: next });
+      continue;
+    }
+
+    const jumpRow = row + dr * 2;
+    const jumpCol = col + dc * 2;
+    if (jumpRow < 0 || jumpRow > 7 || jumpCol < 0 || jumpCol > 7) continue;
+    const jump = jumpRow * 8 + jumpCol;
+    if (board[next]?.toLowerCase() !== side && !board[jump]) {
+      moves.push({ from, to: jump, capture: next });
+    }
+  }
+
+  return moves;
 }
 
 function applyCheckersMove(board: Piece[], move: CheckersMove, side: CheckersSide): Piece[] {
@@ -429,24 +444,43 @@ export function CheckersGame({ playSound, onExit }: GameProps) {
   const [board, setBoard] = useState<Piece[]>(initial);
   const [turn, setTurn] = useState<"r" | "b">("r");
   const [selected, setSelected] = useState<number | null>(null);
+  const [forcedFrom, setForcedFrom] = useState<number | null>(null);
   const white = board.filter((p) => p?.toLowerCase() === "r").length;
   const black = board.filter((p) => p?.toLowerCase() === "b").length;
-  const reset = () => { setBoard(initial()); setTurn("r"); setSelected(null); playSound("click"); };
+  const legalWhiteMoves = checkersMoves(board, "r");
+  const whiteMustCapture = legalWhiteMoves.some((item) => typeof item.capture === "number");
+  const selectedMoves = selected === null ? [] : legalWhiteMoves.filter((item) => item.from === selected);
+  const playablePieces = new Set(legalWhiteMoves.map((item) => item.from));
+  const validTargets = new Set(selectedMoves.map((item) => item.to));
+  const reset = () => { setBoard(initial()); setTurn("r"); setSelected(null); setForcedFrom(null); playSound("click"); };
 
   useEffect(() => {
     if (turn !== "b" || white === 0 || black === 0) return;
     const timer = window.setTimeout(() => {
       setBoard((current) => {
-        const moves = checkersMoves(current, "b");
+        let nextBoard = current;
+        const moves = checkersMoves(nextBoard, "b");
         if (moves.length === 0) return current;
-        const captures = moves.filter((item) => typeof item.capture === "number");
-        const pool = captures.length ? captures : moves;
-        const move = pool[Math.floor(Math.random() * pool.length)];
-        playSound(typeof move.capture === "number" ? "recycle" : "click");
-        return applyCheckersMove(current, move, "b");
+        let move = moves[Math.floor(Math.random() * moves.length)];
+        let jumped = false;
+
+        while (move) {
+          jumped = jumped || typeof move.capture === "number";
+          nextBoard = applyCheckersMove(nextBoard, move, "b");
+          const piece = nextBoard[move.to];
+          const crowned = piece === "B" && Math.floor(move.to / 8) === 7;
+          const followUps = typeof move.capture === "number" && !crowned
+            ? checkersMovesForPiece(nextBoard, move.to, true)
+            : [];
+          move = followUps[Math.floor(Math.random() * followUps.length)];
+        }
+
+        playSound(jumped ? "recycle" : "click");
+        return nextBoard;
       });
       setTurn("r");
       setSelected(null);
+      setForcedFrom(null);
     }, 550);
     return () => window.clearTimeout(timer);
   }, [black, playSound, turn, white]);
@@ -454,27 +488,64 @@ export function CheckersGame({ playSound, onExit }: GameProps) {
   const move = (to: number) => {
     if (turn !== "r") return;
     if (selected === null) {
-      if (board[to]?.toLowerCase() === "r") setSelected(to);
+      if (board[to]?.toLowerCase() === "r" && playablePieces.has(to) && (forcedFrom === null || forcedFrom === to)) {
+        setSelected(to);
+      }
       return;
     }
     const piece = board[selected];
     if (!piece || board[to]) { setSelected(null); return; }
 
-    const valid = checkersMoves(board, "r").find((item) => item.from === selected && item.to === to);
+    const valid = selectedMoves.find((item) => item.to === to);
     if (!valid) { setSelected(null); return; }
-    setBoard((current) => applyCheckersMove(current, valid, "r"));
-    setTurn("b");
-    setSelected(null);
+    const nextBoard = applyCheckersMove(board, valid, "r");
+    const crowned = nextBoard[to] === "R" && Math.floor(to / 8) === 0;
+    const followUps = typeof valid.capture === "number" && !crowned
+      ? checkersMovesForPiece(nextBoard, to, true)
+      : [];
+    setBoard(nextBoard);
+    if (followUps.length > 0) {
+      setForcedFrom(to);
+      setSelected(to);
+    } else {
+      setTurn("b");
+      setSelected(null);
+      setForcedFrom(null);
+    }
     playSound(typeof valid.capture === "number" ? "recycle" : "click");
   };
+
+  const status = white === 0
+    ? "Computer wins."
+    : black === 0
+      ? "White wins."
+      : turn === "b"
+        ? "Computer thinking..."
+        : forcedFrom !== null
+          ? "Keep jumping with the selected piece."
+          : whiteMustCapture
+            ? `White to move. Capture required. White ${white} / Black ${black}`
+            : `White to move. White ${white} / Black ${black}`;
+
   return (
-    <Shell title="Checkers" score={white} best={black} onExit={onExit} onReset={reset} status={`${turn === "r" ? "White" : "Computer"} to move. White ${white} / Black ${black}`}>
+    <Shell title="Checkers" score={white} best={black} onExit={onExit} onReset={reset} status={status}>
       <div className="grid grid-cols-8 border border-[#808080]">
         {board.map((piece, index) => {
           const row = Math.floor(index / 8);
           const dark = (row + index) % 2 === 1;
+          const canMove = turn === "r" && piece?.toLowerCase() === "r" && playablePieces.has(index) && (forcedFrom === null || forcedFrom === index);
+          const canLand = validTargets.has(index);
           return (
-            <button key={index} className="flex h-[38px] w-[38px] items-center justify-center" style={{ background: dark ? "#008080" : "#f0e6c0", outline: selected === index ? "2px solid #ffff00" : "none" }} onClick={() => move(index)}>
+            <button
+              key={index}
+              className="relative flex h-[38px] w-[38px] items-center justify-center"
+              style={{
+                background: dark ? "#008080" : "#f0e6c0",
+                outline: selected === index ? "2px solid #ffff00" : canMove ? "1px solid #ffff00" : "none",
+              }}
+              onClick={() => move(index)}
+            >
+              {canLand && <span className="absolute h-[12px] w-[12px] rounded-full bg-[#ffff00] opacity-80" />}
               {piece && <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full border border-black text-[12px] font-bold" style={{ background: piece.toLowerCase() === "r" ? "#ffffff" : "#111111", color: piece.toLowerCase() === "r" ? "#000" : "#fff", boxShadow: cellOutset }}>{piece === piece.toUpperCase() ? "K" : ""}</span>}
             </button>
           );
