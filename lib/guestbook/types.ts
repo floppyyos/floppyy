@@ -85,7 +85,8 @@ export function sanitizeBody(raw: unknown): string {
   return cleaned.slice(0, BODY_MAX_LENGTH);
 }
 
-// Banned words (RU + EN) to keep the guestbook clean of spam and ads.
+// Spam / advertising words (RU + EN). Matched with word boundaries so benign
+// words that merely contain them (e.g. "better" vs "bet") are not blocked.
 export const BANNED_WORDS = [
   // Russian
   "спам",
@@ -143,11 +144,71 @@ export const BANNED_WORDS = [
   "onlyfans",
 ];
 
-const BANNED_WORD_PATTERNS = BANNED_WORDS.map(
-  (word) => new RegExp(`(^|[^\\p{L}\\p{N}])${word}([^\\p{L}\\p{N}]|$)`, "iu"),
-);
+// Profanity / slurs (RU + EN). These are also matched in a "compacted" form,
+// so obfuscation like "f u c k", "f.u.c.k", "sh1t" or "fuuuck" is caught too.
+// Roots are used for the Russian mat so inflected forms are covered.
+export const PROFANITY_WORDS = [
+  // English
+  "fuck",
+  "fucker",
+  "fucking",
+  "motherfucker",
+  "shit",
+  "bullshit",
+  "bitch",
+  "cunt",
+  "asshole",
+  "dickhead",
+  "bastard",
+  "slut",
+  "whore",
+  "faggot",
+  "nigger",
+  "nigga",
+  "wanker",
+  "twat",
+  "prick",
+  "cock",
+  "pussy",
+  "dick",
+  "jerk off",
+  "jackoff",
+  // Russian (mat) — roots cover inflected forms
+  "хуй",
+  "хуе",
+  "хуё",
+  "хуя",
+  "хуйн",
+  "пизд",
+  "еба",
+  "ебат",
+  "ебан",
+  "ебал",
+  "ебло",
+  "выеб",
+  "заеб",
+  "наеб",
+  "уеб",
+  "бляд",
+  "блять",
+  "бля",
+  "сука",
+  "суки",
+  "сук",
+  "гандон",
+  "гондон",
+  "мудак",
+  "мудил",
+  "долбоеб",
+  "долбоёб",
+  "залуп",
+  "манда",
+  "пидор",
+  "пидар",
+  "пидорас",
+  "пидарас",
+];
 
-// spam ("c4sino", "p0rn") still trips the filter.
 const LEET_MAP: Record<string, string> = {
   "0": "o",
   "1": "i",
@@ -159,15 +220,70 @@ const LEET_MAP: Record<string, string> = {
   $: "s",
 };
 
+// Escape a word so it can be embedded safely in a RegExp.
+function escapeForRegExp(word: string): string {
+  return word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Lowercase + de-leet, keeping the original layout so word boundaries stay meaningful.
 function normalizeForFilter(text: string): string {
   return text
     .toLowerCase()
     .replace(/[013457@$]/g, (char) => LEET_MAP[char] ?? char);
 }
 
+// Strip everything but letters/digits and collapse repeated characters, so
+// "f u c k", "f.u.c.k" and "fuuuck" all reduce to the same "fuck".
+function compactForFilter(text: string): string {
+  return normalizeForFilter(text)
+    .normalize("NFKD")
+    .replace(/[^\p{L}\p{N}]+/gu, "")
+    .replace(/(.)\1+/gu, "$1");
+}
+
+const BANNED_WORD_PATTERNS = BANNED_WORDS.map(
+  (word) => new RegExp(`(^|[^\\p{L}\\p{N}])${escapeForRegExp(word)}([^\\p{L}\\p{N}]|$)`, "iu"),
+);
+
+// Profanity checked against the original text with word boundaries (catches
+// normal usage and leetspeak). Word boundaries avoid false positives like
+// "peacock" (cock), "dickens" (dick) or "shiitake" (shit).
+const PROFANITY_PATTERNS = PROFANITY_WORDS.map(
+  (word) => new RegExp(`(^|[^\\p{L}\\p{N}])${escapeForRegExp(word)}([^\\p{L}\\p{N}]|$)`, "iu"),
+);
+
+// Distinctive words that are extremely unlikely to appear inside a benign word.
+// Only these get the aggressive "compacted" substring check that defeats
+// obfuscation ("f u c k", "f.u.c.k", "fuuuck"), keeping false positives low.
+const PROFANITY_COMPACT = [
+  "fuck",
+  "motherfucker",
+  "faggot",
+  "nigger",
+  "nigga",
+  "хуй",
+  "пизд",
+  "ебан",
+  "ебат",
+  "бляд",
+  "блять",
+  "пидор",
+  "пидар",
+  "гандон",
+  "долбоеб",
+  "долбоёб",
+  "залуп",
+]
+  .map((word) => compactForFilter(word))
+  .filter(Boolean);
+
 export function containsBannedWord(text: string): boolean {
   const normalized = normalizeForFilter(text);
-  return BANNED_WORD_PATTERNS.some((pattern) => pattern.test(normalized));
+  if (BANNED_WORD_PATTERNS.some((pattern) => pattern.test(normalized))) return true;
+  if (PROFANITY_PATTERNS.some((pattern) => pattern.test(normalized))) return true;
+
+  const compact = compactForFilter(text);
+  return PROFANITY_COMPACT.some((word) => compact.includes(word));
 }
 
 export type ValidationResult =
