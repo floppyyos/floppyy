@@ -7,15 +7,9 @@ import { Solitaire } from "@/components/games/Solitaire";
 import { DOS_GAMES, JsDosGame } from "@/components/games/JsDosGame";
 import { BreakoutGame, CheckersGame, PixelPuzzleGame, SnakeGame, TetrisGame, TypingGame } from "@/components/games/RetroGames";
 
-type GameTab = "snake" | "tetris" | "breakout" | "pixel-puzzle" | "typing-game" | "checkers" | "mines" | "solitaire" | "doom" | "duke3d" | "wolf3d" | "dune2" | "warcraft";
+type GameTab = "mines" | "solitaire" | "doom" | "duke3d" | "wolf3d" | "dune2" | "warcraft" | "snake" | "tetris" | "breakout" | "pixel-puzzle" | "typing-game" | "checkers";
 
 const TABS: [GameTab, string][] = [
-  ["snake", "Snake"],
-  ["tetris", "Tetris"],
-  ["breakout", "Breakout"],
-  ["pixel-puzzle", "Pixel Puzzle"],
-  ["typing-game", "Typing"],
-  ["checkers", "Checkers"],
   ["mines", "Minesweeper"],
   ["solitaire", "Solitaire"],
   ["doom", "Doom"],
@@ -23,11 +17,17 @@ const TABS: [GameTab, string][] = [
   ["wolf3d", "Wolfenstein"],
   ["dune2", "Dune II"],
   ["warcraft", "WarCraft"],
+  ["snake", "Snake"],
+  ["tetris", "Tetris"],
+  ["breakout", "Breakout"],
+  ["pixel-puzzle", "Pixel Puzzle"],
+  ["typing-game", "Typing"],
+  ["checkers", "Checkers"],
 ];
 
 function payloadToTab(payload?: string): GameTab {
   if (payload && TABS.some(([id]) => id === payload)) return payload as GameTab;
-  return "snake";
+  return "mines";
 }
 
 export function GamesWindow({ playSound, window }: WindowComponentProps) {

@@ -375,7 +375,7 @@ export function CheckersGame({ playSound, onExit }: GameProps) {
   const [board, setBoard] = useState<Piece[]>(initial);
   const [turn, setTurn] = useState<"r" | "b">("r");
   const [selected, setSelected] = useState<number | null>(null);
-  const red = board.filter((p) => p?.toLowerCase() === "r").length;
+  const white = board.filter((p) => p?.toLowerCase() === "r").length;
   const black = board.filter((p) => p?.toLowerCase() === "b").length;
   const reset = () => { setBoard(initial()); setTurn("r"); setSelected(null); playSound("click"); };
   const move = (to: number) => {
@@ -406,14 +406,14 @@ export function CheckersGame({ playSound, onExit }: GameProps) {
     playSound(jump ? "recycle" : "click");
   };
   return (
-    <Shell title="Checkers" score={red} best={black} onExit={onExit} onReset={reset} status={`${turn === "r" ? "Red" : "Black"} to move. Red ${red} / Black ${black}`}>
+    <Shell title="Checkers" score={white} best={black} onExit={onExit} onReset={reset} status={`${turn === "r" ? "White" : "Black"} to move. White ${white} / Black ${black}`}>
       <div className="grid grid-cols-8 border border-[#808080]">
         {board.map((piece, index) => {
           const row = Math.floor(index / 8);
           const dark = (row + index) % 2 === 1;
           return (
-            <button key={index} className="flex h-[38px] w-[38px] items-center justify-center" style={{ background: dark ? "#008080" : "#f0e6c0", outline: selected === index ? "2px solid #ffff00" : "none" }} onClick={() => move(index)}>
-              {piece && <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full border border-black text-[12px] font-bold" style={{ background: piece.toLowerCase() === "r" ? "#c02020" : "#202020", color: "#fff", boxShadow: cellOutset }}>{piece === piece.toUpperCase() ? "K" : ""}</span>}
+            <button key={index} className="flex h-[38px] w-[38px] items-center justify-center" style={{ background: dark ? "#606060" : "#f0f0f0", outline: selected === index ? "2px solid #ffff00" : "none" }} onClick={() => move(index)}>
+              {piece && <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full border border-black text-[12px] font-bold" style={{ background: piece.toLowerCase() === "r" ? "#ffffff" : "#111111", color: piece.toLowerCase() === "r" ? "#000" : "#fff", boxShadow: cellOutset }}>{piece === piece.toUpperCase() ? "K" : ""}</span>}
             </button>
           );
         })}

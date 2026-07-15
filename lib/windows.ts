@@ -131,7 +131,7 @@ export const windowDefinitions: Record<WindowId, WindowDefinition> = {
   breakout: { id: "breakout", title: "Breakout", icon: "breakout", width: 450, height: 410, minWidth: 380, minHeight: 340 },
   "pixel-puzzle": { id: "pixel-puzzle", title: "Pixel Puzzle", icon: "pixelpuzzle", width: 360, height: 390, minWidth: 320, minHeight: 340 },
   "typing-game": { id: "typing-game", title: "Typing Tutor", icon: "typingtutor", width: 430, height: 300, minWidth: 360, minHeight: 260 },
-  checkers: { id: "checkers", title: "Checkers", icon: "cards", width: 390, height: 420, minWidth: 340, minHeight: 360 },
+  checkers: { id: "checkers", title: "Checkers", icon: "checkers", width: 390, height: 420, minWidth: 340, minHeight: 360 },
   run: { id: "run", title: "Run", icon: "run", width: 380, height: 168, dialog: true },
   settings: { id: "settings", title: "Settings", icon: "gears", width: 520, height: 380 },
   share: { id: "share", title: "Send to a Friend", icon: "garfield", width: 400, height: 555 },

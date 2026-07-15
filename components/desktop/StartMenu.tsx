@@ -26,12 +26,6 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
   ];
 
   const games: Array<[WindowId, string, string, string?]> = [
-    ["snake", "Snake", "snake"],
-    ["tetris", "Tetris", "tetris"],
-    ["breakout", "Breakout", "breakout"],
-    ["pixel-puzzle", "Pixel Puzzle", "pixelpuzzle"],
-    ["typing-game", "Typing Tutor", "typingtutor"],
-    ["checkers", "Checkers", "cards"],
     ["minesweeper", "Minesweeper", "mine"],
     ["solitaire", "Solitaire", "cards"],
     ["doom", "Doom", "doom"],
@@ -39,6 +33,12 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
     ["wolf3d", "Wolfenstein 3D", "wolfenstein"],
     ["dune2", "Dune II", "dune2"],
     ["warcraft", "WarCraft", "warcraft"],
+    ["snake", "Snake", "snake"],
+    ["tetris", "Tetris", "tetris"],
+    ["breakout", "Breakout", "breakout"],
+    ["pixel-puzzle", "Pixel Puzzle", "pixelpuzzle"],
+    ["typing-game", "Typing Tutor", "typingtutor"],
+    ["checkers", "Checkers", "checkers"],
   ];
 
   const favorites: Array<[string, string]> = [

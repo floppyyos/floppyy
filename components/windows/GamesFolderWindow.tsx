@@ -15,12 +15,6 @@ type GameEntry = {
 // Every Floppyy game lives here. Icons resolve from /public/icons/<icon>.png
 // with an SVG fallback, so new PNGs can be dropped in later.
 const GAMES: GameEntry[] = [
-  { id: "snake", label: "Snake", icon: "snake", description: "Retro grid snake with local high score" },
-  { id: "tetris", label: "Tetris", icon: "tetris", description: "Falling blocks, rows, and old keyboard reflexes" },
-  { id: "breakout", label: "Breakout", icon: "breakout", description: "Break every brick before the ball escapes" },
-  { id: "pixel-puzzle", label: "Pixel Puzzle", icon: "pixelpuzzle", description: "Slide the tiles back into order" },
-  { id: "typing-game", label: "Typing Tutor", icon: "typingtutor", description: "Type the retro words before the clock runs out" },
-  { id: "checkers", label: "Checkers", icon: "cards", description: "Two-player checkerboard for the desktop" },
   { id: "minesweeper", label: "Minesweeper", icon: "mine", description: "Classic mine-clearing puzzle" },
   { id: "solitaire", label: "Solitaire", icon: "cards", description: "Klondike solitaire card game" },
   { id: "doom", label: "DOOM", icon: "doom", description: "id Software's legendary FPS" },
@@ -28,6 +22,12 @@ const GAMES: GameEntry[] = [
   { id: "wolf3d", label: "Wolfenstein 3D", icon: "wolfenstein", description: "The original first-person shooter" },
   { id: "dune2", label: "Dune II", icon: "dune2", description: "The real-time strategy pioneer" },
   { id: "warcraft", label: "WarCraft: Orcs & Humans", icon: "warcraft", description: "Blizzard's first RTS" },
+  { id: "snake", label: "Snake", icon: "snake", description: "Retro grid snake with local high score" },
+  { id: "tetris", label: "Tetris", icon: "tetris", description: "Falling blocks, rows, and old keyboard reflexes" },
+  { id: "breakout", label: "Breakout", icon: "breakout", description: "Break every brick before the ball escapes" },
+  { id: "pixel-puzzle", label: "Pixel Puzzle", icon: "pixelpuzzle", description: "Slide the tiles back into order" },
+  { id: "typing-game", label: "Typing Tutor", icon: "typingtutor", description: "Type the retro words before the clock runs out" },
+  { id: "checkers", label: "Checkers", icon: "checkers", description: "Two-player checkerboard for the desktop" },
 ];
 
 const toolbarButtons = [
