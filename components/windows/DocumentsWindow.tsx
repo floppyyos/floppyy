@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { WindowComponentProps } from "@/lib/windows";
+import type { WindowComponentProps, WindowId } from "@/lib/windows";
 import { ToolbarIcon } from "./ToolbarIcon";
 
 type DocumentItem = {
@@ -9,7 +9,8 @@ type DocumentItem = {
   label: string;
   icon: string;
   description: string;
-  action: "image" | "link" | "note";
+  action: "image" | "link" | "note" | "window";
+  windowId?: WindowId;
 };
 
 const documentItems: DocumentItem[] = [
@@ -33,6 +34,14 @@ const documentItems: DocumentItem[] = [
     icon: "notepad",
     description: "Text Document",
     action: "note",
+  },
+  {
+    id: "projects",
+    label: "Projects",
+    icon: "folder",
+    description: "File Folder",
+    action: "window",
+    windowId: "projects",
   },
 ];
 
@@ -63,6 +72,11 @@ export function DocumentsWindow({ notify, openWindow, playSound }: WindowCompone
 
     if (item.action === "image") {
       openWindow("paint", "clouds");
+      return;
+    }
+
+    if (item.action === "window" && item.windowId) {
+      openWindow(item.windowId);
       return;
     }
 

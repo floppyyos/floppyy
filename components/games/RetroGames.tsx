@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { GameMenuBar, GameStatusBar } from "./GameChrome";
 
-type GameProps = { playSound: (name: string) => void; onExit?: () => void };
+type GameProps = { playSound: (name: string) => void; onExit?: () => void; windowWidth?: number };
 
 const cellOutset = "inset -1px -1px #808080, inset 1px 1px #fff";
 const cellInset = "inset 1px 1px #808080, inset -1px -1px #fff";
@@ -38,7 +38,7 @@ function useTick(enabled: boolean, delay: number, callback: () => void) {
   }, [callback, delay, enabled]);
 }
 
-function Shell({ title, score, best, onExit, onReset, children, status }: {
+function Shell({ title, score, best, onExit, onReset, children, status, controls }: {
   title: string;
   score: number;
   best: number;
@@ -46,6 +46,7 @@ function Shell({ title, score, best, onExit, onReset, children, status }: {
   onReset: () => void;
   children: React.ReactNode;
   status?: string;
+  controls?: React.ReactNode;
 }) {
   return (
     <div className="flex h-full flex-col overflow-hidden bg-[#c0c0c0] text-[11px]">
@@ -64,12 +65,32 @@ function Shell({ title, score, best, onExit, onReset, children, status }: {
       <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[#c0c0c0] p-[8px]">
         {children}
       </div>
+      {controls && (
+        <div className="flex shrink-0 flex-wrap items-center justify-center gap-[4px] border-t border-[#808080] bg-[#c0c0c0] p-[4px] sm:hidden">
+          {controls}
+        </div>
+      )}
       <GameStatusBar>
         <span className="min-w-[95px]">Score: {score}</span>
         <span className="min-w-[95px]">Best: {best}</span>
         <span className="truncate">{status ?? "Ready"}</span>
       </GameStatusBar>
     </div>
+  );
+}
+
+function TouchButton({ label, onClick, wide }: { label: string; onClick: () => void; wide?: boolean }) {
+  return (
+    <button
+      type="button"
+      className={`win-button h-[26px] ${wide ? "min-w-[64px]" : "min-w-[34px]"} px-[8px] text-[13px] font-bold`}
+      onPointerDown={(event) => {
+        event.preventDefault();
+        onClick();
+      }}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -89,6 +110,10 @@ export function SnakeGame({ playSound, onExit }: GameProps) {
     playSound("click");
   }, [playSound]);
 
+  const setSnakeDirection = useCallback((nextDir: [number, number]) => {
+    setDir((current) => (current[0] + nextDir[0] === 0 && current[1] + nextDir[1] === 0 ? current : nextDir));
+  }, []);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const next: Record<string, [number, number]> = {
@@ -99,11 +124,11 @@ export function SnakeGame({ playSound, onExit }: GameProps) {
       };
       if (!next[event.key]) return;
       event.preventDefault();
-      setDir((current) => (current[0] + next[event.key][0] === 0 && current[1] + next[event.key][1] === 0 ? current : next[event.key]));
+      setSnakeDirection(next[event.key]);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [setSnakeDirection]);
 
   useTick(running, 120, () => {
     setSnake((current) => {
@@ -125,7 +150,22 @@ export function SnakeGame({ playSound, onExit }: GameProps) {
   });
 
   return (
-    <Shell title="Snake" score={score} best={best} onExit={onExit} onReset={reset} status={running ? "Arrow keys move the snake." : "Game over. Press Game > New."}>
+    <Shell
+      title="Snake"
+      score={score}
+      best={best}
+      onExit={onExit}
+      onReset={reset}
+      status={running ? "Arrow keys or buttons move the snake." : "Game over. Press Game > New."}
+      controls={
+        <>
+          <TouchButton label="◀" onClick={() => setSnakeDirection([-1, 0])} />
+          <TouchButton label="▲" onClick={() => setSnakeDirection([0, -1])} />
+          <TouchButton label="▼" onClick={() => setSnakeDirection([0, 1])} />
+          <TouchButton label="▶" onClick={() => setSnakeDirection([1, 0])} />
+        </>
+      }
+    >
       <div className="grid bg-[#808080] p-[3px]" style={{ gridTemplateColumns: "repeat(16, 16px)", boxShadow: cellInset }}>
         {Array.from({ length: 192 }).map((_, index) => {
           const x = index % 16;
@@ -209,28 +249,51 @@ export function TetrisGame({ playSound, onExit }: GameProps) {
     else setPos(next);
   }, [collides, lock, pos, shape]);
 
+  const moveSide = useCallback((delta: number) => {
+    if (!running) return;
+    const next: Point = [pos[0] + delta, pos[1]];
+    if (!collides(shape, next)) setPos(next);
+  }, [collides, pos, running, shape]);
+
+  const rotateActive = useCallback(() => {
+    if (!running) return;
+    const nextShape = rotate(shape);
+    if (!collides(nextShape, pos)) setShape(nextShape);
+  }, [collides, pos, running, shape]);
+
   useTick(running, 520, drop);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (!running) return;
       if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-        const next: Point = [pos[0] + (event.key === "ArrowLeft" ? -1 : 1), pos[1]];
-        if (!collides(shape, next)) setPos(next);
+        moveSide(event.key === "ArrowLeft" ? -1 : 1);
       }
       if (event.key === "ArrowDown") drop();
-      if (event.key === "ArrowUp") {
-        const nextShape = rotate(shape);
-        if (!collides(nextShape, pos)) setShape(nextShape);
-      }
+      if (event.key === "ArrowUp") rotateActive();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [collides, drop, pos, running, shape]);
+  }, [drop, moveSide, rotateActive, running]);
 
   const active = new Set(shape.map(([x, y]) => `${pos[0] + x}:${pos[1] + y}`));
   return (
-    <Shell title="Tetris" score={score} best={best} onExit={onExit} onReset={reset} status="Arrow keys move, Up rotates.">
+    <Shell
+      title="Tetris"
+      score={score}
+      best={best}
+      onExit={onExit}
+      onReset={reset}
+      status="Move blocks, rotate, and drop."
+      controls={
+        <>
+          <TouchButton label="◀" onClick={() => moveSide(-1)} />
+          <TouchButton label="↻" onClick={rotateActive} />
+          <TouchButton label="▶" onClick={() => moveSide(1)} />
+          <TouchButton label="▼" onClick={drop} />
+        </>
+      }
+    >
       <div className="grid bg-[#808080] p-[3px]" style={{ gridTemplateColumns: "repeat(10, 18px)", boxShadow: cellInset }}>
         {board.flatMap((row, y) => row.map((cell, x) => (
           <div key={`${x}:${y}`} className="h-[18px] w-[18px]" style={{ background: cell || active.has(`${x}:${y}`) ? "#0000aa" : "#000", boxShadow: cell || active.has(`${x}:${y}`) ? cellOutset : "none" }} />
@@ -240,7 +303,7 @@ export function TetrisGame({ playSound, onExit }: GameProps) {
   );
 }
 
-export function BreakoutGame({ playSound, onExit }: GameProps) {
+export function BreakoutGame({ playSound, onExit, windowWidth }: GameProps) {
   const [best, record] = useHighScore("floppyy-breakout-best");
   const [bricks, setBricks] = useState(() => Array.from({ length: 40 }, () => true));
   const [paddle, setPaddle] = useState(40);
@@ -248,15 +311,18 @@ export function BreakoutGame({ playSound, onExit }: GameProps) {
   const [score, setScore] = useState(0);
   const [running, setRunning] = useState(true);
   const reset = () => { setBricks(Array.from({ length: 40 }, () => true)); setBall({ x: 50, y: 70, vx: 1.4, vy: -1.4 }); setPaddle(40); setScore(0); setRunning(true); playSound("click"); };
+  const movePaddle = useCallback((delta: number) => {
+    setPaddle((value) => Math.max(0, Math.min(80, value + delta)));
+  }, []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") setPaddle((v) => Math.max(0, v - 7));
-      if (event.key === "ArrowRight") setPaddle((v) => Math.min(80, v + 7));
+      if (event.key === "ArrowLeft") movePaddle(-7);
+      if (event.key === "ArrowRight") movePaddle(7);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [movePaddle]);
 
   useTick(running, 24, () => {
     setBall((b) => {
@@ -282,14 +348,38 @@ export function BreakoutGame({ playSound, onExit }: GameProps) {
     });
   });
 
+  const scale = windowWidth && windowWidth < 430 ? Math.max(0.72, Math.min(1, (windowWidth - 36) / 390)) : 1;
+
   return (
-    <Shell title="Breakout" score={score} best={best} onExit={onExit} onReset={reset} status="Break every brick.">
-      <div className="relative h-[280px] w-[380px] bg-black" style={{ boxShadow: cellInset }}>
+    <Shell
+      title="Breakout"
+      score={score}
+      best={best}
+      onExit={onExit}
+      onReset={reset}
+      status="Break every brick."
+      controls={
+        <>
+          <TouchButton label="◀" wide onClick={() => movePaddle(-9)} />
+          <TouchButton label="▶" wide onClick={() => movePaddle(9)} />
+        </>
+      }
+    >
+      <div style={scale < 1 ? { width: 380 * scale, height: 280 * scale } : undefined}>
+      <div
+        className="relative h-[280px] w-[380px] bg-black"
+        style={{
+          boxShadow: cellInset,
+          transform: scale < 1 ? `scale(${scale})` : undefined,
+          transformOrigin: "top left",
+        }}
+      >
         <div className="absolute left-[12px] top-[12px] grid grid-cols-8 gap-[2px]">
           {bricks.map((brick, index) => <div key={index} className="h-[14px] w-[42px]" style={{ background: brick ? ["#ff0000", "#ffff00", "#00aa00", "#00aaff", "#ff00ff"][Math.floor(index / 8)] : "transparent", boxShadow: brick ? cellOutset : "none" }} />)}
         </div>
         <div className="absolute h-[9px] w-[9px] bg-white" style={{ left: `${ball.x}%`, top: `${ball.y}%` }} />
         <div className="absolute bottom-[16px] h-[9px] w-[20%] bg-[#c0c0c0]" style={{ left: `${paddle}%`, boxShadow: cellOutset }} />
+      </div>
       </div>
     </Shell>
   );
@@ -311,7 +401,7 @@ export function PixelPuzzleGame({ playSound, onExit }: GameProps) {
     playSound("click");
   };
   return (
-    <Shell title="Pixel Puzzle" score={Math.max(0, 1000 - moves)} best={best} onExit={onExit} onReset={reset} status={solved ? "Solved!" : "Arrange the Floppyy pixels."}>
+    <Shell title="Pixel Puzzle" score={Math.max(0, 1000 - moves)} best={best} onExit={onExit} onReset={reset} status={solved ? "Solved!" : "Tap a tile next to the black square."}>
       <div className="grid grid-cols-4 gap-[3px] bg-[#808080] p-[4px]" style={{ boxShadow: cellInset }}>
         {tiles.map((tile, index) => (
           <button key={index} className="h-[58px] w-[58px] text-[18px] font-bold" style={{ background: tile ? "#c0c0c0" : "#000", boxShadow: tile ? cellOutset : cellInset }} onClick={() => move(index)}>
@@ -326,6 +416,7 @@ export function PixelPuzzleGame({ playSound, onExit }: GameProps) {
 const WORDS = ["floppy", "modem", "guestbook", "winamp", "desktop", "pixel", "archive", "dialup", "folder", "share"];
 
 export function TypingGame({ playSound, onExit }: GameProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [best, record] = useHighScore("floppyy-typing-best");
   const [word, setWord] = useState(WORDS[0]);
   const [input, setInput] = useState("");
@@ -336,12 +427,21 @@ export function TypingGame({ playSound, onExit }: GameProps) {
   useTick(running, 1000, () => setTime((value) => value - 1));
   useEffect(() => { if (!running) record(score); }, [record, running, score]);
   return (
-    <Shell title="Typing" score={score} best={best} onExit={onExit} onReset={reset} status={`Time: ${time}s`}>
+    <Shell
+      title="Typing"
+      score={score}
+      best={best}
+      onExit={onExit}
+      onReset={reset}
+      status={`Time: ${time}s`}
+      controls={<TouchButton label="Type" wide onClick={() => inputRef.current?.focus()} />}
+    >
       <div className="w-[360px] bg-[#c0c0c0] p-[12px]" style={{ boxShadow: cellInset }}>
         <div className="mb-[12px] bg-black px-[10px] py-[12px] text-center text-[24px] font-bold text-[#00ff00]">{word}</div>
         <input
           className="win-bevel-inset h-[28px] w-full bg-white px-[6px] text-[14px]"
           value={input}
+          ref={inputRef}
           disabled={!running}
           autoFocus
           onChange={(event) => {

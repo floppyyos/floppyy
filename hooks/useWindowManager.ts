@@ -5,6 +5,7 @@ import { DesktopWindow, WindowId, windowDefinitions } from "@/lib/windows";
 
 const STORAGE_KEY = "floppyy-windows";
 const SAVE_DEBOUNCE_MS = 400;
+const TALL_MOBILE_WINDOWS = new Set<WindowId>(["internet", "screensaver", "share", "solitaire"]);
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -36,8 +37,12 @@ function loadPersistedWindows(): DesktopWindow[] {
         return [];
       }
 
-      const width = clamp(item.width, definition.minWidth ?? 200, Math.max(200, viewportWidth - 16));
-      const height = clamp(item.height, definition.minHeight ?? 120, Math.max(120, viewportHeight - 42));
+      const maxWidth = Math.max(200, viewportWidth - 16);
+      const maxHeight = Math.max(120, viewportHeight - 42);
+      const minWidth = Math.min(definition.minWidth ?? 200, maxWidth);
+      const minHeight = Math.min(definition.minHeight ?? 120, maxHeight);
+      const width = clamp(item.width, minWidth, maxWidth);
+      const height = clamp(item.height, minHeight, maxHeight);
       return [
         {
           instanceId: item.instanceId,
@@ -103,8 +108,8 @@ export function useWindowManager() {
         const viewportHeight = typeof window === "undefined" ? 768 : window.innerHeight;
         const mobile = viewportWidth < 640;
         const width = mobile ? viewportWidth - 16 : Math.min(definition.width, viewportWidth - 32);
-        const mobileHeightLimit = id === "internet"
-          ? Math.round(viewportHeight * 0.86)
+        const mobileHeightLimit = TALL_MOBILE_WINDOWS.has(id)
+          ? Math.round(viewportHeight * 0.9)
           : Math.round(viewportHeight * 0.72);
         const height = mobile
           ? Math.min(definition.height, Math.max(320, mobileHeightLimit), viewportHeight - 42)
@@ -177,12 +182,14 @@ export function useWindowManager() {
       items.map((item) => {
         if (item.instanceId !== instanceId) return item;
         const definition = windowDefinitions[item.id];
-        const minWidth = definition.minWidth ?? 260;
-        const minHeight = definition.minHeight ?? 180;
+        const maxWidth = Math.max(200, window.innerWidth - item.x);
+        const maxHeight = Math.max(120, window.innerHeight - item.y - 28);
+        const minWidth = Math.min(definition.minWidth ?? 260, maxWidth);
+        const minHeight = Math.min(definition.minHeight ?? 180, maxHeight);
         return {
           ...item,
-          width: clamp(width, minWidth, window.innerWidth - item.x),
-          height: clamp(height, minHeight, window.innerHeight - item.y - 28),
+          width: clamp(width, minWidth, maxWidth),
+          height: clamp(height, minHeight, maxHeight),
           maximized: false,
         };
       }),

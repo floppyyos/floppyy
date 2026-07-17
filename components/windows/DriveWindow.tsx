@@ -109,6 +109,7 @@ const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
       { id: "clouds-doc", label: "Clouds.bmp", icon: "painticon", description: "Bitmap Image", kind: "file" },
       { id: "aol", label: "AOL.url", icon: "url", description: "Internet Shortcut", kind: "file" },
       { id: "readme", label: "README.txt", icon: "notepad", description: "Text Document", kind: "file" },
+      { id: "projects", label: "Projects", icon: "folder", description: "File Folder", kind: "folder" },
     ],
     Projects: [
       { id: "brewwery", label: "Brewwery", icon: "folder", description: "A visual Homebrew manager for macOS.", kind: "file" },
@@ -256,6 +257,12 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
   };
 
   const openItem = (item: DriveItem) => {
+    if (drive === "C" && (path === "" || path === "My Documents") && item.id === "projects") {
+      playSound("open");
+      openWindow("projects");
+      return;
+    }
+
     if (item.kind === "folder" && item.target) {
       goToPath(item.target);
       return;

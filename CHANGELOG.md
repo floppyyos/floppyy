@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.4.4 - 2026-07-17
+
+### Added
+- Added mobile-friendly on-screen controls for Snake, Tetris, Breakout and Typing Tutor.
+- Added clearer mobile play hints for Pixel Puzzle.
+
+### Changed
+- Improved mobile window sizing for Solitaire, Display Properties and Share.
+- Scaled Solitaire on mobile so the full table fits inside the window.
+- Disabled maximize controls for Snake, Tetris, Breakout, Pixel Puzzle and Typing Tutor.
+- Improved mobile window restore and resize clamping so saved desktop window sizes cannot overflow small screens.
+
+### Fixed
+- Fixed mobile Solitaire being cropped on narrow screens.
+- Fixed Display Properties and Share windows appearing too short on mobile.
+
 ## 3.4.0 - 2026-07-15
 
 ### Added

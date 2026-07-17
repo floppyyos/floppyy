@@ -11,7 +11,7 @@ import {
 } from "@/components/games/RetroGames";
 
 export function RetroGameWindow({ playSound, window: win, closeWindow }: WindowComponentProps) {
-  const props = { playSound, onExit: () => closeWindow(win.instanceId) };
+  const props = { playSound, onExit: () => closeWindow(win.instanceId), windowWidth: win.width };
   switch (win.id as WindowId) {
     case "snake":
       return <SnakeGame {...props} />;
