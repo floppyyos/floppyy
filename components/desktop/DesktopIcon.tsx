@@ -18,7 +18,7 @@ type Props = {
 export function DesktopIcon({ label, icon, selected, x, y, onPointerDown, onPointerMove, onPointerUp, onContextMenu }: Props) {
   return (
     <button
-      className="desktop-icon-button absolute flex h-[68px] w-[75px] touch-none flex-col items-center justify-start gap-[2px] p-[2px] text-white focus:outline-none"
+      className="desktop-icon-button absolute flex h-[76px] w-[75px] touch-none flex-col items-center justify-start gap-[2px] p-[2px] text-white focus:outline-none"
       style={{ left: x, top: y }}
       title={label}
       onClick={(event) => event.stopPropagation()}

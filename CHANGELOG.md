@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.9 - 2026-07-17
+
+### Fixed
+- Fixed desktop icon layout migration when new icons are added after users already have saved icon positions.
+- Increased desktop icon cell height so longer labels have room and do not overlap the next shortcut.
+
 ## 3.4.8 - 2026-07-17
 
 ### Added

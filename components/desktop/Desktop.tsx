@@ -93,7 +93,7 @@ type IconDrag = {
 type WindowDrag = { instanceId: string; dx: number; dy: number } | null;
 
 const ICON_WIDTH = 75;
-const ICON_HEIGHT = 68;
+const ICON_HEIGHT = 76;
 const ICON_COLUMN_GAP = 4;
 const ICON_ROW_GAP = 4;
 const ICON_STEP_X = ICON_WIDTH + ICON_COLUMN_GAP;
@@ -192,7 +192,9 @@ function readStoredIconPositions(): Record<string, IconPosition> {
     const savedIcons = globalThis.localStorage.getItem("floppyy-icon-positions");
     if (!savedIcons) return positions;
     const parsed = JSON.parse(savedIcons) as Record<string, IconPosition>;
-    return parsed && typeof parsed === "object" ? { ...positions, ...parsed } : positions;
+    if (!parsed || typeof parsed !== "object") return positions;
+    const hasEveryCurrentIcon = desktopIcons.every((icon) => parsed[icon.id]);
+    return hasEveryCurrentIcon ? { ...positions, ...parsed } : positions;
   } catch {
     return positions;
   }
