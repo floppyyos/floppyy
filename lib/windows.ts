@@ -167,6 +167,7 @@ export const desktopIcons: DesktopIconDefinition[] = [
   { id: "games-folder", label: "Games", icon: "directory_check", windowId: "games-folder" },
   { id: "doom", label: "Doom", icon: "doom", windowId: "doom" },
   { id: "solitaire", label: "Solitaire", icon: "cards", windowId: "solitaire" },
+  { id: "minesweeper", label: "Minesweeper", icon: "mine", windowId: "minesweeper" },
   { id: "calculator", label: "Calculator", icon: "calculator", windowId: "calculator" },
   { id: "credits", label: "Credits", icon: "credits", windowId: "about", payload: "welcome" },
   { id: "outlook", label: "Outlook Express", icon: "msoutlook", windowId: "outlook" },

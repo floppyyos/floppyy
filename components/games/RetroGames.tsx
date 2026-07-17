@@ -392,7 +392,7 @@ export function BreakoutGame({ playSound, onExit, windowWidth }: GameProps) {
       onReset={reset}
       status={lost ? "Game over. Press Game > New." : "Break every brick."}
       controls={
-        <div className="flex w-full justify-center gap-[8px]">
+        <div className="flex w-full justify-between px-[10px]">
           <TouchButton label="Left" icon="left" wide onClick={() => movePaddle(-9)} />
           <TouchButton label="Right" icon="right" wide onClick={() => movePaddle(9)} />
         </div>

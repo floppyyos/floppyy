@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.4.8 - 2026-07-17
+
+### Added
+- Added Minesweeper to the desktop.
+
+### Changed
+- Reduced mobile Solitaire window height to remove extra gray space.
+- Moved Breakout mobile controls to the left and right edges for easier play.
+
 ## 3.4.7 - 2026-07-17
 
 ### Changed

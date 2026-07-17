@@ -17,7 +17,7 @@ const COMPACT_MOBILE_WINDOWS = new Set<WindowId>([
 ]);
 
 function mobileWindowHeight(id: WindowId, defaultHeight: number) {
-  if (id === "solitaire") return Math.min(defaultHeight, 430);
+  if (id === "solitaire") return Math.min(defaultHeight, 360);
   return defaultHeight;
 }
 
