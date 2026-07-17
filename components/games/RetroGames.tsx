@@ -391,20 +391,39 @@ export function BreakoutGame({ playSound, onExit, windowWidth }: GameProps) {
       }
     >
       <div style={scale < 1 ? { width: 322 * scale, height: 220 * scale } : undefined}>
-      <div
-        className="relative h-[220px] w-[322px] bg-black"
-        style={{
-          boxShadow: cellInset,
-          transform: scale < 1 ? `scale(${scale})` : undefined,
-          transformOrigin: "top left",
-        }}
-      >
-        <div className="absolute left-[12px] top-[12px] grid grid-cols-8 gap-[2px]">
-          {bricks.map((brick, index) => <div key={index} className="h-[11px] w-[34px]" style={{ background: brick ? ["#ff0000", "#ffff00", "#00aa00", "#00aaff", "#ff00ff"][Math.floor(index / 8)] : "transparent", boxShadow: brick ? cellOutset : "none" }} />)}
+        <div
+          className="relative h-[220px] w-[322px] bg-black"
+          style={{
+            boxShadow: cellInset,
+            transform: scale < 1 ? `scale(${scale})` : undefined,
+            transformOrigin: "top left",
+          }}
+        >
+          <div className="absolute left-[12px] top-[12px] grid grid-cols-8 gap-[2px]">
+            {bricks.map((brick, index) => <div key={index} className="h-[11px] w-[34px]" style={{ background: brick ? ["#ff0000", "#ffff00", "#00aa00", "#00aaff", "#ff00ff"][Math.floor(index / 8)] : "transparent", boxShadow: brick ? cellOutset : "none" }} />)}
+          </div>
+          <div className="absolute h-[9px] w-[9px] bg-white" style={{ left: `${ball.x}%`, top: `${ball.y}%` }} />
+          <div className="absolute bottom-[16px] h-[9px] w-[20%] bg-[#c0c0c0]" style={{ left: `${paddle}%`, boxShadow: cellOutset }} />
+          {lost && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <div
+                className="w-[220px] bg-[#c0c0c0] p-[3px] text-[11px]"
+                style={{
+                  boxShadow: "inset -1px -1px #0a0a0a, inset 1px 1px #ffffff, inset -2px -2px #808080, inset 2px 2px #dfdfdf",
+                }}
+              >
+                <div className="bg-gradient-to-r from-[#000080] to-[#1084d0] px-[4px] py-[2px] font-bold text-white">Breakout</div>
+                <div className="px-[12px] py-[14px] text-center">
+                  <p className="mb-[12px]">Game over. Start a new game?</p>
+                  <div className="flex justify-center gap-[8px]">
+                    <button className="win-button min-w-[72px]" onClick={reset}>New Game</button>
+                    <button className="win-button min-w-[60px]" onClick={onExit}>Exit</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        <div className="absolute h-[9px] w-[9px] bg-white" style={{ left: `${ball.x}%`, top: `${ball.y}%` }} />
-        <div className="absolute bottom-[16px] h-[9px] w-[20%] bg-[#c0c0c0]" style={{ left: `${paddle}%`, boxShadow: cellOutset }} />
-      </div>
       </div>
     </Shell>
   );

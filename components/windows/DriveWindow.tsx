@@ -66,7 +66,7 @@ const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
       { id: "windows", label: "WINDOWS", icon: "folder", description: "System folder", kind: "folder", target: "WINDOWS" },
       { id: "program-files", label: "Program Files", icon: "folder", description: "Installed programs", kind: "folder", target: "Program Files" },
       { id: "my-documents", label: "My Documents", icon: "documents", description: "Personal documents", kind: "folder", target: "My Documents" },
-      { id: "projects", label: "Projects", icon: "folder", description: "Project files and shortcuts", kind: "folder", target: "Projects" },
+      { id: "projects", label: "Projects", icon: "directory_net", description: "Project files and shortcuts", kind: "folder", target: "Projects" },
       { id: "games", label: "Games", icon: "directory_open", description: "Classic games", kind: "folder", target: "Games" },
       { id: "autoexec", label: "AUTOEXEC.BAT", icon: "notepad", description: "MS-DOS Batch File", kind: "file" },
       { id: "config", label: "CONFIG.SYS", icon: "notepad", description: "System File", kind: "file" },
@@ -109,7 +109,7 @@ const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
       { id: "clouds-doc", label: "Clouds.bmp", icon: "painticon", description: "Bitmap Image", kind: "file" },
       { id: "aol", label: "AOL.url", icon: "url", description: "Internet Shortcut", kind: "file" },
       { id: "readme", label: "README.txt", icon: "notepad", description: "Text Document", kind: "file" },
-      { id: "projects", label: "Projects", icon: "folder", description: "File Folder", kind: "folder" },
+      { id: "projects", label: "Projects", icon: "directory_net", description: "File Folder", kind: "folder" },
     ],
     Projects: [
       { id: "brewwery", label: "Brewwery", icon: "folder", description: "A visual Homebrew manager for macOS.", kind: "file" },
@@ -304,7 +304,6 @@ export function DriveWindow({ window, notify, openWindow, playSound }: WindowCom
     else if (label.endsWith(".txt") || label.endsWith(".sys") || label.endsWith(".bat") || label.endsWith(".ini") || label.endsWith(".inf")) {
       openWindow("notepad", path === "My Documents" && label === "readme.txt" ? "readme" : undefined);
     }
-    notify(`${item.label}: ${item.description}`);
   };
 
   const runToolbar = (action: string, label: string) => {

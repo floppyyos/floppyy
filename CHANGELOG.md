@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.4.6 - 2026-07-17
+
+### Added
+- Added a Breakout game-over dialog with New Game and Exit actions.
+
+### Changed
+- Removed noisy file-description popups when opening files from disk windows.
+
 ## 3.4.5 - 2026-07-17
 
 ### Added
