@@ -6,7 +6,7 @@ import { FloppyyIcon } from "@/components/desktop/FloppyyIcon";
 
 const CARD_W = 71;
 const CARD_H = 96;
-const COL_GAP = 12;
+const COL_GAP = 8;
 const TOP_Y = 14;
 const TABLEAU_Y = TOP_Y + CARD_H + 16;
 const FACE_DOWN_OFFSET = 5;

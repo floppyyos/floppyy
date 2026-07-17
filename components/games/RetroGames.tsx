@@ -62,7 +62,7 @@ function Shell({ title, score, best, onExit, onReset, children, status, controls
           { label: "Help", menu: [{ label: `About ${title}`, disabled: true }] },
         ]}
       />
-      <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[#c0c0c0] p-[8px]">
+      <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-[#c0c0c0] p-[6px]">
         {children}
       </div>
       {controls && (
@@ -79,17 +79,35 @@ function Shell({ title, score, best, onExit, onReset, children, status, controls
   );
 }
 
-function TouchButton({ label, onClick, wide }: { label: string; onClick: () => void; wide?: boolean }) {
+function TouchIcon({ label }: { label: string }) {
+  const common = { stroke: "#000", strokeWidth: 2, fill: "none", strokeLinejoin: "miter" as const };
+  if (label === "left") return <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M9 2 L4 7 L9 12 Z" fill="#000" /></svg>;
+  if (label === "up") return <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 9 L7 4 L12 9 Z" fill="#000" /></svg>;
+  if (label === "down") return <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2 5 L7 10 L12 5 Z" fill="#000" /></svg>;
+  if (label === "right") return <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M5 2 L10 7 L5 12 Z" fill="#000" /></svg>;
+  if (label === "rotate") {
+    return (
+      <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+        <path d="M10.5 5.5 A4 4 0 1 0 11 9" {...common} />
+        <path d="M10 2 L10.5 5.5 L7 5" fill="none" stroke="#000" strokeWidth="2" />
+      </svg>
+    );
+  }
+  return <span>{label}</span>;
+}
+
+function TouchButton({ label, icon, onClick, wide }: { label: string; icon?: string; onClick: () => void; wide?: boolean }) {
   return (
     <button
       type="button"
       className={`win-button h-[26px] ${wide ? "min-w-[64px]" : "min-w-[34px]"} px-[8px] text-[13px] font-bold`}
+      aria-label={label}
       onPointerDown={(event) => {
         event.preventDefault();
         onClick();
       }}
     >
-      {label}
+      {icon ? <TouchIcon label={icon} /> : label}
     </button>
   );
 }
@@ -159,10 +177,10 @@ export function SnakeGame({ playSound, onExit }: GameProps) {
       status={running ? "Arrow keys or buttons move the snake." : "Game over. Press Game > New."}
       controls={
         <>
-          <TouchButton label="◀" onClick={() => setSnakeDirection([-1, 0])} />
-          <TouchButton label="▲" onClick={() => setSnakeDirection([0, -1])} />
-          <TouchButton label="▼" onClick={() => setSnakeDirection([0, 1])} />
-          <TouchButton label="▶" onClick={() => setSnakeDirection([1, 0])} />
+          <TouchButton label="Left" icon="left" onClick={() => setSnakeDirection([-1, 0])} />
+          <TouchButton label="Up" icon="up" onClick={() => setSnakeDirection([0, -1])} />
+          <TouchButton label="Down" icon="down" onClick={() => setSnakeDirection([0, 1])} />
+          <TouchButton label="Right" icon="right" onClick={() => setSnakeDirection([1, 0])} />
         </>
       }
     >
@@ -287,10 +305,10 @@ export function TetrisGame({ playSound, onExit }: GameProps) {
       status="Move blocks, rotate, and drop."
       controls={
         <>
-          <TouchButton label="◀" onClick={() => moveSide(-1)} />
-          <TouchButton label="↻" onClick={rotateActive} />
-          <TouchButton label="▶" onClick={() => moveSide(1)} />
-          <TouchButton label="▼" onClick={drop} />
+          <TouchButton label="Left" icon="left" onClick={() => moveSide(-1)} />
+          <TouchButton label="Rotate" icon="rotate" onClick={rotateActive} />
+          <TouchButton label="Right" icon="right" onClick={() => moveSide(1)} />
+          <TouchButton label="Drop" icon="down" onClick={drop} />
         </>
       }
     >
@@ -310,7 +328,8 @@ export function BreakoutGame({ playSound, onExit, windowWidth }: GameProps) {
   const [ball, setBall] = useState({ x: 50, y: 70, vx: 1.4, vy: -1.4 });
   const [score, setScore] = useState(0);
   const [running, setRunning] = useState(true);
-  const reset = () => { setBricks(Array.from({ length: 40 }, () => true)); setBall({ x: 50, y: 70, vx: 1.4, vy: -1.4 }); setPaddle(40); setScore(0); setRunning(true); playSound("click"); };
+  const [lost, setLost] = useState(false);
+  const reset = () => { setBricks(Array.from({ length: 40 }, () => true)); setBall({ x: 50, y: 70, vx: 1.4, vy: -1.4 }); setPaddle(40); setScore(0); setRunning(true); setLost(false); playSound("click"); };
   const movePaddle = useCallback((delta: number) => {
     setPaddle((value) => Math.max(0, Math.min(80, value + delta)));
   }, []);
@@ -330,6 +349,13 @@ export function BreakoutGame({ playSound, onExit, windowWidth }: GameProps) {
       if (next.x <= 0 || next.x >= 97) next.vx *= -1;
       if (next.y <= 0) next.vy *= -1;
       if (next.y >= 87 && next.x >= paddle && next.x <= paddle + 20) next.vy = -Math.abs(next.vy);
+      if (next.y >= 99) {
+        setRunning(false);
+        setLost(true);
+        record(score);
+        playSound("error");
+        return { ...next, y: 99, vx: 0, vy: 0 };
+      }
       const col = Math.floor(next.x / 12.5);
       const row = Math.floor((next.y - 8) / 7);
       const index = row * 8 + col;
@@ -339,16 +365,15 @@ export function BreakoutGame({ playSound, onExit, windowWidth }: GameProps) {
         next.vy *= -1;
         playSound("click");
       }
-      if (next.y > 100 || bricks.every((brick) => !brick)) {
+      if (bricks.every((brick) => !brick)) {
         setRunning(false);
         record(score);
-        if (next.y > 100) playSound("error");
       }
       return next;
     });
   });
 
-  const scale = windowWidth && windowWidth < 430 ? Math.max(0.72, Math.min(1, (windowWidth - 36) / 390)) : 1;
+  const scale = windowWidth && windowWidth < 360 ? Math.max(0.78, Math.min(1, (windowWidth - 28) / 334)) : 1;
 
   return (
     <Shell
@@ -357,17 +382,17 @@ export function BreakoutGame({ playSound, onExit, windowWidth }: GameProps) {
       best={best}
       onExit={onExit}
       onReset={reset}
-      status="Break every brick."
+      status={lost ? "Game over. Press Game > New." : "Break every brick."}
       controls={
         <>
-          <TouchButton label="◀" wide onClick={() => movePaddle(-9)} />
-          <TouchButton label="▶" wide onClick={() => movePaddle(9)} />
+          <TouchButton label="Left" icon="left" wide onClick={() => movePaddle(-9)} />
+          <TouchButton label="Right" icon="right" wide onClick={() => movePaddle(9)} />
         </>
       }
     >
-      <div style={scale < 1 ? { width: 380 * scale, height: 280 * scale } : undefined}>
+      <div style={scale < 1 ? { width: 322 * scale, height: 220 * scale } : undefined}>
       <div
-        className="relative h-[280px] w-[380px] bg-black"
+        className="relative h-[220px] w-[322px] bg-black"
         style={{
           boxShadow: cellInset,
           transform: scale < 1 ? `scale(${scale})` : undefined,
@@ -375,7 +400,7 @@ export function BreakoutGame({ playSound, onExit, windowWidth }: GameProps) {
         }}
       >
         <div className="absolute left-[12px] top-[12px] grid grid-cols-8 gap-[2px]">
-          {bricks.map((brick, index) => <div key={index} className="h-[14px] w-[42px]" style={{ background: brick ? ["#ff0000", "#ffff00", "#00aa00", "#00aaff", "#ff00ff"][Math.floor(index / 8)] : "transparent", boxShadow: brick ? cellOutset : "none" }} />)}
+          {bricks.map((brick, index) => <div key={index} className="h-[11px] w-[34px]" style={{ background: brick ? ["#ff0000", "#ffff00", "#00aa00", "#00aaff", "#ff00ff"][Math.floor(index / 8)] : "transparent", boxShadow: brick ? cellOutset : "none" }} />)}
         </div>
         <div className="absolute h-[9px] w-[9px] bg-white" style={{ left: `${ball.x}%`, top: `${ball.y}%` }} />
         <div className="absolute bottom-[16px] h-[9px] w-[20%] bg-[#c0c0c0]" style={{ left: `${paddle}%`, boxShadow: cellOutset }} />
@@ -413,17 +438,27 @@ export function PixelPuzzleGame({ playSound, onExit }: GameProps) {
   );
 }
 
-const WORDS = ["floppy", "modem", "guestbook", "winamp", "desktop", "pixel", "archive", "dialup", "folder", "share"];
+const WORDS = [
+  "apple", "beach", "coffee", "window", "rocket", "garden", "summer", "camera", "orange", "wizard",
+  "planet", "magnet", "castle", "button", "memory", "school", "secret", "cookie", "printer", "modem",
+  "floppy", "guestbook", "winamp", "desktop", "pixel", "archive", "dialup", "folder", "share", "browser",
+  "keyboard", "notepad", "network", "compact", "scanner", "mailbox", "download", "internet", "console", "startup",
+];
+
+function randomWord(except?: string) {
+  const choices = except ? WORDS.filter((item) => item !== except) : WORDS;
+  return choices[Math.floor(Math.random() * choices.length)] ?? WORDS[0];
+}
 
 export function TypingGame({ playSound, onExit }: GameProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [best, record] = useHighScore("floppyy-typing-best");
-  const [word, setWord] = useState(WORDS[0]);
+  const [word, setWord] = useState(() => randomWord());
   const [input, setInput] = useState("");
   const [score, setScore] = useState(0);
   const [time, setTime] = useState(45);
   const running = time > 0;
-  const reset = () => { setWord(WORDS[Math.floor(Math.random() * WORDS.length)]); setInput(""); setScore(0); setTime(45); playSound("click"); };
+  const reset = () => { setWord(randomWord(word)); setInput(""); setScore(0); setTime(45); playSound("click"); };
   useTick(running, 1000, () => setTime((value) => value - 1));
   useEffect(() => { if (!running) record(score); }, [record, running, score]);
   return (
@@ -449,7 +484,7 @@ export function TypingGame({ playSound, onExit }: GameProps) {
             if (value.trim().toLowerCase() === word) {
               setScore((current) => current + word.length * 10);
               setInput("");
-              setWord(WORDS[Math.floor(Math.random() * WORDS.length)]);
+              setWord((current) => randomWord(current));
               playSound("click");
             } else {
               setInput(value);

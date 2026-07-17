@@ -6,6 +6,15 @@ import { DesktopWindow, WindowId, windowDefinitions } from "@/lib/windows";
 const STORAGE_KEY = "floppyy-windows";
 const SAVE_DEBOUNCE_MS = 400;
 const TALL_MOBILE_WINDOWS = new Set<WindowId>(["internet", "screensaver", "share", "solitaire"]);
+const COMPACT_MOBILE_WINDOWS = new Set<WindowId>([
+  "minesweeper",
+  "snake",
+  "tetris",
+  "breakout",
+  "pixel-puzzle",
+  "typing-game",
+  "checkers",
+]);
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -37,8 +46,16 @@ function loadPersistedWindows(): DesktopWindow[] {
         return [];
       }
 
-      const maxWidth = Math.max(200, viewportWidth - 16);
-      const maxHeight = Math.max(120, viewportHeight - 42);
+      const mobile = viewportWidth < 640;
+      const mobileHeightLimit = TALL_MOBILE_WINDOWS.has(definition.id)
+        ? Math.round(viewportHeight * 0.9)
+        : Math.round(viewportHeight * 0.72);
+      const maxWidth = mobile && COMPACT_MOBILE_WINDOWS.has(definition.id)
+        ? Math.min(definition.width, Math.max(200, viewportWidth - 16))
+        : Math.max(200, viewportWidth - 16);
+      const maxHeight = mobile
+        ? Math.min(definition.height, Math.max(120, viewportHeight - 42), Math.max(320, mobileHeightLimit))
+        : Math.max(120, viewportHeight - 42);
       const minWidth = Math.min(definition.minWidth ?? 200, maxWidth);
       const minHeight = Math.min(definition.minHeight ?? 120, maxHeight);
       const width = clamp(item.width, minWidth, maxWidth);
@@ -107,7 +124,11 @@ export function useWindowManager() {
         const viewportWidth = typeof window === "undefined" ? 1024 : window.innerWidth;
         const viewportHeight = typeof window === "undefined" ? 768 : window.innerHeight;
         const mobile = viewportWidth < 640;
-        const width = mobile ? viewportWidth - 16 : Math.min(definition.width, viewportWidth - 32);
+        const width = mobile
+          ? COMPACT_MOBILE_WINDOWS.has(id)
+            ? Math.min(definition.width, viewportWidth - 16)
+            : viewportWidth - 16
+          : Math.min(definition.width, viewportWidth - 32);
         const mobileHeightLimit = TALL_MOBILE_WINDOWS.has(id)
           ? Math.round(viewportHeight * 0.9)
           : Math.round(viewportHeight * 0.72);

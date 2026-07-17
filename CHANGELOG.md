@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.4.5 - 2026-07-17
+
+### Added
+- Added a wider randomized word list for Typing Tutor.
+
+### Changed
+- Made the Games folder open at the standard folder-window height.
+- Made Snake, Tetris, Breakout, Pixel Puzzle and Typing Tutor windows more compact on desktop and mobile.
+- Improved mobile sizing for compact game windows so they do not stretch across the full screen.
+- Improved mobile Solitaire sizing with tighter card spacing and less empty gray area.
+
+### Fixed
+- Fixed Breakout continuing after the ball falls below the paddle.
+- Fixed Typing Tutor always starting with the same first word.
+
 ## 3.4.4 - 2026-07-17
 
 ### Added

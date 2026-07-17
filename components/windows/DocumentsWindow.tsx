@@ -38,7 +38,7 @@ const documentItems: DocumentItem[] = [
   {
     id: "projects",
     label: "Projects",
-    icon: "folder",
+    icon: "directory_net",
     description: "File Folder",
     action: "window",
     windowId: "projects",
