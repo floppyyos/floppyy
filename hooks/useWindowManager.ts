@@ -16,6 +16,11 @@ const COMPACT_MOBILE_WINDOWS = new Set<WindowId>([
   "checkers",
 ]);
 
+function mobileWindowHeight(id: WindowId, defaultHeight: number) {
+  if (id === "solitaire") return Math.min(defaultHeight, 430);
+  return defaultHeight;
+}
+
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
@@ -54,7 +59,7 @@ function loadPersistedWindows(): DesktopWindow[] {
         ? Math.min(definition.width, Math.max(200, viewportWidth - 16))
         : Math.max(200, viewportWidth - 16);
       const maxHeight = mobile
-        ? Math.min(definition.height, Math.max(120, viewportHeight - 42), Math.max(320, mobileHeightLimit))
+        ? mobileWindowHeight(definition.id, Math.min(definition.height, Math.max(120, viewportHeight - 42), Math.max(320, mobileHeightLimit)))
         : Math.max(120, viewportHeight - 42);
       const minWidth = Math.min(definition.minWidth ?? 200, maxWidth);
       const minHeight = Math.min(definition.minHeight ?? 120, maxHeight);
@@ -133,7 +138,7 @@ export function useWindowManager() {
           ? Math.round(viewportHeight * 0.9)
           : Math.round(viewportHeight * 0.72);
         const height = mobile
-          ? Math.min(definition.height, Math.max(320, mobileHeightLimit), viewportHeight - 42)
+          ? mobileWindowHeight(id, Math.min(definition.height, Math.max(320, mobileHeightLimit), viewportHeight - 42))
           : Math.min(definition.height, viewportHeight - 42);
         return [
           ...items,

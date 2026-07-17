@@ -13,8 +13,8 @@ export function SolitaireWindow({ playSound, window: win, closeWindow }: WindowC
   }
 
   return (
-    <div className="h-full overflow-auto bg-[#008000]">
-      <div style={{ width: mobileBaseWidth * mobileScale, minHeight: "100%" }}>
+    <div className="overflow-auto bg-[#c0c0c0]">
+      <div style={{ width: mobileBaseWidth * mobileScale, height: 500 * mobileScale }}>
         <div
           style={{
             width: mobileBaseWidth,

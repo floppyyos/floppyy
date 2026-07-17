@@ -210,17 +210,21 @@ function rotate(shape: Point[]): Point[] {
   return shape.map(([x, y]) => [-y, x]);
 }
 
+function randomTetrisShape() {
+  return TETRIS_SHAPES[Math.floor(Math.random() * TETRIS_SHAPES.length)];
+}
+
 export function TetrisGame({ playSound, onExit }: GameProps) {
   const [best, record] = useHighScore("floppyy-tetris-best");
   const [board, setBoard] = useState<number[][]>(() => Array.from({ length: 18 }, () => Array(10).fill(0)));
-  const [shape, setShape] = useState<Point[]>(TETRIS_SHAPES[0]);
+  const [shape, setShape] = useState<Point[]>(randomTetrisShape);
   const [pos, setPos] = useState<Point>([5, 0]);
   const [score, setScore] = useState(0);
   const [running, setRunning] = useState(true);
 
   const reset = useCallback(() => {
     setBoard(Array.from({ length: 18 }, () => Array(10).fill(0)));
-    setShape(TETRIS_SHAPES[Math.floor(Math.random() * TETRIS_SHAPES.length)]);
+    setShape(randomTetrisShape());
     setPos([5, 0]);
     setScore(0);
     setRunning(true);
@@ -251,7 +255,7 @@ export function TetrisGame({ playSound, onExit }: GameProps) {
       }
       return [...Array.from({ length: cleared }, () => Array(10).fill(0)), ...kept];
     });
-    const nextShape = TETRIS_SHAPES[Math.floor(Math.random() * TETRIS_SHAPES.length)];
+    const nextShape = randomTetrisShape();
     setShape(nextShape);
     setPos([5, 0]);
     if (collides(nextShape, [5, 0])) {
@@ -322,14 +326,18 @@ export function TetrisGame({ playSound, onExit }: GameProps) {
 }
 
 export function BreakoutGame({ playSound, onExit, windowWidth }: GameProps) {
+  const newBall = () => {
+    const horizontal = (Math.random() < 0.5 ? -1 : 1) * (1.1 + Math.random() * 0.8);
+    return { x: 50, y: 70, vx: horizontal, vy: -(1.2 + Math.random() * 0.6) };
+  };
   const [best, record] = useHighScore("floppyy-breakout-best");
   const [bricks, setBricks] = useState(() => Array.from({ length: 40 }, () => true));
   const [paddle, setPaddle] = useState(40);
-  const [ball, setBall] = useState({ x: 50, y: 70, vx: 1.4, vy: -1.4 });
+  const [ball, setBall] = useState(newBall);
   const [score, setScore] = useState(0);
   const [running, setRunning] = useState(true);
   const [lost, setLost] = useState(false);
-  const reset = () => { setBricks(Array.from({ length: 40 }, () => true)); setBall({ x: 50, y: 70, vx: 1.4, vy: -1.4 }); setPaddle(40); setScore(0); setRunning(true); setLost(false); playSound("click"); };
+  const reset = () => { setBricks(Array.from({ length: 40 }, () => true)); setBall(newBall()); setPaddle(40); setScore(0); setRunning(true); setLost(false); playSound("click"); };
   const movePaddle = useCallback((delta: number) => {
     setPaddle((value) => Math.max(0, Math.min(80, value + delta)));
   }, []);
@@ -384,10 +392,10 @@ export function BreakoutGame({ playSound, onExit, windowWidth }: GameProps) {
       onReset={reset}
       status={lost ? "Game over. Press Game > New." : "Break every brick."}
       controls={
-        <>
+        <div className="flex w-full justify-center gap-[8px]">
           <TouchButton label="Left" icon="left" wide onClick={() => movePaddle(-9)} />
           <TouchButton label="Right" icon="right" wide onClick={() => movePaddle(9)} />
-        </>
+        </div>
       }
     >
       <div style={scale < 1 ? { width: 322 * scale, height: 220 * scale } : undefined}>

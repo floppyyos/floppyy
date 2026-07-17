@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.4.7 - 2026-07-17
+
+### Changed
+- Made Tetris start with a random first piece.
+- Made Breakout launch the ball upward with randomized horizontal direction and speed.
+- Centered Breakout mobile controls.
+- Added `.exe` suffixes to every game name in the Games folder.
+- Tightened mobile Solitaire height and reduced the extra empty area below the table.
+
 ## 3.4.6 - 2026-07-17
 
 ### Added
