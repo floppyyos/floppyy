@@ -151,7 +151,6 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
   const [avatar, setAvatar] = useState<GuestbookAvatar>(() => readProfile().avatar);
   const [draft, setDraft] = useState("");
   const [website, setWebsite] = useState("");
-  const [shareBadge, setShareBadge] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -279,8 +278,6 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
         /* ignore */
       }
       if (data.message) {
-        const number = String(data.message.id).padStart(4, "0");
-        setShareBadge(`[ Floppyy Guestbook #${number} ] ${trimmedNick} was here - www.floppyy.com`);
         rememberGuestbookMessage(data.message);
         lastSeenId.current = Math.max(lastSeenId.current, data.message.id);
         setMessages((current) =>
@@ -474,23 +471,6 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
           ))}
         </div>
       </div>
-
-      {shareBadge && (
-        <div className="mx-[3px] mt-[3px] field-border flex items-center gap-[5px] bg-[#ffffcc] px-[6px] py-[4px]">
-          <span className="font-bold text-[#000080]">Badge:</span>
-          <input className="win-bevel-inset h-[20px] min-w-0 flex-1 bg-white px-[4px] text-[10px]" readOnly value={shareBadge} />
-          <button
-            className="win-button min-w-[48px]"
-            onClick={() => {
-              navigator.clipboard?.writeText(shareBadge).catch(() => undefined);
-              notify("Guestbook badge copied.");
-              playSound("click");
-            }}
-          >
-            Copy
-          </button>
-        </div>
-      )}
 
       <div className="m-[3px] flex items-end gap-[4px]">
         <textarea

@@ -45,7 +45,7 @@ Just a small machine for good old internet memories.
 - **Netscape Navigator** — retro alternative browser
 - **MS-DOS Prompt** — command-line interface with working commands
 - **Outlook Express** — three-pane email client (Inbox / Outbox / Sent / Deleted), Compose that sends to the Outbox and "delivers" a copy to the Inbox with a *You've got mail* chime, plus Reply and Delete
-- **Guest Book (#floppyy)** — ICQ/mIRC-style chat guestbook where visitors sign in real time with retro avatars, ICQ-style statuses, emoticons, safe BBCode formatting (`[b]`, `[i]`, `[url]`), share badges, per-IP rate limiting, honeypot and stop-word spam filtering; new signings also arrive as mail in Outlook Express
+- **Guest Book (#floppyy)** — ICQ/mIRC-style chat guestbook where visitors sign in real time with retro avatars, ICQ-style statuses, emoticons, safe BBCode formatting (`[b]`, `[i]`, `[url]`), per-IP rate limiting, honeypot and stop-word spam filtering; new signings also arrive as mail in Outlook Express
 - **Norton Commander** — dual-pane file manager
 - **Windows Media Player** — video playback
 - **Winamp** — music player (frameless, authentic skin)
@@ -56,7 +56,7 @@ Just a small machine for good old internet memories.
 - **Disk Defragmenter** — animated defrag utility
 - **Recycle Bin** — holds deleted desktop icons, restore or empty
 - **Run** dialog — authentic fixed-size dialog with a dropdown listing recent history and every available command
-- **Share** dialog, and **About / Credits** — with a classic GeoCities-style seven-segment "You are visitor #…" counter
+- **Share** dialog, and **About / Credits** — share Floppyy and view project credits
 - **Help** — Floppyy Help (getting started, platform-aware keyboard shortcuts, and the full list of secrets)
 - **Screensavers** — Pipes, Starfield, Maze, Mystify, Flying Windows
 
@@ -103,7 +103,7 @@ Floppyy occasionally fights back. A few things to try — the full list lives in
 - **js-dos (DOSBox)** — in-browser MS-DOS games (DOOM, Duke Nukem 3D, Wolfenstein 3D, Dune II, WarCraft), run in an isolated iframe
 - **HTML5 Video** — Media Player
 - **Service Worker** — offline caching
-- **Route Handlers + Postgres + Redis** — Guest Book & visitor counter (graceful in-memory fallback when unconfigured)
+- **Route Handlers + Postgres + Redis** — Guest Book storage, moderation, and rate limiting
 
 ## Getting Started
 

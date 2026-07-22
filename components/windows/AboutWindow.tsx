@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
-import { VisitorCounter } from "@/components/ui/VisitorCounter";
 
 type AboutPanel = "welcome" | "nostalgia" | "credits" | "connect";
 
@@ -170,9 +169,6 @@ function PanelContent({
       <button className="win-button mt-[2px] min-w-[92px]" onClick={() => setPanel("credits")}>
         Credits
       </button>
-      <div className="mt-[6px] border-t border-[#d0d0d0] pt-[12px]">
-        <VisitorCounter />
-      </div>
     </section>
   );
 }

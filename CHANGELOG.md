@@ -6,6 +6,11 @@
 - Fixed desktop icon layout migration when new icons are added after users already have saved icon positions.
 - Increased desktop icon cell height so longer labels have room and do not overlap the next shortcut.
 
+### Removed
+- Removed the visitor counter from About / Credits and deleted the unused visitors API.
+- Removed Projects from My Documents.
+- Removed the Guest Book share badge shown after sending a message.
+
 ## 3.4.8 - 2026-07-17
 
 ### Added
@@ -70,7 +75,6 @@
 - Added avatar support to the Guest Book API, PostgreSQL store, in-memory fallback, profile storage, and database migration.
 - Added ICQ-style status choices beyond Online / Do Not Disturb.
 - Added safe Guest Book formatting for line breaks, emoticons, `[b]`, `[i]`, and `[url]` without rendering raw HTML.
-- Added Guest Book share badges after a successful signing.
 - Added new Win98-style games: Snake, Tetris, Breakout, Pixel Puzzle, Typing Tutor and Checkers.
 - Added local high scores for the new lightweight games where applicable.
 - Added new game icons for Snake, Tetris, Breakout, Pixel Puzzle and Typing Tutor.
