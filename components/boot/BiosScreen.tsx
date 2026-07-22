@@ -221,7 +221,15 @@ export function BiosScreen({ onComplete }: BiosScreenProps) {
             line.dim ? "text-[#666666]" : "",
           ].join(" ")}
         >
-          {line.text || "\u00a0"}
+          {i === 0 ? (
+            <>
+              <span className="max-[640px]:hidden">{line.text}</span>
+              <span className="hidden max-[640px]:block">Award Modular BIOS v4.51PG,</span>
+              <span className="hidden max-[640px]:block">An Energy Star Ally</span>
+            </>
+          ) : (
+            line.text || "\u00a0"
+          )}
         </div>
       ))}
 
