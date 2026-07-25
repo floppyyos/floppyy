@@ -4,7 +4,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type { WindowComponentProps } from "@/lib/windows";
 import { Win98Select } from "@/components/ui/Win98Select";
-import { fetchGuestbookMessages, forgetGuestbookMessage, rememberGuestbookMessage } from "@/lib/guestbook/client";
+import {
+  fetchGuestbookHistory,
+  fetchGuestbookMessages,
+  forgetGuestbookMessage,
+  mergeGuestbookMessages,
+  rememberGuestbookMessage,
+} from "@/lib/guestbook/client";
 import { onProfileChange, readProfile, writeProfile } from "@/lib/profile";
 import {
   BODY_MAX_LENGTH,
@@ -157,6 +163,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
   const [adminToken, setAdminToken] = useState(readAdminToken);
 
   const logRef = useRef<HTMLDivElement>(null);
+  const pinnedToBottom = useRef(true);
   const lastSeenId = useRef(0);
   const ownNick = useRef("");
   const initialised = useRef(false);
@@ -177,7 +184,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
 
   const applyMessages = useCallback(
     (incoming: GuestbookMessage[]) => {
-      setMessages(incoming);
+      setMessages((current) => mergeGuestbookMessages(current, incoming));
       const newest = incoming.length ? incoming[incoming.length - 1].id : 0;
       if (initialised.current && newest > lastSeenId.current) {
         const fromOthers = incoming.some(
@@ -191,30 +198,40 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
     [playSound],
   );
 
-  const fetchMessages = useCallback(async () => {
-    try {
-      const messages = await fetchGuestbookMessages();
-      applyMessages(messages);
-      setError(null);
-    } catch {
-      if (!initialised.current) setError("Could not connect to #floppyy.");
-    } finally {
-      setLoading(false);
-    }
-  }, [applyMessages]);
+  // First load pulls the whole history so the very first entries stay visible;
+  // polling afterwards only needs the newest page.
+  const fetchMessages = useCallback(
+    async (mode: "history" | "poll" = "poll") => {
+      try {
+        const messages =
+          mode === "history" ? await fetchGuestbookHistory() : await fetchGuestbookMessages();
+        applyMessages(messages);
+        setError(null);
+      } catch {
+        if (!initialised.current) setError("Could not connect to #floppyy.");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [applyMessages],
+  );
 
   useEffect(() => {
-    const initialTimer = window.setTimeout(fetchMessages, 0);
-    const timer = window.setInterval(fetchMessages, POLL_INTERVAL_MS);
+    const initialTimer = window.setTimeout(() => fetchMessages("history"), 0);
+    const timer = window.setInterval(() => fetchMessages("poll"), POLL_INTERVAL_MS);
     return () => {
       window.clearTimeout(initialTimer);
       window.clearInterval(timer);
     };
   }, [fetchMessages]);
 
+  // Keep the log pinned to the newest line, but don't yank the view away while
+  // someone is scrolled up reading the old entries.
   useEffect(() => {
     const el = logRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (!el) return;
+    if (!pinnedToBottom.current) return;
+    el.scrollTop = el.scrollHeight;
   }, [messages]);
 
   const peers = useMemo(() => {
@@ -278,6 +295,7 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
         /* ignore */
       }
       if (data.message) {
+        pinnedToBottom.current = true;
         rememberGuestbookMessage(data.message);
         lastSeenId.current = Math.max(lastSeenId.current, data.message.id);
         setMessages((current) =>
@@ -364,6 +382,10 @@ export function GuestbookWindow({ notify, playSound, warmSound }: WindowComponen
       <div className="mx-[3px] mt-[3px] flex min-h-0 flex-1 gap-[3px]">
         <div
           ref={logRef}
+          onScroll={(event) => {
+            const el = event.currentTarget;
+            pinnedToBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 24;
+          }}
           className="field-border flex-1 overflow-auto bg-white px-[6px] py-[4px] leading-[1.5]"
           style={{ fontFamily: "'Fixedsys', 'Consolas', monospace" }}
         >

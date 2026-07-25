@@ -1,6 +1,6 @@
 {
   "name": "floppyy",
-  "version": "3.4.9",
+  "version": "3.5.0",
   "private": true,
   "description": "Floppyy is a retro computer in your browser.",
   "engines": {
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "ioredis": "^5.11.1",
-    "next": "16.2.7",
+    "next": "16.2.11",
     "postgres": "^3.4.9",
     "react": "19.2.7",
     "react-dom": "19.2.7"
@@ -28,7 +28,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.7",
+    "eslint-config-next": "16.2.11",
     "tailwindcss": "^4.3.2",
     "typescript": "5.9.3"
   }

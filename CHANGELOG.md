@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.5.0 - 2026-07-25
+
+### Changed
+- Updated Next.js to 16.2.11 (and `eslint-config-next` to match).
+
+### Fixed
+- Guest Book now loads the full message history when it opens instead of only the newest page, so the very first messages are no longer hidden.
+- Guest Book polling merges new messages into the loaded history instead of replacing it, and no longer scrolls you back to the bottom while you are reading older entries.
+
 ## 3.4.9 - 2026-07-17
 
 ### Fixed
