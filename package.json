@@ -1,6 +1,6 @@
 {
   "name": "floppyy",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "private": true,
   "description": "Floppyy is a retro computer in your browser.",
   "engines": {
@@ -15,21 +15,22 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "ioredis": "^5.11.1",
-    "next": "16.2.11",
+    "ioredis": "^6.0.0",
+    "next": "16.3.0",
     "postgres": "^3.4.9",
-    "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.5",
-    "@tailwindcss/postcss": "^4.3.2",
-    "@types/node": "^24.13.2",
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.11",
-    "tailwindcss": "^4.3.2",
-    "typescript": "5.9.3"
+    "@eslint/compat": "^2.1.0",
+    "@eslint/eslintrc": "^3.3.6",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "eslint": "^10.8.1",
+    "eslint-config-next": "^16.3.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
   }
 }

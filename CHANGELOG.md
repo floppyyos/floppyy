@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.6.0 - 2026-08-14
+
+### Changed
+- Updated the runtime and development toolchain: Next.js 16.3.0, React 19.2.8, React DOM 19.2.8, ioredis 6, Tailwind CSS 4.3.3, ESLint 10.8.1, and current React/Node type definitions.
+- Updated `eslint-config-next` to 16.3.1 and added the ESLint 10 compatibility layer for the Next flat config.
+- Updated TypeScript to 6.0.3, the current version supported by the TypeScript ESLint integration used by Next.
+- Refreshed the lockfile and resolved the remaining dependency audit findings.
+
 ## 3.5.0 - 2026-07-25
 
 ### Changed

@@ -8,9 +8,9 @@ Mostly.
 
 > The web you grew up on.
 
-![Floppyy](https://img.shields.io/badge/Floppyy-v3.5.0-008080?style=flat-square)
+![Floppyy](https://img.shields.io/badge/Floppyy-v3.6.0-008080?style=flat-square)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=flat-square&logo=typescript)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?style=flat-square&logo=typescript)
 ![React](https://img.shields.io/badge/React-19-61dafb?style=flat-square&logo=react)
 
 ## What is Floppyy?
@@ -94,10 +94,11 @@ Floppyy occasionally fights back. A few things to try — the full list lives in
 
 ## Tech Stack
 
-- **Next.js 16** — App Router, Turbopack
-- **React 19** — latest concurrent features
-- **TypeScript 5.9** — strict type safety
-- **Tailwind CSS 4** — utility-first styling + custom Win98 CSS
+- **Next.js 16.3** — App Router, Turbopack
+- **React 19.2** — concurrent features
+- **TypeScript 6.0** — strict type safety
+- **Tailwind CSS 4.3** — utility-first styling + custom Win98 CSS
+- **ESLint 10** — linting with the Next.js flat-config compatibility layer
 - **Web Audio API** — sound effects
 - **Canvas API** — Paint app
 - **js-dos (DOSBox)** — in-browser MS-DOS games (DOOM, Duke Nukem 3D, Wolfenstein 3D, Dune II, WarCraft), run in an isolated iframe
@@ -122,6 +123,9 @@ npm start
 
 # Lint / React Compiler checks
 npm run lint
+
+# Dependency security audit
+npm audit
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
