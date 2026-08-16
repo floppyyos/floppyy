@@ -78,6 +78,10 @@ export function StartMenu({ onOpen, onScreensaver, onShutdown, onNotify }: Props
           <FloppyyIcon type="directory_net" size={16} />
           <span>Projects</span>
         </button>
+        <button className="menu-command flex items-center gap-[8px] py-[3px]" onClick={() => onOpen("support")}>
+          <FloppyyIcon type="support" size={16} />
+          <span>Support Floppyy</span>
+        </button>
         <div className="mx-[3px] my-[2px] h-[1px] bg-[#808080] shadow-[0_1px_0_#fff]" />
 
         <div className="group/programs relative">

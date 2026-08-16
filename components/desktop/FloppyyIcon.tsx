@@ -10,12 +10,13 @@ type Props = {
 export function FloppyyIcon({ type, size = 32 }: Props) {
   const [useFallback, setUseFallback] = useState(false);
   const s = size;
+  const source = type === "support" ? "/support/floppyy.png" : `/icons/${type}.png`;
 
   if (!useFallback) {
     return (
       <span aria-hidden="true" className="inline-flex items-center justify-center" style={{ width: s, height: s }}>
         <img
-          src={`/icons/${type}.png`}
+          src={source}
           alt=""
           width={s}
           height={s}

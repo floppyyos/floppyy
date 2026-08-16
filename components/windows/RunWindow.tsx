@@ -26,6 +26,7 @@ const RUN_SUGGESTIONS = [
   "projects",
   "screensaver",
   "solitaire",
+  "support",
   "winamp",
 ];
 
@@ -93,7 +94,7 @@ export function RunWindow({ window: win, openWindow, closeWindow, notify, playSo
     const normalized = trimmed.toLowerCase();
 
     if (normalized === "commands" || normalized === "?") {
-      notify("Commands: about, computer, winamp, ie, netscape, notepad, paint, calc, cmd, doom, projects, games, music, screensaver, defrag, help. Some old words still work.");
+      notify("Commands: about, computer, winamp, ie, netscape, notepad, paint, calc, cmd, doom, projects, support, games, music, screensaver, defrag, help. Some old words still work.");
       return;
     }
 

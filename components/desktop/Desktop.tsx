@@ -35,6 +35,7 @@ import { RunWindow } from "@/components/windows/RunWindow";
 import { ScreensaverWindow } from "@/components/windows/ScreensaverWindow";
 import { SettingsWindow } from "@/components/windows/SettingsWindow";
 import { ShareWindow } from "@/components/windows/ShareWindow";
+import { SupportWindow } from "@/components/windows/SupportWindow";
 import { DefragWindow } from "@/components/windows/DefragWindow";
 import { HelpWindow } from "@/components/windows/HelpWindow";
 import { DocumentsWindow } from "@/components/windows/DocumentsWindow";
@@ -640,6 +641,8 @@ export default function Desktop() {
         return <SettingsWindow {...props} />;
       case "share":
         return <ShareWindow {...props} />;
+      case "support":
+        return <SupportWindow {...props} />;
       case "defrag":
         return <DefragWindow {...props} />;
       case "help":

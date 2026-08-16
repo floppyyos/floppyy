@@ -3,6 +3,7 @@ import type { WindowId } from "./windows";
 export const commands: Record<string, WindowId> = {
   about: "about",
   projects: "projects",
+  support: "support",
   games: "games",
   music: "music",
   winamp: "music",

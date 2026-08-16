@@ -1,6 +1,6 @@
 {
   "name": "floppyy",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "private": true,
   "description": "Floppyy is a retro computer in your browser.",
   "engines": {
@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "ioredis": "^6.0.0",
-    "next": "16.3.0",
+    "next": "16.3.1",
     "postgres": "^3.4.9",
     "react": "19.2.8",
     "react-dom": "19.2.8"

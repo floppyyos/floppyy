@@ -195,7 +195,7 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
       body: (
         <div className="space-y-[10px]">
           <p><b>Floppyy</b> — the web you grew up on.</p>
-          <p>Version 3.6</p>
+          <p>Version 3.7</p>
           <p>
             Built with a lot of nostalgia. For the full story and credits, open{" "}
             <button className="text-[#0000ff] underline" onClick={() => openWindow("about", "welcome")}>
@@ -213,6 +213,38 @@ export function HelpWindow({ openWindow }: WindowComponentProps) {
           <p>
             Questions or hello: <a className="text-[#0000ff] underline" href="mailto:hi@floppyy.com">hi@floppyy.com</a>
           </p>
+        </div>
+      ),
+    },
+    {
+      id: "support",
+      title: "Support Floppyy",
+      body: (
+        <div className="space-y-[10px]">
+          <p>
+            Floppyy is a free nostalgic trip back to the old web. If you enjoy the project, you can help keep it online and support future updates.
+          </p>
+          <p><b>Every coffee helps.</b></p>
+          <div className="flex gap-[8px]">
+            <a
+              className="win-button flex min-w-[98px] items-center justify-center gap-[6px] px-[10px]"
+              href="https://ko-fi.com/floppyyos"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src="/support/kofi.png" alt="" width={16} height={16} style={{ imageRendering: "pixelated" }} draggable={false} />
+              Ko-fi
+            </a>
+            <a
+              className="win-button flex min-w-[98px] items-center justify-center gap-[6px] px-[10px]"
+              href="https://paypal.me/UmidM"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src="/support/paypal.png" alt="" width={16} height={16} style={{ imageRendering: "pixelated" }} draggable={false} />
+              PayPal
+            </a>
+          </div>
         </div>
       ),
     },

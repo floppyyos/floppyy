@@ -113,7 +113,6 @@ const driveFiles: Record<DriveId, Record<string, DriveItem[]>> = {
     ],
     Projects: [
       { id: "brewwery", label: "Brewwery", icon: "folder", description: "A visual Homebrew manager for macOS.", kind: "file" },
-      { id: "with-no-hype", label: "With No Hype", icon: "folder", description: "AI and new tech explained honestly. No Hype.", kind: "file" },
       { id: "openmodels", label: "OpenModels", icon: "folder", description: "Open Registry & Telemetry for AI Infrastructure.", kind: "file" },
       { id: "titanbase", label: "Titanbase", icon: "folder", description: "Visual Schema Designer For Developers and Product Teams.", kind: "file" },
       { id: "floppyy", label: "Floppyy", icon: "folder", description: "A retro computer in your browser.", kind: "file" },

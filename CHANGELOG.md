@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.7.0 - 2026-08-16
+
+### Added
+- Added Support Floppyy, with Ko-fi and PayPal options available.
+
+### Changed
+- Updated Next.js to 16.3.1
+
 ## 3.6.0 - 2026-08-14
 
 ### Changed

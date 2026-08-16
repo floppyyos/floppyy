@@ -41,16 +41,6 @@ export const projects: Project[] = [
     details: "Open Registry & Telemetry for AI Infrastructure.",
   },
   {
-    slug: "with-no-hype",
-    name: "With No Hype",
-    description: "AI and new tech explained honestly. No Hype.",
-    status: "Online",
-    stack: ["AI", "Education", "Writing"],
-    site: "https://www.withnohype.com",
-    github: "https://github.com/withnohype",
-    details: "AI and new tech explained honestly. No Hype.",
-  },
-  {
     slug: "floppyy",
     name: "Floppyy",
     description: "Floppyy is a browser desktop built on pure nostalgia.",
