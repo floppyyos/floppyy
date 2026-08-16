@@ -101,6 +101,7 @@ const ICON_STEP_X = ICON_WIDTH + ICON_COLUMN_GAP;
 const ICON_STEP_Y = ICON_HEIGHT + ICON_ROW_GAP;
 const DESKTOP_PADDING = 6;
 const TASKBAR_HEIGHT = 28;
+const SUPPORT_ICON_POSITION_MIGRATION = "floppyy-support-icon-position-v1";
 
 function initialIconPositions() {
   return iconGridPositions(desktopIcons.map((icon) => icon.id));
@@ -195,7 +196,21 @@ function readStoredIconPositions(): Record<string, IconPosition> {
     const parsed = JSON.parse(savedIcons) as Record<string, IconPosition>;
     if (!parsed || typeof parsed !== "object") return positions;
     const hasEveryCurrentIcon = desktopIcons.every((icon) => parsed[icon.id]);
-    return hasEveryCurrentIcon ? { ...positions, ...parsed } : positions;
+    if (!hasEveryCurrentIcon) return positions;
+
+    if (!globalThis.localStorage.getItem(SUPPORT_ICON_POSITION_MIGRATION) && parsed.support) {
+      globalThis.localStorage.setItem(SUPPORT_ICON_POSITION_MIGRATION, "1");
+      return {
+        ...positions,
+        ...parsed,
+        support: {
+          ...parsed.support,
+          y: Math.max(DESKTOP_PADDING, parsed.support.y - ICON_STEP_Y),
+        },
+      };
+    }
+
+    return { ...positions, ...parsed };
   } catch {
     return positions;
   }
